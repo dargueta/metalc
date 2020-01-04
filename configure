@@ -156,6 +156,7 @@ def build_toolchain_params(args):
     variables["COMPILE_FOR_KERNEL"] = 1 if args.kernel_mode else 0
     variables["USE_EFI"] = 1 if "efi" in args.feature_flags else 0
     variables["X86_USE_SHADOW_STACK"] = 1 if "shadow-stack" in args.feature_flags else 0
+    variables["FASTCALL_INTERNALS"] = 0 if "no-fastcall-internals" in args.feature_flags else 1
     if args.arch == "host":
         variables["TARGET_PROCESSOR"] = MACHINE_TO_TARGET_NAME[platform.machine()]
     else:

@@ -1,12 +1,11 @@
 ABI Compatibility
 =================
 
-
 Calling Conventions
 -------------------
 
-Microsoft, System V/GNU, and Watcom calling conventions are supported, with
-some limitations:
+The Microsoft and System V/GNU calling conventions are supported, with some
+limitations:
 
 64-bit code
 ~~~~~~~~~~~
@@ -17,8 +16,8 @@ compiler. Routines implemented in assembly language adhere to this.
 32-bit code
 ~~~~~~~~~~~
 
-Functions written in assembly language use the `__fastcall`_ calling convention
-on MinGW, Visual Studio, and GCC-compatible compilers. For the sake of simplicity
-if you're using a Watcom compiler, the standard C calling convention is used.
+Functions written in assembly language use the `fastcall`_ calling convention
+unless ``-fno-fastcall-internals`` was passed to the configuration script, in
+which case the functions use the compiler's default calling convention.
 
-.. ___fastcall:
+.. _fastcall: https://en.wikipedia.org/wiki/X86_calling_conventions#Microsoft_fastcall
