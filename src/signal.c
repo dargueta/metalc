@@ -5,8 +5,8 @@
 #include <metalc/stddef.h>
 
 
-extern MetalCRuntimeInfo *gRuntimeInfo;
-extern jmp_buf gMetalCAbortTarget;
+extern MetalCRuntimeInfo *__mclib_runtime_info;
+extern jmp_buf __mclib_abort_target;
 
 
 __attribute__((noreturn)) static void _sighandler_term(int sig) {
@@ -17,41 +17,55 @@ __attribute__((noreturn)) static void _sighandler_term(int sig) {
         case SIGABRT:
         case SIGBUS:
         case SIGFPE:
-        /* case SIGIOT: */
         case SIGSEGV:
         case SIGSTKFLT:
         case SIGXCPU:
         case SIGXFSZ:
         case SIGSYS:
-        /* case SIGUNUSED: */
+            /* All of these signals require a core dump and immediate termination.
+             * crt_teardown() will *not* be called and no resources are released.
+             * It's up to the operating system to release memory, file handles,
+             * etc. */
+            if (__mclib_runtime_info->f_core_dump != NULL)
+                __mclib_runtime_info->f_core_dump(sig, __mclib_runtime_info->udata);
 
-        /* All of these signals require a core dump and immediate termination.
-         * crt_teardown() will *not* be called and no resources will be released.
-         * it's up to the operating system to handle that. */
-            gRuntimeInfo->f_core_dump(sig, gRuntimeInfo->udata);
+            /* Else: Kernel didn't give us a core dump function, terminate the
+             * process without dumping memory. */
             break;
 
         default:
             break;
     };
 
-    longjmp(gMetalCAbortTarget, sig);
+    longjmp(__mclib_abort_target, sig);
 }
 
 
+/* Signal handler does nothing. */
 static void _sighandler_ignore(int sig) {
     (void)sig;
 }
 
 
+/* Signal handler pauses the current process. */
 static void _sighandler_stop(int sig) {
-    gRuntimeInfo->stop_process(sig);
+    if (__mclib_runtime_info->stop_process != NULL)
+        __mclib_runtime_info->stop_process(sig, __mclib_runtime_info->udata);
+    else
+        /* Kernel didn't give us a way to pause the process. Explode. */
+        raise(SIGSYS);
 }
 
 
+/* Signal handler resumes the current process. */
 static void _sighandler_resume(int sig) {
-    gRuntimeInfo->resume_process(sig);
+    if (__mclib_runtime_info->resume_process != NULL)
+        __mclib_runtime_info->resume_process(sig, __mclib_runtime_info->udata);
+    else
+        /* No way to resume the process. Explode. */
+        raise(SIGSYS);
 }
+
 
 /*
 static const signal_mask_t kDefaultMask = 0x04401aad00000004;

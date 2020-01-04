@@ -11,8 +11,8 @@
 static unsigned g_rand_seed = 0;
 static const char *kIntAlphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-extern MetalCRuntimeInfo *gRuntimeInfo;
-extern jmp_buf gMetalCAbortTarget;
+extern MetalCRuntimeInfo *__mclib_runtime_info;
+extern jmp_buf __mclib_abort_target;
 
 
 void abort(void) {
@@ -31,8 +31,8 @@ void srand(unsigned seed) {
 
 void exit(int code) {
     /* TODO: execute atexit handlers here */
-    gRuntimeInfo->main_return_value = code;
-    longjmp(gMetalCAbortTarget, INT_MIN);
+    __mclib_runtime_info->main_return_value = code;
+    longjmp(__mclib_abort_target, INT_MIN);
 }
 
 

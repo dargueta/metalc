@@ -6,21 +6,19 @@
 #include <metalc/stdint.h>
 
 
-typedef void *(* cmetal_page_alloc_fn)(unsigned n_pages, void *udata);
-typedef void *(* cmetal_page_free_fn)(void *base, unsigned count, void *udata);
-typedef void (* cmetal_suspend_fn)(int sig, void *udata) /* __attribute__((cold)) */;
-typedef void (* cmetal_resume_fn)(int sig, void *udata) /* __attribute__((cold)) */;
+typedef void (* cmetal_suspend_fn)(int sig, void *udata);
+typedef void (* cmetal_resume_fn)(int sig, void *udata);
 typedef void (* cmetal_core_dump_fn)(int sig, void *udata) __attribute__((noreturn));
 typedef int (* cmetal_main_fn)(int argc, char **argv, char **env);
 typedef int (* cmetal_brk_fn)(void *new_brk, void *udata);
 
-typedef int (* cmetal_open_fn)(const char *file, int mode, int perms);
-typedef ssize_t (* cmetal_write_fn)(intptr_t fdesc, const void *data, size_t size);
-typedef ssize_t (* cmetal_read_fn)(intptr_t fdesc, void *buffer, size_t size);
-typedef off_t (* cmetal_seek_fn)(intptr_t fdesc, off_t offset, int whence);
-typedef off_t (* cmetal_tell_fn)(intptr_t fdesc);
-typedef int (* cmetal_fsync_fn)(intptr_t fdesc);
-typedef void (* cmetal_close_fn)(intptr_t fdesc);
+typedef int (* cmetal_open_fn)(const char *file, int mode, int perms, void *udata);
+typedef ssize_t (* cmetal_write_fn)(intptr_t fdesc, const void *data, size_t size, void *udata);
+typedef ssize_t (* cmetal_read_fn)(intptr_t fdesc, void *buffer, size_t size, void *udata);
+typedef off_t (* cmetal_seek_fn)(intptr_t fdesc, off_t offset, int whence, void *udata);
+typedef off_t (* cmetal_tell_fn)(intptr_t fdesc, void *udata);
+typedef int (* cmetal_fsync_fn)(intptr_t fdesc, void *udata);
+typedef void (* cmetal_close_fn)(intptr_t fdesc, void *udata);
 
 
 /**
@@ -83,7 +81,7 @@ typedef struct {
      *
      * Used to implement the default behavior of signals @ref SIGSTOP,
      * @ref SIGTSTP, @ref SIGTTIN, and @ref SIGTTOU. If this function is `NULL`,
-     * any of the above signals will trigger @ref SIGTERM instead and terminate
+     * any of the above signals will trigger @ref SIGSYS instead and terminate
      * the process.
      */
     cmetal_suspend_fn stop_process;
@@ -92,19 +90,37 @@ typedef struct {
      * A callback function provided by the OS that resumes the calling process.
      *
      * Used to implement the default behavior of @ref SIGCONT. If this function
-     * is `NULL`, the process cannot be resumed.
+     * is `NULL`, the process cannot be resumed, and @ref SIGSYS will be raised
+     * instead.
      */
     cmetal_resume_fn resume_process;
 
     /**
      * Pointer to a function implementing the POSIX `brk()` function.
      *
-     * Required by @ref malloc.
+     * Required by @ref malloc. If this isn't implemented and @ref malloc is
+     * ever called, the @ref SIGSYS signal will be raised and the process will
+     * be killed.
      */
     cmetal_brk_fn f_brk;
 
-    void *current_brk;
+    /**
+     * A pointer to the first byte past the end of this process' writable data
+     * segment.
+     *
+     * MetalC will not modify the value it receives here, and expects it not to
+     * change after the library's initialized. It's used by @ref sbrk and
+     * @ref malloc to allocate/free writable memory to use for the heap.
+     */
+    void *original_brk;
 
+    /**
+     * A callback function to tell the OS to dump the core and terminate this
+     * process.
+     *
+     * If not given, any uncaught signal that would normally trigger a core dump
+     * will behave like @ref SIGHUP. The original signal number is still preserved.
+     */
     cmetal_core_dump_fn f_core_dump;
 
     cmetal_open_fn f_io_open;

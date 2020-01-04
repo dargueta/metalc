@@ -14,12 +14,12 @@ extern int stdio_init(void);
 extern int stdio_teardown(void);
 
 
-MetalCRuntimeInfo *gRuntimeInfo __attribute__((visibility("hidden"))) = NULL;
-jmp_buf gMetalCAbortTarget __attribute__((aligned(16), visibility("hidden")));
+MetalCRuntimeInfo *__mclib_runtime_info __attribute__((visibility("hidden"))) = NULL;
+jmp_buf __mclib_abort_target __attribute__((aligned(16), visibility("hidden")));
 
 
 static int crt_init(void) {
-    if (gRuntimeInfo == NULL)
+    if (__mclib_runtime_info == NULL)
         return EFAULT;
 
     errno = 0;
@@ -44,7 +44,7 @@ int metalc_internal__start(
 ) {
     int result;
 
-    gRuntimeInfo = rti;
+    __mclib_runtime_info = rti;
 
     result = crt_init();
     if (result != 0) {
@@ -55,7 +55,7 @@ int metalc_internal__start(
         return result;
     }
 
-    result = setjmp(gMetalCAbortTarget);
+    result = setjmp(__mclib_abort_target);
     if (result == 0) {
         /* Call main() using the three-argument form. It's up to the kernel to
          * provide a shim for main() implementations that take zero or two

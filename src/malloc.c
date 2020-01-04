@@ -2,12 +2,14 @@
 #include <metalc/crtinit.h>
 #include <metalc/errno.h>
 #include <metalc/metalc.h>
+#include <metalc/posix.h>
 #include <metalc/signal.h>
 #include <metalc/stdarg.h>
 #include <metalc/stddef.h>
 #include <metalc/stdio.h>
 #include <metalc/stdlib.h>
 #include <metalc/string.h>
+
 
 #pragma pack(push, 2)
 struct PointerEntry {
@@ -17,7 +19,7 @@ struct PointerEntry {
 #pragma pack(pop)
 
 
-extern MetalCRuntimeInfo *gRuntimeInfo;
+extern MetalCRuntimeInfo *__mclib_runtime_info;
 
 static void **g_heap_pages = NULL;
 static struct PointerEntry *g_bookkeeping_pages = NULL;
@@ -54,21 +56,11 @@ METALC_API_INTERNAL void _malloc_assert(int expression, const char *message, ...
 }
 
 
-METALC_API_INTERNAL void *_request_new_page(unsigned count) {
-    (void)count;
-    /*
-    unsigned page_index, page_offset, i, pointers_per_page;
+METALC_API_INTERNAL void *_allocate_pages(int count) {
+    void *original_top = sbrk(0);
 
-    void *new_pages = gRuntimeInfo->allocate_pages(count, gRuntimeInfo->udata);
-    if (new_pages == NULL)
-        return ENOMEM;
-
-    pointers_per_page = gRuntimeInfo->page_size / sizeof(void *);
-    for (i = 0; i < count; ++i) {
-        ;
-    }
-*/
-    errno = ENOSYS;
+    if (sbrk(count * __mclib_runtime_info->page_size) != (void *)-1)
+        return original_top;
     return NULL;
 }
 
@@ -155,49 +147,38 @@ METALC_API_INTERNAL uintptr_t _size_of_allocation(const void *pointer) {
 
 
 METALC_API_INTERNAL int malloc_init(void) {
-    g_heap_pages = gRuntimeInfo->allocate_pages(1, gRuntimeInfo->udata);
-    if (g_heap_pages == NULL)
-        return ENOMEM;
+    if ((__mclib_runtime_info->page_size == 0) || (__mclib_runtime_info->f_brk == NULL))
+        return ENOSYS;
 
-    g_bookkeeping_pages = gRuntimeInfo->allocate_pages(1, gRuntimeInfo->udata);
+    g_heap_pages = _allocate_pages(1);
+    if (g_heap_pages == NULL)
+        return errno;
+
+    g_bookkeeping_pages = _allocate_pages(1);
     if (g_bookkeeping_pages == NULL) {
-        gRuntimeInfo->free_pages(g_heap_pages, 1, gRuntimeInfo->udata);
+        _allocate_pages(-1);
         return ENOMEM;
     }
 
-    memset(g_heap_pages, 0, gRuntimeInfo->page_size);
+    memset(g_heap_pages, 0, __mclib_runtime_info->page_size);
 
-    g_heap_pages[1] = gRuntimeInfo->allocate_pages(1, gRuntimeInfo->udata);
+    g_heap_pages[1] = _allocate_pages(1);
     if (g_heap_pages[1] == NULL) {
-        gRuntimeInfo->free_pages(g_heap_pages, 1, gRuntimeInfo->udata);
-        gRuntimeInfo->free_pages(g_bookkeeping_pages, 1, gRuntimeInfo->udata);
+        _allocate_pages(-2);
         return ENOMEM;
     }
 
     g_bookkeeping_pages[0].base = NULL;
     g_bookkeeping_pages[0].size = 1;
     g_bookkeeping_pages[1].base = g_heap_pages[1];
-    g_bookkeeping_pages[1].size = gRuntimeInfo->page_size;
+    g_bookkeeping_pages[1].size = __mclib_runtime_info->page_size;
     return 0;
 }
 
 
 METALC_API_INTERNAL int malloc_teardown(void) {
-    void **current_page_pointer, **tracker_page, **next_tracker_page;
-
-    tracker_page = g_heap_pages;
-
-    while (tracker_page != NULL) {
-        current_page_pointer = &tracker_page[1];
-        while (current_page_pointer != NULL) {
-            gRuntimeInfo->free_pages(*current_page_pointer, 1, gRuntimeInfo->udata);
-            ++current_page_pointer;
-        }
-        next_tracker_page = current_page_pointer[0];
-        gRuntimeInfo->free_pages(tracker_page, 1, gRuntimeInfo->udata);
-        tracker_page = next_tracker_page;
-    }
-
+    if (__mclib_runtime_info->f_brk)
+        __mclib_runtime_info->f_brk(__mclib_runtime_info->original_brk);
     return 0;
 }
 

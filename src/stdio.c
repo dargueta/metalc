@@ -53,9 +53,9 @@ struct MCFormatSpecifier {
 
 
 METALC_API_INTERNAL int stdio_init(void) {
-    internal_stdin_.descriptor = gRuntimeInfo->stdin_handle;
-    internal_stdout_.descriptor = gRuntimeInfo->stdout_handle;
-    internal_stderr_.descriptor = gRuntimeInfo->stderr_handle;
+    internal_stdin_.descriptor = __mclib_runtime_info->stdin_handle;
+    internal_stdout_.descriptor = __mclib_runtime_info->stdout_handle;
+    internal_stderr_.descriptor = __mclib_runtime_info->stderr_handle;
     return 0;
 }
 
