@@ -15,7 +15,7 @@ setjmp:
     mov     [FN_ARG_1_Q + tJmpBuf.j_esp], esp
     mov     [FN_ARG_1_Q + tJmpBuf.j_ebp], ebp
 
-    %if METALC_USE_SHADOW_STACK
+    %if USE_SHADOW_STACK
         rdsspd  eax
         mov     [FN_ARG_1_Q + tJmpBuf.j_shadow_stack_ptr], eax
     %endif
@@ -32,7 +32,7 @@ setjmp:
 longjmp:
     fxrstor     [FN_ARG_1_Q + tJmpBuf.j_fpu_state]
 
-    %if METALC_USE_SHADOW_STACK
+    %if USE_SHADOW_STACK
         %error "Using the shadow stack is not supported."
     ;     rstorsspd   [FN_ARG_1_Q + tJmpBuf.j_shadow_stack_ptr]
     %endif

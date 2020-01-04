@@ -21,7 +21,7 @@ setjmp:
     mov     [FN_ARG_1_Q + tJmpBuf.j_r14], r14
     mov     [FN_ARG_1_Q + tJmpBuf.j_r15], r15
 
-    %if METALC_USE_SHADOW_STACK
+    %if USE_SHADOW_STACK
         %error "Using the shadow stack is not supported."
         rdsspq  rax
         mov     [FN_ARG_1_Q + tJmpBuf.j_shadow_stack_ptr], rax
@@ -50,7 +50,7 @@ longjmp:
     mov     r14, [FN_ARG_1_Q + tJmpBuf.j_r14]
     mov     r15, [FN_ARG_1_Q + tJmpBuf.j_r15]
 
-    %if METALC_USE_SHADOW_STACK
+    %if USE_SHADOW_STACK
         %error "Using the shadow stack is not supported."
         rstorsspq   [FN_ARG_1_Q + tJmpBuf.j_shadow_stack_ptr]
     %endif
