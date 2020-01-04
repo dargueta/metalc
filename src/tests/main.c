@@ -58,6 +58,7 @@ int fake_brk(void *new_brk, void *udata) {
 
 int main(int argc, char **argv) {
     unsigned n_failed, n_succeeded, n_errored;
+    size_t i;
     int result;
     const struct UnitTestEntry **group;
     const struct UnitTestEntry *current_test;
@@ -69,6 +70,10 @@ int main(int argc, char **argv) {
     else
         test_output_fd = open(argv[1], O_RDWR, 0644);
 
+    /* Equivalent to memset(&rti, 0, sizeof(rti)) without using memset(). */
+    for (i = 0; i < sizeof(rti); ++i)
+        ((char *)&rti)[i] = 0;
+
     n_failed = n_succeeded = n_errored = 0;
     os_state.current_brk = os_state.data_area;
 
@@ -77,7 +82,8 @@ int main(int argc, char **argv) {
             rti.main = current_test->function;
             rti.page_size = FAKE_PAGE_SIZE;
             rti.udata = &os_state;
-            rti.brk = fake_brk;
+            rti.f_brk = fake_brk;
+            rti.original_brk = os_state.data_area;
 
             result = metalc_internal__start(&rti, 0, NULL, NULL);
             fsync(test_output_fd);
