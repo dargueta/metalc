@@ -1,0 +1,78 @@
+set(LIBRARY_C_SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/assert.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/crtinit.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ctype.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/errno.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/locale.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/malloc.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/math.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/posix.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/signal.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/stdio.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/stdlib.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/string.c"
+)
+
+set(LIBRARY_X86_ASM_SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_PROCESSOR}/atomic.asm"
+    "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_PROCESSOR}/setjmp.asm"
+)
+
+set(TEST_SOURCE_FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/main.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/string.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/testing.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/testing.h"
+)
+
+include_directories("${CMAKE_BINARY_DIR}/include")
+
+if (TARGET_PROCESSOR STREQUAL "x86_16" OR TARGET_PROCESSOR STREQUAL "x86_32" OR TARGET_PROCESSOR STREQUAL "x86_64")
+    set(ASM_SOURCES
+        "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_PROCESSOR}/atomic.asm"
+        "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_PROCESSOR}/setjmp.asm"
+    )
+else()
+    set(ASM_SOURCES
+        "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_PROCESSOR}/atomic.s"
+        "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_PROCESSOR}/setjmp.s"
+    )
+endif()
+
+add_library(metalc_asm STATIC ${ASM_SOURCES})
+
+# MetalC, compiled as a dynamic library for linking with other programs. Given
+# that the major selling point of this library is that you'll used on bare metal
+# or UEFI, you'll only need this as your system's standard C library when loading
+# other programs. Your kernel won't be using this.
+add_library(metalc SHARED ${LIBRARY_C_SOURCES})
+add_dependencies(metalc metalc_asm)
+target_compile_options(metalc PRIVATE -ffreestanding -Wextra -pedantic -pedantic-errors)
+target_compile_definitions(metalc PRIVATE -DMETALC_BUILDING_LIBC=1)
+target_link_libraries(metalc metalc_asm)
+
+
+# MetalC, compiled as a static library. You'll probably want to use this with
+# your kernel or bootloader, since you'd need to write a dynamic linker to be
+# able to use the shared one.
+add_library(metalcstatic STATIC ${LIBRARY_C_SOURCES})
+add_dependencies(metalcstatic metalc_asm)
+target_compile_options(metalcstatic PRIVATE -Wextra -ffreestanding -pedantic -pedantic-errors)
+target_compile_definitions(metalcstatic PRIVATE -DMETALC_BUILDING_LIBC=1)
+target_link_libraries(metalcstatic metalc_asm)
+
+
+# Unit testing
+add_executable(test_executable ${TEST_SOURCE_FILES})
+add_dependencies(test_executable metalcstatic)
+target_link_libraries(test_executable metalcstatic)
+
+# Disable linking the executable with the OS's C standard library and use our
+# implementation instead.
+target_compile_options(
+    test_executable PRIVATE
+    -Wextra
+    -ggdb
+    -O0
+    -Wno-declaration-after-statement    # TODO: This should not be necessary
+)

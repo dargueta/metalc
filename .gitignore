@@ -1,0 +1,14 @@
+*.o
+*.a
+*.dylib
+*.so
+*.dll
+*.py[cow]
+*.gch
+core*
+
+build/
+CMakeFiles/
+toolchain.cmake
+settings.cmake
+Makefile.in

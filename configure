@@ -1,0 +1,262 @@
+#!/usr/bin/env python3
+
+from __future__ import print_function
+
+import argparse
+import datetime
+import collections
+import os
+import platform
+import string
+import sys
+
+
+class ErrorExit(Exception):
+    pass
+
+
+_EPILOG = """\
+FEATURES
+--------
+
+You can use the -f<feature_name> and -fno-<feature_name> flags to turn features
+on and off, respectively. For example, to enable use of the x86 processors' shadow
+stack, pass -fshadow-stack. To disable it, pass -fno-shadow-stack. A full list of
+supported features is below.
+
+
+-ffastcall-internals [default] / -fno-fastcall-internals
+    (x86_32 only) Internal functions not exposed as part of the C library will
+    use the fastcall calling convention instead of the normal cdecl.
+
+-fshadow-stack / -fno-shadow-stack [default]
+    Enable or disable use of the shadow stack. Supported on 32/64-bit x86 targets
+    only, and disabled by default.
+
+-fefi / -fno-efi [default]
+    (x86 targets only) Compile with or without EFI support. This allows the
+    library to use use UEFI runtime services for file I/O, memory management,
+    etc. without any OS-level support. Requires an EFI toolchain such as GNU-EFI
+    or Tianocore.
+"""
+
+HERE = os.path.dirname(__file__)
+
+
+MACHINE_TO_ARCH_ID = {
+    "i386": 1,  # x86_32
+    "i486": 1,  # x86_32
+    "i586": 2,  # x86_64
+    "x86_64": 2,  # x86_64
+    # TODO: Add support here for other processors if possible
+}
+
+
+MACHINE_TO_TARGET_NAME = {
+    "i386": "x86_32",
+    "i486": "x86_32",
+    "i586": "x86_64",
+    "x86_64": "x86_64",
+}
+
+ARCH_ID_TO_BITS = {
+    0: 16,  # x86-16
+    1: 32,  # x86-32
+    2: 64,  # x86-64
+    3: 32,  # MIPS32
+    4: 64,  # MIPS64
+}
+
+
+TOOLCHAIN_NAMES = {
+    "host": {
+        "ASSEMBLER": "as",
+        "COMPILER": "gcc",
+        "LINKER": "ld",
+        "ARCHITECTURE_ID": MACHINE_TO_ARCH_ID[platform.machine()],
+        "ARCHITECTURE_BITS": ARCH_ID_TO_BITS[MACHINE_TO_ARCH_ID[platform.machine()]],
+        "COMPILER_DEFINES": ["-march=native", "-mtune=native"],
+        "ASSEMBLER_DEFINES": ["-march=native"],
+    },
+    "x86_16": {
+        "ASSEMBLER": "nasm",
+        "COMPILER": "gcc",
+        "LINKER": "ld",
+        "ARCHITECTURE_ID": 0,
+        "ARCHITECTURE_BITS": 16,
+        "COMPILER_DEFINES": ["-m16"],
+        "ASSEMBLER_DEFINES": [],
+    },
+    "x86_32": {
+        "ASSEMBLER": "nasm",
+        "COMPILER": "gcc",
+        "LINKER": "ld",
+        "ARCHITECTURE_ID": 1,
+        "ARCHITECTURE_BITS": 32,
+        "COMPILER_DEFINES": ["-march=i386"],
+        "ASSEMBLER_DEFINES": [],
+    },
+    "x86_64": {
+        "ASSEMBLER": "nasm",
+        "COMPILER": "x86_64-linux-gnu-gcc",
+        "LINKER": "x86_64-linux-gnu-ld",
+        "ARCHITECTURE_ID": 2,
+        "ARCHITECTURE_BITS": 64,
+        "COMPILER_DEFINES": ["-march=x86-64"],
+        "ASSEMBLER_DEFINES": [],
+    },
+    "mips32": {
+        "ASSEMBLER": "mips-linux-gnu-as",
+        "COMPILER": "mips-linux-gnu-gcc",
+        "LINKER": "mips-linux-gnu-ld",
+        "ARCHITECTURE_ID": 3,
+        "ARCHITECTURE_BITS": 32,
+        "COMPILER_DEFINES": ["-march=mips32"],
+        "ASSEMBLER_DEFINES": ["-march=mips32"],
+    },
+    "mips64": {
+        "ASSEMBLER": "mips-linux-gnu-as",
+        "COMPILER": "mips-linux-gnu-gcc",
+        "LINKER": "mips-linux-gnu-ld",
+        "ARCHITECTURE_ID": 4,
+        "ARCHITECTURE_BITS": 64,
+        "COMPILER_DEFINES": ["-march=mips64"],
+        "ASSEMBLER_DEFINES": ["-march=mips64"],
+    },
+}
+
+
+def build_toolchain_params(args):
+    """Build a list of key-value pairs to write to the CMake toolchain file.
+    """
+    if "efi" in args.feature_flags and args.arch not in ("x86_32", "x86_64"):
+        raise ErrorExit(
+            "Cannot use architecture `%s` with UEFI. You can only use x86_32 or x86_64"
+            " with it."
+        )
+
+    variables = collections.OrderedDict()
+    variables["REPOSITORY_ROOT"] = HERE
+
+    defines = " ".join(args.defines or ())
+    if args.kernel_mode:
+        defines += " -DMETALC_COMPILE_FOR_KERNEL"
+        variables["COMPILE_FOR_KERNEL"] = 1
+    else:
+        variables["COMPILE_FOR_KERNEL"] = 0
+
+    if args.build == "test":
+        defines += " -DMETALC_COMPILE_FOR_TESTING"
+        variables["COMPILE_FOR_TESTING"] = 1
+    else:
+        variables["COMPILE_FOR_TESTING"] = 0
+
+    variables["C_DEFINES"] = defines
+    variables["TOOLCHAIN_ID"] = args.toolchain or ""
+    variables["COMPILE_FOR_KERNEL"] = 1 if args.kernel_mode else 0
+    variables["USE_EFI"] = 1 if "efi" in args.feature_flags else 0
+    variables["X86_USE_SHADOW_STACK"] = 1 if "shadow-stack" in args.feature_flags else 0
+    if args.arch == "host":
+        variables["TARGET_PROCESSOR"] = MACHINE_TO_TARGET_NAME[platform.machine()]
+    else:
+        variables["TARGET_PROCESSOR"] = args.arch
+
+    # TODO (dargueta): Modify this to be independent of EFI use.
+    # We can do this once support is implemented for giving the kernel callbacks
+    # to catch I/O events with.
+    variables["ENABLE_ALL_IO"] = variables["USE_EFI"]
+
+    variables.update(TOOLCHAIN_NAMES[args.arch])
+    return variables
+
+
+def templatize_cmake_file(params, basename):
+    with open(basename + "-template.cmake", "r") as fd:
+        text = fd.read()
+
+    template = string.Template(text)
+    with open(basename + ".cmake", "w") as fd:
+        fd.write(template.substitute(params))
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description="Configure the MetalC library for building.",
+        epilog=_EPILOG,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        fromfile_prefix_chars="@",
+    )
+    parser.add_argument(
+        "-a",
+        "--arch",
+        choices=("x86_16", "x86_32", "x86_64", "mips32", "mips64", "host"),
+        help="Choose the target architecture to build the library for. `host` (the"
+        " default) chooses the current hardware as the target architecture.",
+        default="host",
+    )
+    parser.add_argument(
+        "-b",
+        "--build",
+        choices=("debug", "release", "test"),
+        help="The mode to compile the library in. Debug mode includes debug symbols in"
+        " the output binary and disables all optimizations. Test mode disables aliasing"
+        " so that MetalC can be used alongside the standard library to test it."
+        " Release mode enables aliasing and optimizations, and strips out debug info.",
+        default="test",
+    )
+    parser.add_argument(
+        "-D",
+        action="append",
+        dest="defines",
+        metavar="KEY=VALUE",
+        help="Define macros at compile time.",
+        default=[],
+    )
+    parser.add_argument(
+        "-f",
+        action="append",
+        dest="feature_flags",
+        metavar="FLAG",
+        help="Enable or disable a feature. See `FEATURES` below for more information.",
+        default=[],
+    )
+    parser.add_argument(
+        "-k",
+        "--kernel-mode",
+        action="store_true",
+        help="Compile the library for static linkage to an OS kernel. This enables the"
+        " library to make some assumptions about privileges, and disables some features"
+        " inappropriate for use in a kernel, like red zones.",
+    )
+    parser.add_argument(
+        "-t",
+        "--toolchain",
+        metavar="NAME",
+        help="The name of the compiler toolchain to use when cross-compiling. This is"
+        " a three-part string of the form <cpu>-<host>-<abi>. This is normally deduced"
+        " from --arch and whether -fefi is enabled, but you can manually override it"
+        " here.",
+    )
+    return parser.parse_args()
+
+
+def main():
+    args = parse_arguments()
+    params = build_toolchain_params(args)
+    templatize_cmake_file(params, "toolchain")
+    templatize_cmake_file(params, "settings")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("Killed by user.")
+        sys.exit(1)
+    except ErrorExit as err:
+        print(str(err))
+        sys.exit(2)
+    except Exception as err:
+        print("Unexpected error: (%s) %s" % (type(err).__name__, err))
+        sys.exit(3)
+    sys.exit(0)

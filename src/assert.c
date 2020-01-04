@@ -1,0 +1,34 @@
+#include <stdbool.h>
+
+#include <metalc/assert.h>
+#include <metalc/signal.h>
+#include <metalc/stdio.h>
+#include <metalc/stdlib.h>
+
+
+extern const void *gAbortJumpAddress;
+
+
+void _internal_assert(int expression, int line, const char *function, const char *file) {
+    FILE *out;
+
+    if (expression)
+        return;
+
+#if METALC_COMPILE_OPTION_ENABLE_FILE_IO
+    out = (stderr) ? stderr : stdout;
+    if (out) {
+        fprintf(
+            out,
+            "Debug assertion failed in function %s on line %d in file %s.\n",
+            function,
+            line,
+            file
+        );
+    }
+#else
+    (void)out, (void)line, (void)function, (void)file;
+#endif
+
+    abort();
+}
