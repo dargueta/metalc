@@ -177,8 +177,12 @@ METALC_API_INTERNAL int malloc_init(void) {
 
 
 METALC_API_INTERNAL int malloc_teardown(void) {
-    if (__mclib_runtime_info->f_brk)
-        __mclib_runtime_info->f_brk(__mclib_runtime_info->original_brk);
+    if (__mclib_runtime_info->f_brk) {
+        __mclib_runtime_info->f_brk(
+            __mclib_runtime_info->original_brk,
+            __mclib_runtime_info->udata
+        );
+    }
     return 0;
 }
 
