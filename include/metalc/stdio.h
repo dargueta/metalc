@@ -7,6 +7,8 @@
 
 struct FILE_;
 typedef struct FILE_ FILE;
+typedef ssize_t off_t;
+typedef size_t fpos_t;
 
 extern FILE *stdin;
 extern FILE *stdout;
