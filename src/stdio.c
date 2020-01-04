@@ -7,19 +7,23 @@
 #include <metalc/stdlib.h>
 #include <metalc/string.h>
 
+extern MetalCRuntimeInfo *__mclib_runtime_info;
+
 
 struct FILE_ {
     intptr_t descriptor;
+    int eof;
+    int last_error;
 };
 
 
-static struct FILE_ internal_stdin_;
-static struct FILE_ internal_stdout_;
-static struct FILE_ internal_stderr_;
+static struct FILE_ _internal_stdin;
+static struct FILE_ _internal_stdout;
+static struct FILE_ _internal_stderr;
 
-FILE *stdin = &internal_stdin_;
-FILE *stdout = &internal_stdout_;
-FILE *stderr = &internal_stderr_;
+FILE *stdin = &_internal_stdin;
+FILE *stdout = &_internal_stdout;
+FILE *stderr = &_internal_stderr;
 
 
 enum MCArgumentType {
@@ -53,9 +57,15 @@ struct MCFormatSpecifier {
 
 
 METALC_API_INTERNAL int stdio_init(void) {
-    internal_stdin_.descriptor = __mclib_runtime_info->stdin_handle;
-    internal_stdout_.descriptor = __mclib_runtime_info->stdout_handle;
-    internal_stderr_.descriptor = __mclib_runtime_info->stderr_handle;
+    _internal_stdin.descriptor = __mclib_runtime_info->stdin_handle;
+    _internal_stdout.descriptor = __mclib_runtime_info->stdout_handle;
+    _internal_stderr.descriptor = __mclib_runtime_info->stderr_handle;
+    _internal_stdin.eof = 0;
+    _internal_stdout.eof = 0;
+    _internal_stderr.eof = 0;
+    _internal_stdin.last_error = 0;
+    _internal_stdout.last_error = 0;
+    _internal_stderr.last_error = 0;
     return 0;
 }
 
