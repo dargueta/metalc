@@ -2,8 +2,9 @@
 #define INCLUDE_METALC_CRTINIT_H_
 
 #include <metalc/metalc.h>
-#include <metalc/stdbool.h>
+#include <metalc/stddef.h>
 #include <metalc/stdint.h>
+#include <metalc/stdio.h>
 
 
 typedef void (* cmetal_suspend_fn)(int sig, void *udata);
@@ -41,13 +42,6 @@ typedef struct {
      * Failing to do so can cause unpredictable behavior.
      */
     unsigned page_size;
-
-    /**
-     * Indicates if a core dump is necessary.
-     *
-     * TODO (dargueta): This is completely the wrong way to go about it.
-     */
-    bool need_core_dump;
 
     /**
      * The return value from main().
