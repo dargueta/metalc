@@ -79,8 +79,13 @@
 #endif
 
 
-#define METALC_API_INTERNAL                 __attribute__((visibility("hidden")))
-#define METALC_API_INTERAL_WITH_ATTR(attr)  __attribute__((visibility("hidden"), attr))
+#if METALC_INTERNALS_USE_FASTCALL && (METALC_ARCH_BITS != 64)
+    #define METALC_API_INTERNAL                 __attribute__((visibility("hidden"), fastcall))
+    #define METALC_API_INTERAL_WITH_ATTR(attr)  __attribute__((visibility("hidden"), fastcall, attr))
+#else
+    #define METALC_API_INTERNAL                 __attribute__((visibility("hidden")))
+    #define METALC_API_INTERAL_WITH_ATTR(attr)  __attribute__((visibility("hidden"), attr))
+#endif
 
 
 #if METALC_ENABLE_ASM_IMPLEMENTATIONS
