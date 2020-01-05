@@ -1,6 +1,7 @@
 #include <metalc/assert.h>
 #include <metalc/crtinit.h>
 #include <metalc/errno.h>
+#include <metalc/kernel_hooks.h>
 #include <metalc/metalc.h>
 #include <metalc/posix.h>
 #include <metalc/signal.h>
@@ -147,7 +148,7 @@ static uintptr_t _size_of_allocation(const void *pointer) {
 
 
 METALC_API_INTERNAL int malloc_init(void) {
-    if ((__mclib_runtime_info->page_size == 0) || (__mclib_runtime_info->f_brk == NULL))
+    if (__mclib_runtime_info->page_size == 0)
         return __mcapi_ENOSYS;
 
     g_heap_pages = _allocate_pages(1);
@@ -177,12 +178,7 @@ METALC_API_INTERNAL int malloc_init(void) {
 
 
 METALC_API_INTERNAL int malloc_teardown(void) {
-    if (__mclib_runtime_info->f_brk) {
-        __mclib_runtime_info->f_brk(
-            __mclib_runtime_info->original_brk,
-            __mclib_runtime_info->udata
-        );
-    }
+    krnlhook_brk(__mclib_runtime_info->original_brk, __mclib_runtime_info->udata);
     return 0;
 }
 

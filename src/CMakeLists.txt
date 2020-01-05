@@ -4,6 +4,7 @@ set(LIBRARY_C_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/ctype.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/errno.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/file_io.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/kernel_hooks.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/locale.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/malloc.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/math.c"

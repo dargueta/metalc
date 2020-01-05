@@ -31,7 +31,7 @@ struct FakeOSState {
 };
 
 
-int fake_brk(void *new_brk, void *udata) {
+int krnlhook_brk(void *new_brk, void *udata) {
     struct FakeOSState *state = (struct FakeOSState *)udata;
 
     /* Ensure the new data break pointer is within allowable bounds. */
@@ -80,7 +80,6 @@ int main(int argc, char **argv) {
             rti.main = current_test->function;
             rti.page_size = FAKE_PAGE_SIZE;
             rti.udata = &os_state;
-            rti.f_brk = fake_brk;
             rti.original_brk = os_state.data_area;
 
             result = cstdlib_start(&rti, 0, NULL, NULL);

@@ -3,6 +3,7 @@
 #include <metalc/crtinit.h>
 #include <metalc/errno.h>
 #include <metalc/fcntl.h>
+#include <metalc/kernel_hooks.h>
 #include <metalc/stdio.h>
 #include <metalc/stdlib.h>
 #include <metalc/string.h>
@@ -118,11 +119,8 @@ void __mcapi_clearerr(__mcapi_FILE *stream) {
 
 __attribute__((nonnull))
 void __mcapi_fclose(__mcapi_FILE *stream) {
-    if (__mclib_runtime_info->f_io_close == NULL) {
-        __mcapi_errno = __mcapi_ENOSYS;
-        return;
-    }
-    __mclib_runtime_info->f_io_close(stream->descriptor, __mclib_runtime_info->udata);
+    krnlhook_fsync(stream->descriptor, __mclib_runtime_info->udata);
+    krnlhook_close(stream->descriptor, __mclib_runtime_info->udata);
     __mcapi_free(stream);
 }
 
@@ -144,12 +142,6 @@ __mcapi_FILE *__mcapi_fopen(const char *path, const char *mode) {
     __mcapi_FILE *stream;
     int io_flags;
 
-    /* We can't do anything if the kernel didn't give us a hook. */
-    if (__mclib_runtime_info->f_io_open == NULL) {
-        __mcapi_errno = __mcapi_ENOSYS;
-        return NULL;
-    }
-
     /* Convert the OS-agnostic mode string to POSIX bit flags, which will be
      * easier for the kernel to deal with. */
     io_flags = __mcint_mode_string_to_flags(mode);
@@ -163,11 +155,10 @@ __mcapi_FILE *__mcapi_fopen(const char *path, const char *mode) {
         return NULL;
 
     /* Open the file, always using mode 0644 if we're creating a new file. */
-    stream->descriptor = __mclib_runtime_info->f_io_open(
+    stream->descriptor = krnlhook_open(
         path, io_flags, 0644, __mclib_runtime_info->udata
     );
     if (stream->descriptor == -1) {
-        /* TODO (dargueta): How do we carry over errno to here? */
         __mcapi_free(stream);
         return NULL;
     }
@@ -181,11 +172,6 @@ __mcapi_FILE *__mcapi_fopen(const char *path, const char *mode) {
 
 __attribute__((nonnull))
 size_t __mcapi_fwrite(const void *ptr, size_t size, size_t count, __mcapi_FILE *stream) {
-    if (__mclib_runtime_info->f_io_write == NULL) {
-        __mcapi_errno = __mcapi_ENOSYS;
-        return ~0;
-    }
-
     /* Complain if we're trying to write to a read-only stream. */
     if ((stream->io_flags & O_ACCMODE) == O_RDONLY) {
         __mcapi_errno = __mcapi_EPERM;
@@ -196,7 +182,7 @@ size_t __mcapi_fwrite(const void *ptr, size_t size, size_t count, __mcapi_FILE *
     if (stream->io_flags & O_APPEND)
         __mcapi_fseek(stream, 0, __mcapi_SEEK_END);
 
-    return __mclib_runtime_info->f_io_write(
+    return krnlhook_write(
         stream->descriptor, ptr, size * count, __mclib_runtime_info->udata
     );
 }
@@ -204,18 +190,13 @@ size_t __mcapi_fwrite(const void *ptr, size_t size, size_t count, __mcapi_FILE *
 
 __attribute__((nonnull))
 size_t __mcapi_fread(void *ptr, size_t size, size_t count, __mcapi_FILE *stream) {
-    if (__mclib_runtime_info->f_io_read == NULL) {
-        __mcapi_errno = __mcapi_ENOSYS;
-        return ~0;
-    }
-
     /* Complain if we're trying to read from a write-only stream. */
     if ((stream->io_flags & O_ACCMODE) == O_WRONLY) {
         __mcapi_errno = __mcapi_EPERM;
         return ~0;
     }
 
-    return __mclib_runtime_info->f_io_read(
+    return krnlhook_read(
         stream->descriptor, ptr, size * count, __mclib_runtime_info->udata
     );
 }
@@ -223,11 +204,7 @@ size_t __mcapi_fread(void *ptr, size_t size, size_t count, __mcapi_FILE *stream)
 
 __attribute__((nonnull))
 __mcapi_fpos_t __mcapi_fseek(__mcapi_FILE *stream, long offset, int whence) {
-    if (__mclib_runtime_info->f_io_lseek == NULL) {
-        __mcapi_errno = __mcapi_ENOSYS;
-        return -1;
-    }
-    return __mclib_runtime_info->f_io_lseek(
+    return krnlhook_seek(
         stream->descriptor, offset, whence, __mclib_runtime_info->udata
     );
 }

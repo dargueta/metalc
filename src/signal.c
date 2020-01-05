@@ -1,4 +1,5 @@
 #include <metalc/errno.h>
+#include <metalc/kernel_hooks.h>
 #include <metalc/setjmp.h>
 #include <metalc/signal.h>
 #include <metalc/stdbool.h>
@@ -26,18 +27,13 @@ __attribute__((noreturn)) static void _sighandler_term(int sig) {
              * crt_teardown() will *not* be called and no resources are released.
              * It's up to the operating system to release memory, file handles,
              * etc. */
-            if (__mclib_runtime_info->f_core_dump != NULL)
-                __mclib_runtime_info->f_core_dump(sig, __mclib_runtime_info->udata);
-
-            /* Else: Kernel didn't give us a core dump function, terminate the
-             * process without dumping memory. */
+            krnlhook_core_dump(sig, __mclib_runtime_info->udata);
             break;
 
         default:
+            __mcapi_longjmp(__mclib_abort_target, sig);
             break;
     };
-
-    __mcapi_longjmp(__mclib_abort_target, sig);
 }
 
 
@@ -49,21 +45,13 @@ static void _sighandler_ignore(int sig) {
 
 /* Signal handler pauses the current process. */
 static void _sighandler_stop(int sig) {
-    if (__mclib_runtime_info->stop_process != NULL)
-        __mclib_runtime_info->stop_process(sig, __mclib_runtime_info->udata);
-    else
-        /* Kernel didn't give us a way to pause the process. Explode. */
-        __mcapi_raise(__mcapi_SIGSYS);
+    krnlhook_suspend(sig, __mclib_runtime_info->udata);
 }
 
 
 /* Signal handler resumes the current process. */
 static void _sighandler_resume(int sig) {
-    if (__mclib_runtime_info->resume_process != NULL)
-        __mclib_runtime_info->resume_process(sig, __mclib_runtime_info->udata);
-    else
-        /* No way to resume the process. Explode. */
-        __mcapi_raise(__mcapi_SIGSYS);
+    krnlhook_resume(sig, __mclib_runtime_info->udata);
 }
 
 
