@@ -1,1 +1,1 @@
-int errno;
+int __mcapi_errno __attribute__((used));

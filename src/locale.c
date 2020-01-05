@@ -4,7 +4,7 @@
 #include <metalc/string.h>
 
 
-static const struct lconv kDefaultCLocale = {
+static const struct __mcapi_lconv kDefaultCLocale = {
    ".",        /* decimal_point */
    "",         /* thousands_sep */
    "",         /* grouping */
@@ -32,11 +32,11 @@ static const struct lconv kDefaultCLocale = {
 };
 
 
-static struct lconv gCurrentCLocale;
+static struct __mcapi_lconv gCurrentCLocale;
 
 
 struct LocaleEntry {
-    const struct lconv * const locale;
+    const struct __mcapi_lconv * const locale;
     const char * const name;
 };
 
@@ -48,40 +48,40 @@ const struct LocaleEntry gSupportedLocales[] = {
 };
 
 
-static const struct lconv *_find_locale(const char *name) {
+static const struct __mcapi_lconv *_find_locale(const char *name) {
     const struct LocaleEntry *ptr = gSupportedLocales;
 
     while (ptr->name != NULL) {
-        if (strcmp(ptr->name, name) == 0)
+        if (__mcapi_strcmp(ptr->name, name) == 0)
             return ptr->locale;
     }
     return NULL;
 }
 
 
-int setlocale(int what, const char *name) {
-    const struct lconv *defaults = _find_locale(name);
+int __mcapi_setlocale(int what, const char *name) {
+    const struct __mcapi_lconv *defaults = _find_locale(name);
     if (defaults == NULL)
-        return EINVAL;
+        return __mcapi_EINVAL;
 
     switch (what) {
-        case LC_ALL:
-            memcpy(&gCurrentCLocale, defaults, sizeof(struct lconv));
+        case __mcapi_LC_ALL:
+            __mcapi_memcpy(&gCurrentCLocale, defaults, sizeof(struct __mcapi_lconv));
             return 0;
-        case LC_COLLATE:
-        case LC_CTYPE:
-        case LC_MONETARY:
-        case LC_NUMERIC:
-        case LC_TIME:
-            errno = ENOSYS;
-            return ENOSYS;
+        case __mcapi_LC_COLLATE:
+        case __mcapi_LC_CTYPE:
+        case __mcapi_LC_MONETARY:
+        case __mcapi_LC_NUMERIC:
+        case __mcapi_LC_TIME:
+            __mcapi_errno = __mcapi_ENOSYS;
+            return __mcapi_ENOSYS;
         default:
-            errno = EINVAL;
-            return EINVAL;
+            __mcapi_errno = __mcapi_EINVAL;
+            return __mcapi_EINVAL;
     }
 }
 
 
-struct lconv* localeconv(void) {
+struct __mcapi_lconv* __mcapi_localeconv(void) {
     return &gCurrentCLocale;
 }

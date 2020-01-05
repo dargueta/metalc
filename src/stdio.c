@@ -8,22 +8,7 @@
 #include <metalc/string.h>
 
 extern MetalCRuntimeInfo *__mclib_runtime_info;
-
-
-struct FILE_ {
-    intptr_t descriptor;
-    int eof;
-    int last_error;
-};
-
-
-static struct FILE_ _internal_stdin;
-static struct FILE_ _internal_stdout;
-static struct FILE_ _internal_stderr;
-
-FILE *stdin = &_internal_stdin;
-FILE *stdout = &_internal_stdout;
-FILE *stderr = &_internal_stderr;
+extern int fileio_init(void);
 
 
 enum MCArgumentType {
@@ -57,16 +42,7 @@ struct MCFormatSpecifier {
 
 
 METALC_API_INTERNAL int stdio_init(void) {
-    _internal_stdin.descriptor = __mclib_runtime_info->stdin_handle;
-    _internal_stdout.descriptor = __mclib_runtime_info->stdout_handle;
-    _internal_stderr.descriptor = __mclib_runtime_info->stderr_handle;
-    _internal_stdin.eof = 0;
-    _internal_stdout.eof = 0;
-    _internal_stderr.eof = 0;
-    _internal_stdin.last_error = 0;
-    _internal_stdout.last_error = 0;
-    _internal_stderr.last_error = 0;
-    return 0;
+    return fileio_init();
 }
 
 
@@ -77,22 +53,22 @@ METALC_API_INTERNAL int stdio_teardown(void) {
 
 static int _determine_format(const char *format, struct MCFormatSpecifier *info) {
     (void)format; (void)info;
-    return ENOSYS;
+    return __mcapi_ENOSYS;
 }
 
 
 static size_t _copy_buffer(const char *temp, char **buffer) {
-    size_t buffer_size = strlen(temp);
+    size_t buffer_size = __mcapi_strlen(temp);
 
     if (*buffer) {
-        strcpy(*buffer, temp);
+        __mcapi_strcpy(*buffer, temp);
         *buffer += buffer_size;
     }
     return buffer_size;
 }
 
 
-int vsprintf(char *buffer, const char *format, va_list arg_list) {
+int __mcapi_vsprintf(char *buffer, const char *format, va_list arg_list) {
     struct MCFormatSpecifier format_info;
     int format_error, n_chars_written, buffer_size, i;
     char temp[256];
@@ -125,7 +101,7 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
                 break;
             case 'd':
             case 'i':
-                itoa(va_arg(arg_list, int), temp, 10);
+                __mcapi_itoa(va_arg(arg_list, int), temp, 10);
                 n_chars_written += _copy_buffer(temp, &buffer);
                 break;
             case 'h':
@@ -136,27 +112,27 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
                 switch (*format) {
                     case 'd':
                     case 'i':
-                        itoa(va_arg(arg_list, int), temp, 10);
+                        __mcapi_itoa(va_arg(arg_list, int), temp, 10);
                         break;
                     case 'u':
-                        utoa(va_arg(arg_list, unsigned), temp, 10);
+                        __mcapi_utoa(va_arg(arg_list, unsigned), temp, 10);
                         break;
                     case 'x':
                     case 'X':
-                        utoa(va_arg(arg_list, unsigned), temp, 16);
-                        buffer_size = (int)strlen(temp);
+                        __mcapi_utoa(va_arg(arg_list, unsigned), temp, 16);
+                        buffer_size = (int)__mcapi_strlen(temp);
                         if (*format == 'X') {
                             for (i = 0; i < buffer_size; ++i)
-                                temp[i] = toupper(temp[i]);
+                                temp[i] = __mcapi_toupper(temp[i]);
                         }
                         break;
                     case 'e':
                     case 'f':
                     case 'g':
-                        errno = ENOSYS;
+                        __mcapi_errno = __mcapi_ENOSYS;
                         return -n_chars_written;
                     default:
-                        errno = EINVAL;
+                        __mcapi_errno = __mcapi_EINVAL;
                         return -n_chars_written;
                 }
                 n_chars_written += _copy_buffer(temp, &buffer);
@@ -173,26 +149,26 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
                         switch (*format) {
                             case 'd':
                             case 'i':
-                                lltoa(va_arg(arg_list, long long), temp, 10);
+                                __mcapi_lltoa(va_arg(arg_list, long long), temp, 10);
                                 break;
                             case 'u':
-                                ulltoa(
+                                __mcapi_ulltoa(
                                     va_arg(arg_list, unsigned long long), temp, 10
                                 );
                                 break;
                             case 'x':
                             case 'X':
-                                ulltoa(
+                                __mcapi_ulltoa(
                                     va_arg(arg_list, unsigned long long), temp, 16
                                 );
-                                buffer_size = (int)strlen(temp);
+                                buffer_size = (int)__mcapi_strlen(temp);
                                 if (*format == 'X') {
                                     for (i = 0; i < buffer_size; ++i)
-                                        temp[i] = toupper(temp[i]);
+                                        temp[i] = __mcapi_toupper(temp[i]);
                                 }
                                 break;
                             default:
-                                errno = EINVAL;
+                                __mcapi_errno = __mcapi_EINVAL;
                                 return -n_chars_written;
                         }
                     }
@@ -201,10 +177,10 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
                         switch (*format) {
                             case 'd':
                             case 'i':
-                                ltoa(va_arg(arg_list, long), temp, 10);
+                                __mcapi_ltoa(va_arg(arg_list, long), temp, 10);
                                 break;
                             case 'u':
-                                ultoa(
+                                __mcapi_ultoa(
                                     va_arg(arg_list, unsigned long), temp, 10
                                 );
                                 break;
@@ -214,10 +190,10 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
                             case 'f':
                             case 'g':
                                 /* TODO */
-                                errno = ENOSYS;
+                                __mcapi_errno = __mcapi_ENOSYS;
                                 return -n_chars_written;
                             default:
-                                errno = EINVAL;
+                                __mcapi_errno = __mcapi_EINVAL;
                                 return -n_chars_written;
                         }
                     }
@@ -226,18 +202,18 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
                     switch (*format) {
                         case 'd':
                         case 'i':
-                            ltoa(va_arg(arg_list, long), temp, 10);
+                            __mcapi_ltoa(va_arg(arg_list, long), temp, 10);
                             break;
                         case 'u':
-                            ultoa(va_arg(arg_list, unsigned long), temp, 10);
+                            __mcapi_ultoa(va_arg(arg_list, unsigned long), temp, 10);
                             break;
                         case 'x':
                         case 'X':
                             /* TODO */
-                            errno = ENOSYS;
+                            __mcapi_errno = __mcapi_ENOSYS;
                             return -n_chars_written;
                         default:
-                            errno = EINVAL;
+                            __mcapi_errno = __mcapi_EINVAL;
                             return -n_chars_written;
                     }
                 #endif
@@ -249,19 +225,19 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
                 *va_arg(arg_list, int *) = n_chars_written;
                 break;
             case 'u':
-                utoa(va_arg(arg_list, unsigned), temp, 10);
+                __mcapi_utoa(va_arg(arg_list, unsigned), temp, 10);
                 n_chars_written += _copy_buffer(temp, &buffer);
                 break;
             case 'x':
             case 'X':
-                utoa(va_arg(arg_list, unsigned), temp, 16);
-                buffer_size = (int)strlen(temp);
+                __mcapi_utoa(va_arg(arg_list, unsigned), temp, 16);
+                buffer_size = (int)__mcapi_strlen(temp);
                 if (*format == 'X') {
                     for (i = 0; i < buffer_size; ++i)
-                        temp[i] = toupper(temp[i]);
+                        temp[i] = __mcapi_toupper(temp[i]);
                 }
                 if (buffer) {
-                    strcpy(temp, buffer);
+                    __mcapi_strcpy(temp, buffer);
                     buffer += buffer_size;
                 }
                 n_chars_written += buffer_size;
@@ -269,13 +245,13 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
             case 'e':
             case 'f':
             case 'g':
-                errno = ENOSYS;
+                __mcapi_errno = __mcapi_ENOSYS;
                 return -n_chars_written;
             default:
                 /* Else: This is a complex format specifier. */
                 format_error = _determine_format(format, &format_info);
                 if (format_error != 0) {
-                    errno = EINVAL;
+                    __mcapi_errno = __mcapi_EINVAL;
                     return -n_chars_written;
                 }
                 /* Else: Valid format specifier. */
@@ -289,59 +265,63 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
 }
 
 
-int sprintf(char *buffer, const char *format, ...) {
+__attribute__((nonnull))
+int __mcapi_sprintf(char *buffer, const char *format, ...) {
     va_list arg_list;
     int result;
 
     va_start(arg_list, format);
-    result = vsprintf(buffer, format, arg_list);
+    result = __mcapi_vsprintf(buffer, format, arg_list);
     va_end(arg_list);
     return result;
 }
 
 
-int vfprintf(FILE *file, const char *format, va_list arg_list) {
+__attribute__((nonnull))
+int __mcapi_vfprintf(__mcapi_FILE *stream, const char *format, va_list arg_list) {
     char *buffer;
     int n_chars_written;
 
-    n_chars_written = vsprintf(NULL, format, arg_list);
+    n_chars_written = __mcapi_vsprintf(NULL, format, arg_list);
     if (n_chars_written < 0)
         return n_chars_written;
 
-    buffer = malloc(n_chars_written);
+    buffer = __mcapi_malloc(n_chars_written);
     if (buffer == NULL)
         return -1;
 
-    vsprintf(buffer, format, arg_list);
-    fwrite(buffer, n_chars_written - 1, 1, file);
-    free(buffer);
-
+    __mcapi_vsprintf(buffer, format, arg_list);
+    __mcapi_fwrite(buffer, n_chars_written - 1, 1, stream);
+    __mcapi_free(buffer);
     return n_chars_written - 1;
 }
 
 
-int fprintf(FILE *file, const char *format, ...) {
+__attribute__((nonnull))
+int __mcapi_fprintf(__mcapi_FILE *stream, const char *format, ...) {
     va_list arg_list;
     int result;
 
     va_start(arg_list, format);
-    result = vfprintf(file, format, arg_list);
+    result = __mcapi_vfprintf(stream, format, arg_list);
     va_end(arg_list);
     return result;
 }
 
 
-int vprintf(const char *format, va_list arg_list) {
-    return vfprintf(stdout, format, arg_list);
+__attribute__((nonnull))
+int __mcapi_vprintf(const char *format, va_list arg_list) {
+    return __mcapi_vfprintf(__mcapi_stdout, format, arg_list);
 }
 
 
-int printf(const char *format, ...) {
+__attribute__((nonnull))
+int __mcapi_printf(const char *format, ...) {
     va_list arg_list;
     int result;
 
     va_start(arg_list, format);
-    result = vprintf(format, arg_list);
+    result = __mcapi_vprintf(format, arg_list);
     va_end(arg_list);
     return result;
 }

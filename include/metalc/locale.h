@@ -3,15 +3,15 @@
 
 #include <metalc/metalc.h>
 
-#define LC_ALL      0
-#define LC_COLLATE  1
-#define LC_CTYPE    2
-#define LC_MONETARY 3
-#define LC_NUMERIC  4
-#define LC_TIME     5
+#define __mcapi_LC_ALL      0
+#define __mcapi_LC_COLLATE  1
+#define __mcapi_LC_CTYPE    2
+#define __mcapi_LC_MONETARY 3
+#define __mcapi_LC_NUMERIC  4
+#define __mcapi_LC_TIME     5
 
 
-struct lconv {
+struct __mcapi_lconv {
     char *decimal_point;
     char *thousands_sep;
     char *grouping;
@@ -39,8 +39,8 @@ struct lconv {
 };
 
 
-METALC_API_EXPORT int setlocale(int what, const char *name);
-METALC_API_EXPORT struct lconv* localeconv(void);
+METALC_API_EXPORT int __mcapi_setlocale(int what, const char *name);
+METALC_API_EXPORT struct __mcapi_lconv* __mcapi_localeconv(void);
 
 
 #endif  /* INCLUDE_METALC_LOCALE_H_ */

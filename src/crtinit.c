@@ -15,15 +15,15 @@ extern int stdio_teardown(void);
 
 
 MetalCRuntimeInfo *__mclib_runtime_info __attribute__((visibility("hidden"))) = NULL;
-jmp_buf __mclib_abort_target __attribute__((aligned(16), visibility("hidden")));
+__mcapi_jmp_buf __mclib_abort_target __attribute__((aligned(16), visibility("hidden")));
 
 
 static int crt_init(void) {
     if (__mclib_runtime_info == NULL)
-        return EFAULT;
+        return __mcapi_EFAULT;
 
-    errno = 0;
-    setlocale(LC_ALL, "C");
+    __mcapi_errno = 0;
+    __mcapi_setlocale(__mcapi_LC_ALL, "C");
     malloc_init();
     stdio_init();
     /* TODO (dargueta): Initialize atexit here. */
@@ -39,9 +39,7 @@ static int crt_teardown(void) {
 }
 
 
-int metalc_internal__start(
-    MetalCRuntimeInfo *rti, int argc, char **argv, char **env
-) {
+int cstdlib_start(MetalCRuntimeInfo *rti, int argc, char **argv, char **env) {
     int result;
 
     __mclib_runtime_info = rti;
@@ -55,7 +53,7 @@ int metalc_internal__start(
         return result;
     }
 
-    result = setjmp(__mclib_abort_target);
+    result = __mcapi_setjmp(__mclib_abort_target);
     if (result == 0) {
         /* Call main() using the three-argument form. It's up to the kernel to
          * provide a shim for main() implementations that take zero or two

@@ -8,11 +8,11 @@ extern MetalCRuntimeInfo *__mclib_runtime_info;
 void *__mclib_current_brk __attribute__((visibility("hidden"))) = NULL;
 
 
-void *sbrk(intptr_t diff) {
+void *__mclib_sbrk(intptr_t diff) {
     void *old_brk, *new_brk;
 
     if (__mclib_runtime_info->f_brk == NULL) {
-        errno = ENOSYS;
+        __mcapi_errno = __mcapi_ENOSYS;
         return (void *)-1;
     }
 
@@ -21,7 +21,7 @@ void *sbrk(intptr_t diff) {
          * the OS didn't tell us where it is; presumably f_brk isn't implemented
          * either. */
         if (__mclib_runtime_info->original_brk == NULL) {
-            errno = ENOSYS;
+            __mcapi_errno = __mcapi_ENOSYS;
             return (void *)-1;
         }
 

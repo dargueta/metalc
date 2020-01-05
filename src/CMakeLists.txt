@@ -3,6 +3,7 @@ set(LIBRARY_C_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/crtinit.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/ctype.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/errno.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/file_io.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/locale.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/malloc.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/math.c"
@@ -64,8 +65,8 @@ target_link_libraries(metalcstatic metalc_asm)
 
 # Unit testing
 add_executable(test_executable ${TEST_SOURCE_FILES})
-add_dependencies(test_executable metalcstatic)
-target_link_libraries(test_executable metalcstatic)
+add_dependencies(test_executable metalc)
+target_link_libraries(test_executable metalc)
 
 # Disable linking the executable with the OS's C standard library and use our
 # implementation instead.

@@ -47,7 +47,7 @@ Build Requirements
 To build this library you'll need:
 
 * CMake 3.8 or higher
-* A compiler supporting ANSI C90 or later, such as GCC or MinGW. Visual Studio
+* A compiler supporting ANSI C99 or later, such as GCC or MinGW. Visual Studio
   cannot cross-compile and so is not supported.
 * (UEFI mode only) A UEFI library implementation, such as `GNU_EFI`_ or `TianoCore`_.
 

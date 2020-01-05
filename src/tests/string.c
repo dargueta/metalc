@@ -1,30 +1,32 @@
+#include <string.h>
+
 #include <metalc/string.h>
 #include "testing.h"
 
 
 BEGIN_TEST(test_memchr__basic)
     static const char *str = "Th\nisIsAString";
-    CHECK_EQ(memchr(str, '\n', 5), memchr(str, '\n', 5));
+    CHECK_EQ(__mcapi_memchr(str, '\n', 5), memchr(str, '\n', 5));
 END_TEST()
 
 
 BEGIN_TEST(test_memchr__zero_length)
-    CHECK_EQ(memchr("", '\n', 5), NULL);
+    CHECK_EQ(__mcapi_memchr("", '\n', 5), NULL);
 END_TEST()
 
 
 BEGIN_TEST(test_memcmp__zero_length)
-    CHECK_EQ(memcmp("", "", 0), 0);
+    CHECK_EQ(__mcapi_memcmp("", "", 0), 0);
 END_TEST()
 
 
 BEGIN_TEST(test_memcmp__one_character_zero_equal)
-    CHECK_EQ(memcmp("", "", 1), 0);
+    CHECK_EQ(__mcapi_memcmp("", "", 1), 0);
 END_TEST()
 
 
 BEGIN_TEST(test_memcmp__one_character_nonzero_equal)
-    CHECK_EQ(memcmp("A", "A", 1), 0);
+    CHECK_EQ(__mcapi_memcmp("A", "A", 1), 0);
 END_TEST()
 
 

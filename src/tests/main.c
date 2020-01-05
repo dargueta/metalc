@@ -1,10 +1,8 @@
+#include <stdio.h>
+
 #include <metalc/crtinit.h>
 #include <metalc/errno.h>
 #include <metalc/stdio.h>
-
-#include <fcntl.h>
-#include <stddef.h>
-#include <unistd.h>
 
 #include "testing.h"
 
@@ -17,7 +15,7 @@ const struct UnitTestEntry *kAllUnitTestGroups[] = {
 };
 
 
-int test_output_fd;
+FILE *test_output_fd;
 
 #define FAKE_PAGE_SIZE  4096
 #define PAGE_MASK       (FAKE_PAGE_SIZE - 1)
@@ -41,13 +39,13 @@ int fake_brk(void *new_brk, void *udata) {
         ((char *)new_brk < state->data_area)
         || ((char *)new_brk >= (state->data_area + DATA_AREA_SIZE))
     ) {
-        errno = EINVAL;
+        __mcapi_errno = __mcapi_EINVAL;
         return -1;
     }
 
     /* Address must be aligned on a page boundary */
     if ((uintptr_t)new_brk % FAKE_PAGE_SIZE != 0) {
-        errno = EFAULT;
+        __mcapi_errno = __mcapi_EFAULT;
         return -1;
     }
 
@@ -66,9 +64,9 @@ int main(int argc, char **argv) {
     struct FakeOSState os_state;
 
     if (argc == 1)
-        test_output_fd = 1;
+        test_output_fd = stdout;
     else
-        test_output_fd = open(argv[1], O_RDWR, 0644);
+        test_output_fd = fopen(argv[1], "w");
 
     /* Equivalent to memset(&rti, 0, sizeof(rti)) without using memset(). */
     for (i = 0; i < sizeof(rti); ++i)
@@ -85,8 +83,8 @@ int main(int argc, char **argv) {
             rti.f_brk = fake_brk;
             rti.original_brk = os_state.data_area;
 
-            result = metalc_internal__start(&rti, 0, NULL, NULL);
-            fsync(test_output_fd);
+            result = cstdlib_start(&rti, 0, NULL, NULL);
+            fflush(test_output_fd);
 
             if (result == 0) {
                 if (rti.signal_code != 0)
@@ -101,8 +99,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (test_output_fd != 1)
-        close(test_output_fd);
+    if (test_output_fd != stdout)
+        fclose(test_output_fd);
 
     return 0;
 }

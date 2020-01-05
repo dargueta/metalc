@@ -1,9 +1,9 @@
-.globl setjmp
-.globl longjmp
+.globl __mcapi_setjmp
+.globl __mcapi_longjmp
 
 .section .text
 
-setjmp:
+__mcapi_setjmp:
     # $a0 contains the jump buffer
     sw  $s0, 0($a0)
     sw  $s1, 4($a0)
@@ -28,7 +28,7 @@ setjmp:
     jr  $ra
 
 
-longjmp:
+__mcapi_longjmp:
     # $a0 contains the jump buffer, $a1 is the return value.
     lw  $s0, 0($a0)
     lw  $s1, 4($a0)

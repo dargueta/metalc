@@ -14,10 +14,10 @@ typedef int (* cmetal_main_fn)(int argc, char **argv, char **env);
 typedef int (* cmetal_brk_fn)(void *new_brk, void *udata);
 
 typedef int (* cmetal_open_fn)(const char *file, int mode, int perms, void *udata);
-typedef ssize_t (* cmetal_write_fn)(intptr_t fdesc, const void *data, size_t size, void *udata);
-typedef ssize_t (* cmetal_read_fn)(intptr_t fdesc, void *buffer, size_t size, void *udata);
-typedef off_t (* cmetal_seek_fn)(intptr_t fdesc, off_t offset, int whence, void *udata);
-typedef off_t (* cmetal_tell_fn)(intptr_t fdesc, void *udata);
+typedef __mcapi_ssize_t (* cmetal_write_fn)(intptr_t fdesc, const void *data, size_t size, void *udata);
+typedef __mcapi_ssize_t (* cmetal_read_fn)(intptr_t fdesc, void *buffer, size_t size, void *udata);
+typedef __mcapi_off_t (* cmetal_seek_fn)(intptr_t fdesc, __mcapi_off_t offset, int whence, void *udata);
+typedef __mcapi_off_t (* cmetal_tell_fn)(intptr_t fdesc, void *udata);
 typedef int (* cmetal_fsync_fn)(intptr_t fdesc, void *udata);
 typedef void (* cmetal_close_fn)(intptr_t fdesc, void *udata);
 
@@ -127,7 +127,7 @@ typedef struct {
 } MetalCRuntimeInfo;
 
 
-METALC_API_EXPORT int metalc_internal__start(
+METALC_API_EXPORT int cstdlib_start(
     MetalCRuntimeInfo *rti, int argc, char **argv, char **env
 );
 

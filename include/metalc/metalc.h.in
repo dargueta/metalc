@@ -67,33 +67,33 @@
     /* Can't use cdecl here because GCC, MinGW, etc. will ignore it. GCC will
      * issue warnings and break the build. */
     #define METALC_API_EXPORT
-    #define METALC_API_EXPORT_WITH_ATTR(attr)        __attribute__((attr))
+    #define METALC_API_EXPORT_WITH_ATTR(...)         __attribute__((__VA_ARGS__))
     #define METALC_API_EXPORT_FAST
-    #define METALC_API_EXPORT_FAST_WITH_ATTR(attr)   __attribute__((attr))
+    #define METALC_API_EXPORT_FAST_WITH_ATTR(...)    __attribute__((__VA_ARGS__))
 #else
     /* 16- or 32-bit compile architecture. */
     #define METALC_API_EXPORT
-    #define METALC_API_EXPORT_WITH_ATTR(attr)       __attribute__((attr))
+    #define METALC_API_EXPORT_WITH_ATTR(...)        __attribute__((__VA_ARGS__))
     #define METALC_API_EXPORT_FAST                  __attribute__((fastcall))
-    #define METALC_API_EXPORT_FAST_WITH_ATTR(attr)  __attribute__((fastcall, attr))
+    #define METALC_API_EXPORT_FAST_WITH_ATTR(...)   __attribute__((fastcall, __VA_ARGS__))
 #endif
 
 
 #if METALC_INTERNALS_USE_FASTCALL && (METALC_ARCH_BITS != 64)
     #define METALC_API_INTERNAL                 __attribute__((visibility("hidden"), fastcall))
-    #define METALC_API_INTERAL_WITH_ATTR(attr)  __attribute__((visibility("hidden"), fastcall, attr))
+    #define METALC_API_INTERAL_WITH_ATTR(...)   __attribute__((visibility("hidden"), fastcall, __VA_ARGS__))
 #else
     #define METALC_API_INTERNAL                 __attribute__((visibility("hidden")))
-    #define METALC_API_INTERAL_WITH_ATTR(attr)  __attribute__((visibility("hidden"), attr))
+    #define METALC_API_INTERAL_WITH_ATTR(...)   __attribute__((visibility("hidden"), __VA_ARGS__))
 #endif
 
 
 #if METALC_ENABLE_ASM_IMPLEMENTATIONS
     #define METALC_API_EXPORT_ASM   METALC_API_EXPORT_WITH_ATTR(naked)
-    #define METALC_API_EXPORT_ASM_WITH_ATTR(attr)   METALC_API_EXPORT_WITH_ATTR(naked, attr)
+    #define METALC_API_EXPORT_ASM_WITH_ATTR(...)    METALC_API_EXPORT_WITH_ATTR(naked, __VA_ARGS__)
 #else
     #define METALC_API_EXPORT_ASM   METALC_API_EXPORT
-    #define METALC_API_EXPORT_ASM_WITH_ATTR(attr)   METALC_API_EXPORT_WITH_ATTR(attr)
+    #define METALC_API_EXPORT_ASM_WITH_ATTR(...)    METALC_API_EXPORT_WITH_ATTR(__VA_ARGS__)
 #endif
 
 

@@ -29,6 +29,12 @@ supported features is below.
     (x86_32 only) Internal functions not exposed as part of the C library will
     use the fastcall calling convention instead of the normal cdecl.
 
+-fcheck-args / -fno-check-args [default]
+    Causes functions to check the validity of their arguments before proceeding,
+    setting `errno` and (if possible) returning an appropriate error value. This
+    is useful for avoiding use of null pointers, but slows down execution due to
+    the additional code being run.
+
 -fshadow-stack / -fno-shadow-stack [default]
     Enable or disable use of the shadow stack. Supported on 32/64-bit x86 targets
     only, and disabled by default.
@@ -150,6 +156,9 @@ def build_toolchain_params(args):
         variables["COMPILE_FOR_TESTING"] = 1
     else:
         variables["COMPILE_FOR_TESTING"] = 0
+
+    if "check-args" in args.feature_flags:
+        defines += " -DMETALC_CHECK_ARGS"
 
     variables["C_DEFINES"] = defines
     variables["TOOLCHAIN_ID"] = args.toolchain or ""

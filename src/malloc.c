@@ -38,34 +38,34 @@ static struct PointerEntry *g_bookkeeping_pages = NULL;
 #define _is_allocated(p)        ((uintptr_t)(p) & (uintptr_t)1)
 
 
-METALC_API_INTERNAL void _malloc_assert(int expression, const char *message, ...) {
-    FILE *out;
+static void _malloc_assert(int expression, const char *message, ...) {
+    __mcapi_FILE *out;
     va_list args;
 
     if (expression)
         return;
 
-    out = (stderr != NULL) ? stderr : stdout;
+    out = (__mcapi_stderr != NULL) ? __mcapi_stderr : __mcapi_stdout;
     if (out) {
         va_start(args, message);
-        vfprintf(out, "malloc() assertion failed: %s\n", args);
+        __mcapi_vfprintf(out, "malloc() assertion failed: %s\n", args);
         va_end(args);
     }
 
-    raise(SIGABRT);
+    __mcapi_raise(__mcapi_SIGABRT);
 }
 
 
-METALC_API_INTERNAL void *_allocate_pages(int count) {
-    void *original_top = sbrk(0);
+static void *_allocate_pages(int count) {
+    void *original_top = __mclib_sbrk(0);
 
-    if (sbrk(count * __mclib_runtime_info->page_size) != (void *)-1)
+    if (__mclib_sbrk(count * __mclib_runtime_info->page_size) != (void *)-1)
         return original_top;
     return NULL;
 }
 
 
-METALC_API_INTERNAL struct PointerEntry *_page_containing_index(size_t index) {
+static struct PointerEntry *_page_containing_index(size_t index) {
     struct PointerEntry *current_page = g_bookkeeping_pages;
 
     while (current_page != NULL) {
@@ -99,7 +99,7 @@ METALC_API_INTERNAL struct PointerEntry *_page_containing_index(size_t index) {
 }
 
 
-METALC_API_INTERNAL struct PointerEntry *_pointer_at_index(size_t index) {
+static struct PointerEntry *_pointer_at_index(size_t index) {
     struct PointerEntry *page = _page_containing_index(index);
 
     if (page == NULL)
@@ -108,7 +108,7 @@ METALC_API_INTERNAL struct PointerEntry *_pointer_at_index(size_t index) {
 }
 
 
-METALC_API_INTERNAL struct PointerEntry *_find_pointer(const void *pointer) {
+static struct PointerEntry *_find_pointer(const void *pointer) {
     struct PointerEntry *entry;
     unsigned i;
 
@@ -136,10 +136,10 @@ METALC_API_INTERNAL struct PointerEntry *_find_pointer(const void *pointer) {
 }
 
 
-METALC_API_INTERNAL uintptr_t _size_of_allocation(const void *pointer) {
+static uintptr_t _size_of_allocation(const void *pointer) {
     const struct PointerEntry *entry = _find_pointer(pointer);
     if (entry == NULL) {
-        errno = EINVAL;
+        __mcapi_errno = __mcapi_EINVAL;
         return 0;
     }
     return entry->size;
@@ -148,24 +148,24 @@ METALC_API_INTERNAL uintptr_t _size_of_allocation(const void *pointer) {
 
 METALC_API_INTERNAL int malloc_init(void) {
     if ((__mclib_runtime_info->page_size == 0) || (__mclib_runtime_info->f_brk == NULL))
-        return ENOSYS;
+        return __mcapi_ENOSYS;
 
     g_heap_pages = _allocate_pages(1);
     if (g_heap_pages == NULL)
-        return errno;
+        return __mcapi_errno;
 
     g_bookkeeping_pages = _allocate_pages(1);
     if (g_bookkeeping_pages == NULL) {
         _allocate_pages(-1);
-        return ENOMEM;
+        return __mcapi_ENOMEM;
     }
 
-    memset(g_heap_pages, 0, __mclib_runtime_info->page_size);
+    __mcapi_memset(g_heap_pages, 0, __mclib_runtime_info->page_size);
 
     g_heap_pages[1] = _allocate_pages(1);
     if (g_heap_pages[1] == NULL) {
         _allocate_pages(-2);
-        return ENOMEM;
+        return __mcapi_ENOMEM;
     }
 
     g_bookkeeping_pages[0].base = NULL;
@@ -187,16 +187,18 @@ METALC_API_INTERNAL int malloc_teardown(void) {
 }
 
 
-METALC_API_EXPORT void *malloc(size_t size) {
+__attribute__((malloc, warn_unused_result))
+void *__mcapi_malloc(size_t size) {
     if (size == 0)
         return NULL;
 
-    errno = ENOSYS;
+    __mcapi_errno = __mcapi_ENOSYS;
     return NULL;
 }
 
 
-METALC_API_EXPORT void *calloc(size_t n_elements, size_t element_size) {
+__attribute__((malloc, warn_unused_result))
+void *__mcapi_calloc(size_t n_elements, size_t element_size) {
     size_t total_size;
     void *pointer;
 
@@ -207,29 +209,30 @@ METALC_API_EXPORT void *calloc(size_t n_elements, size_t element_size) {
 
     /* Bail out if n_elements * element_size overflows. */
     if (total_size / element_size != n_elements) {
-        errno = ERANGE;
+        __mcapi_errno = __mcapi_ERANGE;
         return NULL;
     }
 
-    pointer = malloc(total_size);
+    pointer = __mcapi_malloc(total_size);
     if (pointer == NULL)
         return pointer;
 
-    memset(pointer, 0, total_size);
+    __mcapi_memset(pointer, 0, total_size);
     return pointer;
 }
 
 
-METALC_API_EXPORT void *realloc(void *pointer, size_t new_size) {
+__attribute__((warn_unused_result))
+void *__mcapi_realloc(void *pointer, size_t new_size) {
     uintptr_t old_size;
     void *new_pointer;
 
     if (new_size == 0) {
-        free(pointer);
+        __mcapi_free(pointer);
         return NULL;
     }
     else if (pointer == NULL)
-        return malloc(new_size);
+        return __mcapi_malloc(new_size);
 
     /* Inefficient implementation. The smart way to do it is to try and resize
      * the current block, and if the block can be resized, then update the
@@ -240,18 +243,18 @@ METALC_API_EXPORT void *realloc(void *pointer, size_t new_size) {
      * falsely claim it's run out of memory because we're holding two copies of
      * the same block in memory at once. */
     old_size = _size_of_allocation(pointer);
-    new_pointer = malloc(new_size);
+    new_pointer = __mcapi_malloc(new_size);
     if (new_pointer == NULL)
         /* errno already set by malloc(), no need to do it here. */
         return NULL;
 
-    memcpy(new_pointer, pointer, old_size);
-    free(pointer);
+    __mcapi_memcpy(new_pointer, pointer, old_size);
+    __mcapi_free(pointer);
     return new_pointer;
 }
 
 
-METALC_API_EXPORT void free(void *pointer) {
+void __mcapi_free(void *pointer) {
     struct PointerEntry *info;
 
     /* Ignore attempt to free a null pointer. */

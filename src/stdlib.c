@@ -12,32 +12,34 @@ static unsigned g_rand_seed = 0;
 static const char *kIntAlphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 extern MetalCRuntimeInfo *__mclib_runtime_info;
-extern jmp_buf __mclib_abort_target;
+extern __mcapi_jmp_buf __mclib_abort_target;
 
 
-void abort(void) {
-    raise(SIGABRT);
+__attribute__((noreturn))
+void __mcapi_abort(void) {
+    __mcapi_raise(__mcapi_SIGABRT);
 
     /* Theoretically we should never get here; the program should exit once the
      * abort signal has been raised. On the off chance that doesn't happen... */
-    exit(-1);
+    __mcapi_exit(-1);
 }
 
 
-void srand(unsigned seed) {
+void __mcapi_srand(unsigned seed) {
     g_rand_seed = seed;
 }
 
 
-void exit(int code) {
+__attribute__((noreturn))
+void __mcapi_exit(int code) {
     /* TODO: execute atexit handlers here */
     __mclib_runtime_info->main_return_value = code;
-    longjmp(__mclib_abort_target, INT_MIN);
+    __mcapi_longjmp(__mclib_abort_target, INT_MIN);
 }
 
 
 #if 0
-double atof(const char *str) {
+double __mcapi_atof(const char *str) {
     double result = 0.0;
     double sign = 1;
 
@@ -47,7 +49,7 @@ double atof(const char *str) {
 
     /* If we hit the end of the string, bail. */
     if (*str == '\0') {
-        errno = EINVAL;
+        __mcapi_errno = __mcapi_EINVAL;
         return 0.0;
     }
 
@@ -73,33 +75,33 @@ double atof(const char *str) {
 #endif
 
 
-int abs(int x) {
+int __mcapi_abs(int x) {
     if (x >= 0)
         return x;
     return -x;
 }
 
 
-long labs(long x) {
+long __mcapi_labs(long x) {
     if (x >= 0)
         return x;
     return -x;
 }
 
 
-char *itoa(int value, char *str, int base) {
-    return ltoa((long)value, str, base);
+char *__mcapi_itoa(int value, char *str, int base) {
+    return __mcapi_ltoa((long)value, str, base);
 }
 
 
-char *utoa(unsigned value, char *str, int base) {
-    return ultoa((unsigned long)value, str, base);
+char *__mcapi_utoa(unsigned value, char *str, int base) {
+    return __mcapi_ultoa((unsigned long)value, str, base);
 }
 
 
-char *ltoa(long value, char *str, int base) {
+char *__mcapi_ltoa(long value, char *str, int base) {
     if ((base < 2) || (base > 36)) {
-        errno = EINVAL;
+        __mcapi_errno = __mcapi_EINVAL;
         return NULL;
     }
 
@@ -109,17 +111,17 @@ char *ltoa(long value, char *str, int base) {
     /* Values are always treated as unsigned if the base is not 10. We also just
      * wrote the sign for `value` (if applicable) so we don't care that it's
      * negative anymore. */
-    return ultoa((unsigned long)labs(value), str, base);
+    return __mcapi_ultoa((unsigned long)__mcapi_labs(value), str, base);
 }
 
 
-char *ultoa(unsigned long value, char *str, int base) {
+char *__mcapi_ultoa(unsigned long value, char *str, int base) {
     int i;
     char temp_c;
     char *write_pointer = str;
 
     if ((base < 2) || (base > 36)) {
-        errno = EINVAL;
+        __mcapi_errno = __mcapi_EINVAL;
         return NULL;
     }
 
@@ -145,8 +147,8 @@ char *ultoa(unsigned long value, char *str, int base) {
 }
 
 
-div_t div(int numer, int denom) {
-    div_t result;
+__mcapi_div_t __mcapi_div(int numer, int denom) {
+    __mcapi_div_t result;
 
     result.quot = numer / denom;
     result.rem = numer % denom;
@@ -154,8 +156,8 @@ div_t div(int numer, int denom) {
 }
 
 
-ldiv_t ldiv(long numer, long denom) {
-    ldiv_t result;
+__mcapi_ldiv_t __mcapi_ldiv(long numer, long denom) {
+    __mcapi_ldiv_t result;
 
     result.quot = numer / denom;
     result.rem = numer % denom;
@@ -164,8 +166,8 @@ ldiv_t ldiv(long numer, long denom) {
 
 
 #if METALC_HAVE_LONG_LONG
-    lldiv_t lldiv(long long numer, long long denom) {
-        lldiv_t result;
+    __mcapi_lldiv_t __mcapi_lldiv(long long numer, long long denom) {
+        __mcapi_lldiv_t result;
 
         result.quot = numer / denom;
         result.rem = numer % denom;
@@ -173,9 +175,57 @@ ldiv_t ldiv(long numer, long denom) {
     }
 
 
-    long long llabs(long long x) {
+    long long __mcapi_llabs(long long x) {
         if (x >= 0)
             return x;
         return -x;
+    }
+
+
+    char *__mcapi_lltoa(long long value, char *str, int base) {
+        if ((base < 2) || (base > 36)) {
+            __mcapi_errno = __mcapi_EINVAL;
+            return NULL;
+        }
+
+        if ((base == 10) && (value < 0))
+            *str++ = '-';
+
+        /* Values are always treated as unsigned if the base is not 10. We also just
+         * wrote the sign for `value` (if applicable) so we don't care that it's
+         * negative anymore. */
+        return __mcapi_ulltoa((unsigned long)__mcapi_labs(value), str, base);
+    }
+
+
+    char *__mcapi_ulltoa(unsigned long long value, char *str, int base) {
+        int i;
+        char temp_c;
+        char *write_pointer = str;
+
+        if ((base < 2) || (base > 36)) {
+            __mcapi_errno = __mcapi_EINVAL;
+            return NULL;
+        }
+
+        do {
+            *write_pointer++ = kIntAlphabet[value % base];
+            value /= base;
+        } while (value != 0);
+
+        *write_pointer = '\0';
+
+        /* When we get here the string is backwards, and write_pointer points past
+         * the end of it. Decrement the write pointer so it points to the last
+         * character in the string, and swap characters until we meet in the middle.
+         */
+        --write_pointer;
+        for (i = 0; &str[i] != write_pointer; ++i, --write_pointer) {
+            temp_c = str[i];
+            str[i] = *write_pointer;
+            *write_pointer = temp_c;
+        }
+
+        return str;
     }
 #endif

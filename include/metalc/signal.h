@@ -6,58 +6,58 @@
 #include <metalc/stdint.h>
 
 
-typedef int32_t sig_atomic_t;
-typedef int64_t signal_mask_t;
-typedef void (*signal_handler_t)(int);
+typedef int32_t __mcapi_sig_atomic_t;
+typedef int64_t __mcapi_signal_mask_t;
+typedef void (*__mcapi_signal_handler_t)(int);
 
-METALC_API_EXPORT int raise(int sig);
-METALC_API_EXPORT signal_handler_t signal(int sig, signal_handler_t handler);
+METALC_API_EXPORT int __mcapi_raise(int sig);
+METALC_API_EXPORT __mcapi_signal_handler_t __mcapi_signal(int sig, __mcapi_signal_handler_t handler);
 
-#define SIGHUP       1
-#define SIGINT       2
-#define SIGQUIT      3
-#define SIGILL       4
-#define SIGTRAP      5
-#define SIGABRT      6
-#define SIGIOT       SIGABRT
-#define SIGBUS       7
-#define SIGFPE       8
-#define SIGKILL      9
-#define SIGUSR1     10
-#define SIGSEGV     11
-#define SIGUSR2     12
-#define SIGPIPE     13
-#define SIGALRM     14
-#define SIGTERM     15
-#define SIGSTKFLT   16
-#define SIGCHLD     17
-#define SIGCONT     18
-#define SIGSTOP     19
-#define SIGTSTP     20
-#define SIGTTIN     21
-#define SIGTTOU     22
-#define SIGURG      23
-#define SIGXCPU     24
-#define SIGXFSZ     25
-#define SIGVTALRM   26
-#define SIGPROF     27
-#define SIGWINCH    28
-#define SIGIO       29
-#define SIGPOLL     SIGIO
+#define __mcapi_SIGHUP       1
+#define __mcapi_SIGINT       2
+#define __mcapi_SIGQUIT      3
+#define __mcapi_SIGILL       4
+#define __mcapi_SIGTRAP      5
+#define __mcapi_SIGABRT      6
+#define __mcapi_SIGIOT       __mcapi_SIGABRT
+#define __mcapi_SIGBUS       7
+#define __mcapi_SIGFPE       8
+#define __mcapi_SIGKILL      9
+#define __mcapi_SIGUSR1     10
+#define __mcapi_SIGSEGV     11
+#define __mcapi_SIGUSR2     12
+#define __mcapi_SIGPIPE     13
+#define __mcapi_SIGALRM     14
+#define __mcapi_SIGTERM     15
+#define __mcapi_SIGSTKFLT   16
+#define __mcapi_SIGCHLD     17
+#define __mcapi_SIGCONT     18
+#define __mcapi_SIGSTOP     19
+#define __mcapi_SIGTSTP     20
+#define __mcapi_SIGTTIN     21
+#define __mcapi_SIGTTOU     22
+#define __mcapi_SIGURG      23
+#define __mcapi_SIGXCPU     24
+#define __mcapi_SIGXFSZ     25
+#define __mcapi_SIGVTALRM   26
+#define __mcapi_SIGPROF     27
+#define __mcapi_SIGWINCH    28
+#define __mcapi_SIGIO       29
+#define __mcapi_SIGPOLL     __mcapi_SIGIO
 /*
 #define SIGLOST     29
 */
-#define SIGPWR      30
-#define SIGSYS      31
-#define SIGUNUSED   31
+#define __mcapi_SIGPWR      30
+#define __mcapi_SIGSYS      31
+#define __mcapi_SIGUNUSED   31
 
 /**
  * Default signal handling
  *
  * The signal is handled by the default action for that particular signal.
  */
-#define SIG_DFL     0
-#define SIG_IGN     1   /**< Ignore signal: The signal is ignored. */
-#define SIG_ERR     2   /**< The signal triggers an error. */
+#define __mcapi_SIG_DFL     0
+#define __mcapi_SIG_IGN     1   /**< Ignore signal: The signal is ignored. */
+#define __mcapi_SIG_ERR     2   /**< The signal triggers an error. */
 
 #endif  /* INCLUDE_METALC_SIGNAL_H_ */

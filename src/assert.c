@@ -6,11 +6,11 @@
 #include <metalc/stdlib.h>
 
 
-extern const void *gAbortJumpAddress;
+extern const void *__mclib_abort_target;
 
 
 void _internal_assert(int expression, int line, const char *function, const char *file) {
-    FILE *out;
+    __mcapi_FILE *out;
 
     if (expression)
         return;
@@ -18,7 +18,7 @@ void _internal_assert(int expression, int line, const char *function, const char
 #if METALC_COMPILE_OPTION_ENABLE_FILE_IO
     out = (stderr) ? stderr : stdout;
     if (out) {
-        fprintf(
+        __mcapi_fprintf(
             out,
             "Debug assertion failed in function %s on line %d in file %s.\n",
             function,
@@ -30,5 +30,5 @@ void _internal_assert(int expression, int line, const char *function, const char
     (void)out, (void)line, (void)function, (void)file;
 #endif
 
-    abort();
+    __mcapi_abort();
 }

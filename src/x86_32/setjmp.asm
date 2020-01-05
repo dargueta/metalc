@@ -3,11 +3,11 @@ bits 32
 %include "metalc/x86/metalc.inc"
 %include "metalc/x86/setjmp.inc"
 
-global setjmp:function
-global longjmp:function
+global __mcapi_setjmp:function
+global __mcapi_longjmp:function
 
 
-setjmp:
+__mcapi_setjmp:
     fxsave  [FN_ARG_1_Q + tJmpBuf.j_fpu_state]
     mov     [FN_ARG_1_Q + tJmpBuf.j_ebx], ebx
     mov     [FN_ARG_1_Q + tJmpBuf.j_esi], esi
@@ -29,7 +29,7 @@ setjmp:
     ret
 
 
-longjmp:
+__mcapi_longjmp:
     fxrstor     [FN_ARG_1_Q + tJmpBuf.j_fpu_state]
 
     %if USE_SHADOW_STACK
