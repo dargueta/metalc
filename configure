@@ -145,17 +145,6 @@ def build_toolchain_params(args):
     variables["REPOSITORY_ROOT"] = HERE
 
     defines = " ".join(args.defines or ())
-    if args.kernel_mode:
-        defines += " -DMETALC_COMPILE_FOR_KERNEL"
-        variables["COMPILE_FOR_KERNEL"] = 1
-    else:
-        variables["COMPILE_FOR_KERNEL"] = 0
-
-    if args.build == "test":
-        defines += " -DMETALC_COMPILE_FOR_TESTING"
-        variables["COMPILE_FOR_TESTING"] = 1
-    else:
-        variables["COMPILE_FOR_TESTING"] = 0
 
     if "check-args" in args.feature_flags:
         defines += " -DMETALC_CHECK_ARGS"
@@ -166,6 +155,9 @@ def build_toolchain_params(args):
     variables["USE_EFI"] = 1 if "efi" in args.feature_flags else 0
     variables["X86_USE_SHADOW_STACK"] = 1 if "shadow-stack" in args.feature_flags else 0
     variables["FASTCALL_INTERNALS"] = 0 if "no-fastcall-internals" in args.feature_flags else 1
+    variables["COMPILE_FOR_KERNEL"] = 1 if args.kernel_mode else 0
+    variables["COMPILE_FOR_TESTING"] = 1 if args.build == "test" else 0
+
     if args.arch == "host":
         variables["TARGET_PROCESSOR"] = MACHINE_TO_TARGET_NAME[platform.machine()]
     else:
