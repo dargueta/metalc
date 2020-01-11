@@ -43,6 +43,11 @@ endif()
 
 add_library(metalc_asm STATIC ${ASM_SOURCES})
 
+if (METALC_COMPILE_FOR_TESTING)
+    add_compile_options(-O0 -g)
+endif()
+
+
 # MetalC, compiled as a dynamic library for linking with other programs. Given
 # that the major selling point of this library is that you'll used on bare metal
 # or UEFI, you'll only need this as your system's standard C library when loading
@@ -50,7 +55,12 @@ add_library(metalc_asm STATIC ${ASM_SOURCES})
 add_library(metalc SHARED ${LIBRARY_C_SOURCES})
 add_dependencies(metalc metalc_asm)
 target_compile_options(metalc PRIVATE -ffreestanding -Wextra -pedantic -pedantic-errors)
-target_compile_definitions(metalc PRIVATE -DMETALC_BUILDING_LIBC=1)
+target_compile_definitions(
+    metalc PRIVATE
+    -DMETALC_BUILDING_LIBC=1
+    -DMETALC_BUILD_KIND_SHARED=1
+    -DMETALC_COMPILE_FOR_TESTING=${METALC_COMPILE_FOR_TESTING}
+)
 target_link_libraries(metalc metalc_asm)
 
 
@@ -60,21 +70,29 @@ target_link_libraries(metalc metalc_asm)
 add_library(metalcstatic STATIC ${LIBRARY_C_SOURCES})
 add_dependencies(metalcstatic metalc_asm)
 target_compile_options(metalcstatic PRIVATE -Wextra -ffreestanding -pedantic -pedantic-errors)
-target_compile_definitions(metalcstatic PRIVATE -DMETALC_BUILDING_LIBC=1)
+target_compile_definitions(
+    metalcstatic PRIVATE
+    -DMETALC_BUILDING_LIBC=1
+    -DMETALC_BUILD_KIND_STATIC=1
+    -DMETALC_COMPILE_FOR_TESTING=${METALC_COMPILE_FOR_TESTING}
+)
 target_link_libraries(metalcstatic metalc_asm)
 
 
 # Unit testing
-add_executable(test_executable ${TEST_SOURCE_FILES})
-add_dependencies(test_executable metalc)
-target_link_libraries(test_executable metalc)
+if (METALC_COMPILE_FOR_TESTING)
+    add_executable(test_executable ${TEST_SOURCE_FILES})
+    add_dependencies(test_executable metalc)
+    target_link_libraries(test_executable metalc)
 
-# Disable linking the executable with the OS's C standard library and use our
-# implementation instead.
-target_compile_options(
-    test_executable PRIVATE
-    -Wextra
-    -ggdb
-    -O0
-    -Wno-declaration-after-statement    # TODO: This should not be necessary
-)
+    # Disable linking the executable with the OS's C standard library and use our
+    # implementation instead.
+    target_compile_options(
+        test_executable PRIVATE
+        -Wextra
+        -Wno-declaration-after-statement    # TODO: This should not be necessary
+    )
+    target_compile_definitions(
+        test_executable PRIVATE -DMETALC_COMPILE_FOR_TESTING=1
+    )
+endif()
