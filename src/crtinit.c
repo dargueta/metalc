@@ -15,7 +15,7 @@ extern int stdio_teardown(void);
 
 
 MetalCRuntimeInfo *__mclib_runtime_info __attribute__((visibility("hidden"))) = NULL;
-__mcapi_jmp_buf __mclib_abort_target __attribute__((aligned(16), visibility("hidden")));
+__mcapi_jmp_buf __mclib_abort_target;
 
 
 static int crt_init(void) {
