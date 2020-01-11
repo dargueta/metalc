@@ -68,7 +68,7 @@ static signal_handler_t kHandlersByMaskValue[] = {
 */
 
 
-static const __mcapi_signal_handler_t gDefaultSignalHandlers[] = {
+static const __mcapi_signal_handler_t _default_signal_handlers[] = {
     /* Signal numbers begin at 1. Don't bother storing a handler for signal 0. */
     _sighandler_term,       /* __mcapi_SIGHUP */
     _sighandler_ignore,     /* __mcapi_SIGINT */
@@ -106,11 +106,11 @@ static const __mcapi_signal_handler_t gDefaultSignalHandlers[] = {
 
 
 static void _sighandler_default(int sig) {
-    gDefaultSignalHandlers[sig - 1](sig);
+    _default_signal_handlers[sig - 1](sig);
 }
 
 
-static __mcapi_signal_handler_t gConfiguredSignalHandlers[] = {
+static __mcapi_signal_handler_t _current_signal_handlers[] = {
     /* Signal numbers begin at 1. Don't bother storing a handler for signal 0. */
     _sighandler_default,
     _sighandler_default,
@@ -151,7 +151,7 @@ METALC_API_EXPORT int __mcapi_raise(int sig) {
     if ((sig < 1) || (sig > 32))
         return __mcapi_EINVAL;
 
-    gConfiguredSignalHandlers[sig - 1](sig);
+    _current_signal_handlers[sig - 1](sig);
     return 0;
 }
 
@@ -170,16 +170,16 @@ METALC_API_EXPORT __mcapi_signal_handler_t __mcapi_signal(int sig, __mcapi_signa
         return _sighandler_term;
     }
 
-    original_handler = gConfiguredSignalHandlers[sig - 1];
+    original_handler = _current_signal_handlers[sig - 1];
 
     if (handler == (__mcapi_signal_handler_t)__mcapi_SIG_DFL)
-        gConfiguredSignalHandlers[sig - 1] = _sighandler_default;
+        _current_signal_handlers[sig - 1] = _sighandler_default;
     else if (handler == (__mcapi_signal_handler_t)__mcapi_SIG_IGN)
-        gConfiguredSignalHandlers[sig - 1] = _sighandler_ignore;
+        _current_signal_handlers[sig - 1] = _sighandler_ignore;
     else if (handler == (__mcapi_signal_handler_t)__mcapi_SIG_ERR)
-        gConfiguredSignalHandlers[sig - 1] = _sighandler_term;
+        _current_signal_handlers[sig - 1] = _sighandler_term;
     else
-        gConfiguredSignalHandlers[sig - 1] = handler;
+        _current_signal_handlers[sig - 1] = handler;
 
     return original_handler;
 }
