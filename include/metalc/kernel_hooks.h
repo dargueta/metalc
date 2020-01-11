@@ -43,8 +43,10 @@ void krnlhook_core_dump(int sig, void *udata) __attribute__((noreturn, weak));
  *
  * Required by @ref malloc. If this isn't implemented and @ref malloc is ever
  * called, the @ref SIGSYS signal will be raised and the process will be killed.
+ *
+ * @param
  */
-int krnlhook_brk(void *new_brk, void *udata) __attribute__((weak));
+void *krnlhook_brk(void *new_brk, void *udata) __attribute__((weak));
 int krnlhook_open(const char *file, int mode, int perms, void *udata) __attribute__((weak));
 int krnlhook_close(intptr_t fdesc, void *udata) __attribute__((weak));
 __mcapi_ssize_t krnlhook_write(intptr_t fdesc, const void *data, size_t size, void *udata) __attribute__((weak));

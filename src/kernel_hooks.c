@@ -26,13 +26,13 @@ void krnlhook_core_dump(int sig, void *udata) {
 }
 
 
-int krnlhook_brk(void *new_brk, void *udata) {
+void *krnlhook_brk(void *new_brk, void *udata) {
     (void)new_brk, (void)udata;
     __mcapi_raise(__mcapi_SIGSYS);
 
     /* We should never get here unless there's a bug in our implementation of raise().*/
     __mcapi_errno = __mcapi_ENOSYS;
-    return -1;
+    return (void *)-1;
 }
 
 
