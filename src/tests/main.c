@@ -1,8 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <metalc/crtinit.h>
 #include <metalc/errno.h>
-#include <metalc/stdio.h>
 
 #include "testing.h"
 
@@ -23,64 +24,67 @@ FILE *test_output_fd;
 
 
 struct FakeOSState {
-    void *heap_start;
-    unsigned n_heap_pages;
-
-    char data_area[DATA_AREA_SIZE];
     void *current_brk;
+    char data_area[DATA_AREA_SIZE];
 };
 
 
-int krnlhook_brk(void *new_brk, void *udata) {
+void *krnlhook_brk(void *new_brk, void *udata) {
     struct FakeOSState *state = (struct FakeOSState *)udata;
+
+    if (new_brk == NULL) {
+        printf("# Requested current break: %p\n", state->current_brk);
+        return state->current_brk;
+    }
 
     /* Ensure the new data break pointer is within allowable bounds. */
     if (
         ((char *)new_brk < state->data_area)
         || ((char *)new_brk >= (state->data_area + DATA_AREA_SIZE))
     ) {
+        printf(
+            "# ERROR: new_brk out of bounds: %p not in [%p, %p)\n",
+            new_brk, state->data_area, state->data_area + DATA_AREA_SIZE
+        );
         __mcapi_errno = __mcapi_EINVAL;
-        return -1;
-    }
-
-    /* Address must be aligned on a page boundary */
-    if ((uintptr_t)new_brk % FAKE_PAGE_SIZE != 0) {
-        __mcapi_errno = __mcapi_EFAULT;
-        return -1;
+        return NULL;
     }
 
     state->current_brk = new_brk;
-    return 0;
+    printf("# DEBUG: Setting data break to %p\n", new_brk);
+    return new_brk;
 }
 
 
 int main(int argc, char **argv) {
     unsigned n_failed, n_succeeded, n_errored;
-    size_t i;
-    int result;
-    const struct UnitTestEntry **group;
-    const struct UnitTestEntry *current_test;
+    int result, i_group, i_test;
     MetalCRuntimeInfo rti;
-    struct FakeOSState os_state;
+    const struct UnitTestEntry *group, *current_test;
+    struct FakeOSState *os_state;
 
     if (argc == 1)
         test_output_fd = stdout;
     else
         test_output_fd = fopen(argv[1], "w");
 
-    /* Equivalent to memset(&rti, 0, sizeof(rti)) without using memset(). */
-    for (i = 0; i < sizeof(rti); ++i)
-        ((char *)&rti)[i] = 0;
+    os_state = malloc(sizeof(*os_state));
+    memset(os_state, 0, sizeof(*os_state));
+    os_state->current_brk = os_state->data_area;
 
     n_failed = n_succeeded = n_errored = 0;
-    os_state.current_brk = os_state.data_area;
 
-    for (group = kAllUnitTestGroups; group != NULL; ++group) {
-        for (current_test = group[0]; current_test->name != NULL; ++current_test) {
+    for (i_group = 0; kAllUnitTestGroups[i_group] != NULL; ++i_group) {
+        group = kAllUnitTestGroups[i_group];
+        for (i_test = 0; group[i_test].name != NULL; ++i_test) {
+            current_test = &group[i_test];
+
+            printf("# DEBUG: Running test: %s\n", current_test->name);
+            memset(&rti, 0, sizeof(rti));
+
             rti.main = current_test->function;
             rti.page_size = FAKE_PAGE_SIZE;
-            rti.udata = &os_state;
-            rti.original_brk = os_state.data_area;
+            rti.udata = os_state;
 
             result = cstdlib_start(&rti, 0, NULL, NULL);
             fflush(test_output_fd);
@@ -88,18 +92,21 @@ int main(int argc, char **argv) {
             if (result == 0) {
                 if (rti.signal_code != 0)
                     ++n_errored;
-                if (rti.main_return_value == 0)
+                else if (rti.main_return_value == 0)
                     ++n_succeeded;
                 else
                     ++n_failed;
             }
             else
                 ++n_errored;
+            printf("# DEBUG: Finished test: %p\n", current_test->name);
         }
     }
+    printf("# DEBUG: Finished all tests.\n");
+
+    free(os_state);
 
     if (test_output_fd != stdout)
         fclose(test_output_fd);
-
     return 0;
 }
