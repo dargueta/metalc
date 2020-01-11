@@ -58,10 +58,10 @@ static int _determine_format(const char *format, struct MCFormatSpecifier *info)
 
 
 static size_t _copy_buffer(const char *temp, char **buffer) {
-    size_t buffer_size = __mcapi_strlen(temp);
+    size_t buffer_size = strlen(temp);
 
     if (*buffer) {
-        __mcapi_strcpy(*buffer, temp);
+        strcpy(*buffer, temp);
         *buffer += buffer_size;
     }
     return buffer_size;
@@ -120,7 +120,7 @@ int __mcapi_vsprintf(char *buffer, const char *format, va_list arg_list) {
                     case 'x':
                     case 'X':
                         __mcapi_utoa(va_arg(arg_list, unsigned), temp, 16);
-                        buffer_size = (int)__mcapi_strlen(temp);
+                        buffer_size = (int)strlen(temp);
                         if (*format == 'X') {
                             for (i = 0; i < buffer_size; ++i)
                                 temp[i] = __mcapi_toupper(temp[i]);
@@ -161,7 +161,7 @@ int __mcapi_vsprintf(char *buffer, const char *format, va_list arg_list) {
                                 __mcapi_ulltoa(
                                     va_arg(arg_list, unsigned long long), temp, 16
                                 );
-                                buffer_size = (int)__mcapi_strlen(temp);
+                                buffer_size = (int)strlen(temp);
                                 if (*format == 'X') {
                                     for (i = 0; i < buffer_size; ++i)
                                         temp[i] = __mcapi_toupper(temp[i]);
@@ -231,13 +231,13 @@ int __mcapi_vsprintf(char *buffer, const char *format, va_list arg_list) {
             case 'x':
             case 'X':
                 __mcapi_utoa(va_arg(arg_list, unsigned), temp, 16);
-                buffer_size = (int)__mcapi_strlen(temp);
+                buffer_size = (int)strlen(temp);
                 if (*format == 'X') {
                     for (i = 0; i < buffer_size; ++i)
                         temp[i] = __mcapi_toupper(temp[i]);
                 }
                 if (buffer) {
-                    __mcapi_strcpy(temp, buffer);
+                    strcpy(temp, buffer);
                     buffer += buffer_size;
                 }
                 n_chars_written += buffer_size;

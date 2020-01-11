@@ -52,7 +52,7 @@ static const struct __mcapi_lconv *_find_locale(const char *name) {
     const struct LocaleEntry *ptr = gSupportedLocales;
 
     while (ptr->name != NULL) {
-        if (__mcapi_strcmp(ptr->name, name) == 0)
+        if (strcmp(ptr->name, name) == 0)
             return ptr->locale;
     }
     return NULL;
@@ -66,7 +66,7 @@ int __mcapi_setlocale(int what, const char *name) {
 
     switch (what) {
         case __mcapi_LC_ALL:
-            __mcapi_memcpy(&gCurrentCLocale, defaults, sizeof(struct __mcapi_lconv));
+            memcpy(&gCurrentCLocale, defaults, sizeof(struct __mcapi_lconv));
             return 0;
         case __mcapi_LC_COLLATE:
         case __mcapi_LC_CTYPE:

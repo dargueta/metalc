@@ -9,37 +9,62 @@
 #include <metalc/stddef.h>
 
 
-METALC_API_EXPORT void *__mcapi_memchr(const void *ptr, int value, size_t num);
-METALC_API_EXPORT int __mcapi_memcmp(const void *ptr1, const void *ptr2, size_t num);
-METALC_API_EXPORT void *__mcapi_memcpy(void *destination, const void *source, size_t num);
-METALC_API_EXPORT void *__mcapi_memmove(void *destination, const void *source, size_t num);
-METALC_API_EXPORT void *__mcapi_memset(void *ptr, int value, size_t num);
-METALC_API_EXPORT char *__mcapi_strcat(char *destination, const char *source);
-METALC_API_EXPORT char *__mcapi_strchr(const char *str, int character);
-METALC_API_EXPORT int __mcapi_strcmp(const char *str1, const char *str2);
+void *memchr(const void *ptr, int value, size_t num);
+int memcmp(const void *ptr1, const void *ptr2, size_t num);
+void *memcpy(void *destination, const void *source, size_t num);
+void *memmove(void *destination, const void *source, size_t num);
+void *memset(void *ptr, int value, size_t num);
+char *strcat(char *destination, const char *source);
+char *strchr(const char *str, int character);
+int strcmp(const char *str1, const char *str2);
 
 /**
  * @warn Standards violation: Identical to @ref strcmp.
  */
-METALC_API_EXPORT int __mcapi_strcoll(const char *str1, const char *str2);
-METALC_API_EXPORT char *__mcapi_strcpy(char *destination, const char *source);
-METALC_API_EXPORT size_t __mcapi_strcspn(const char *str1, const char *str2);
-METALC_API_EXPORT char *__mcapi_strerror(int errnum);
-METALC_API_EXPORT size_t __mcapi_strlen(const char *str);
-METALC_API_EXPORT char *__mcapi_strncat(char *destination, const char *source, size_t num);
-METALC_API_EXPORT int __mcapi_strncmp(const char *str1, const char *str2, size_t num);
-METALC_API_EXPORT char *__mcapi_strncpy(char *destination, const char *source, size_t num);
-METALC_API_EXPORT char *__mcapi_strpbrk(const char *str1, const char *str2);
-METALC_API_EXPORT char *__mcapi_strrchr(const char *str, int character);
-METALC_API_EXPORT size_t __mcapi_strspn(const char *str1, const char *str2);
-METALC_API_EXPORT char *__mcapi_strstr(const char *str, const char *substr);
-METALC_API_EXPORT char *__mcapi_strtok(char *str, const char *delimiters);
+int strcoll(const char *str1, const char *str2);
+char *strcpy(char *destination, const char *source);
+size_t strcspn(const char *str1, const char *str2);
+char *strerror(int errnum);
+size_t strlen(const char *str);
+char *strncat(char *destination, const char *source, size_t num);
+int strncmp(const char *str1, const char *str2, size_t num);
+char *strncpy(char *destination, const char *source, size_t num);
+char *strpbrk(const char *str1, const char *str2);
+char *strrchr(const char *str, int character);
+size_t strspn(const char *str1, const char *str2);
+char *strstr(const char *str, const char *substr);
+char *strtok(char *str, const char *delimiters);
 
 
 /**
  * @warn Standards violation: Performs no transform, nearly identical to @ref strncpy.
  */
-METALC_API_EXPORT size_t __mcapi_strxfrm(char *destination, const char *source, size_t num);
+size_t strxfrm(char *destination, const char *source, size_t num);
+
+
+
+cstdlib_export_with_attr(memchr, nonnull);
+cstdlib_export_with_attr(memcmp, nonnull);
+cstdlib_export_with_attr(memcpy, nonnull);
+cstdlib_export_with_attr(memmove, nonnull);
+cstdlib_export_with_attr(memset, nonnull);
+cstdlib_export_with_attr(strcat, nonnull);
+cstdlib_export_with_attr(strchr, nonnull);
+cstdlib_export_with_attr(strcmp, nonnull);
+cstdlib_export_with_attr(strcoll, nonnull);
+cstdlib_export_with_attr(strcpy, nonnull);
+cstdlib_export_with_attr(strcspn, nonnull);
+cstdlib_export(strerror);
+cstdlib_export_with_attr(strlen, nonnull);
+cstdlib_export_with_attr(strncat, nonnull);
+cstdlib_export_with_attr(strncmp, nonnull);
+cstdlib_export_with_attr(strncpy, nonnull);
+cstdlib_export_with_attr(strpbrk, nonnull);
+cstdlib_export_with_attr(strrchr, nonnull);
+cstdlib_export_with_attr(strspn, nonnull);
+cstdlib_export_with_attr(strstr, nonnull);
+cstdlib_export_with_attr(strtok, nonnull(2));
+cstdlib_export_with_attr(strxfrm, nonnull(2));
 
 
 #endif  /* INCLUDE_METALC_STRING_H_ */

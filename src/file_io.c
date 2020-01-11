@@ -29,9 +29,9 @@ __mcapi_FILE * const __mcapi_stderr = &_internal_stderr;
 
 
 METALC_API_INTERNAL int fileio_init(void) {
-    __mcapi_memset(&_internal_stdin, 0, sizeof(_internal_stdin));
-    __mcapi_memset(&_internal_stdout, 0, sizeof(_internal_stdout));
-    __mcapi_memset(&_internal_stderr, 0, sizeof(_internal_stderr));
+    memset(&_internal_stdin, 0, sizeof(_internal_stdin));
+    memset(&_internal_stdout, 0, sizeof(_internal_stdout));
+    memset(&_internal_stderr, 0, sizeof(_internal_stderr));
 
     _internal_stdin.descriptor = __mclib_runtime_info->stdin_handle;
     _internal_stdin.io_flags = O_RDONLY;

@@ -142,7 +142,7 @@ static const char *ERROR_STRINGS[__mcapi__MAX_ERRNO] = {
 };
 
 
-void *__mcapi_memchr(const void *ptr, int value, size_t num) {
+void *memchr(const void *ptr, int value, size_t num) {
     const unsigned char *p;
 
     for (p = ptr; num != 0; --num, ++p) {
@@ -151,9 +151,10 @@ void *__mcapi_memchr(const void *ptr, int value, size_t num) {
     }
     return NULL;
 }
+cstdlib_implement(memchr);
 
 
-int __mcapi_memcmp(const void *ptr1, const void *ptr2, size_t num) {
+int memcmp(const void *ptr1, const void *ptr2, size_t num) {
     const signed char *left, *right;
     int diff;
 
@@ -166,9 +167,10 @@ int __mcapi_memcmp(const void *ptr1, const void *ptr2, size_t num) {
 
     return diff;
 }
+cstdlib_implement(memcmp);
 
 
-void *__mcapi_memcpy(void *destination, const void *source, size_t num) {
+void *memcpy(void *destination, const void *source, size_t num) {
     char *p_dest;
     const char *p_src;
 
@@ -180,9 +182,10 @@ void *__mcapi_memcpy(void *destination, const void *source, size_t num) {
 
     return destination;
 }
+cstdlib_implement(memcpy);
 
 
-void *__mcapi_memmove(void *destination, const void *source, size_t num) {
+void *memmove(void *destination, const void *source, size_t num) {
     char *p_dest;
     const char *p_src;
 
@@ -209,9 +212,10 @@ void *__mcapi_memmove(void *destination, const void *source, size_t num) {
 
     return destination;
 }
+cstdlib_implement(memmove);
 
 
-void *__mcapi_memset(void *ptr, int value, size_t num) {
+void *memset(void *ptr, int value, size_t num) {
     unsigned char *p_dest;
 
     for (p_dest = (unsigned char *)ptr; num > 0; --num)
@@ -219,14 +223,16 @@ void *__mcapi_memset(void *ptr, int value, size_t num) {
 
     return ptr;
 }
+cstdlib_implement(memset);
 
 
-char *__mcapi_strcat(char *destination, const char *source) {
-    return __mcapi_strcpy(__mcapi_strchr(destination, 0), source);
+char *strcat(char *destination, const char *source) {
+    return strcpy(strchr(destination, 0), source);
 }
+cstdlib_implement(strcat);
 
 
-char *__mcapi_strchr(const char *str, int character) {
+char *strchr(const char *str, int character) {
     do {
         if (*str == (char)character)
             return (char *)str;
@@ -234,9 +240,10 @@ char *__mcapi_strchr(const char *str, int character) {
 
     return NULL;
 }
+cstdlib_implement(strchr);
 
 
-int __mcapi_strcmp(const char *str1, const char *str2) {
+int strcmp(const char *str1, const char *str2) {
     int diff = 0;
 
     for (; (*str1 != '\0') && (*str2 != '\0'); ++str1, ++str2) {
@@ -247,16 +254,18 @@ int __mcapi_strcmp(const char *str1, const char *str2) {
 
     return *(signed char *)str1 - *(signed char *)str2;
 }
+cstdlib_implement(strcmp);
 
 
-int __mcapi_strcoll(const char *str1, const char *str2) {
+int strcoll(const char *str1, const char *str2) {
     /* Pretty sure this only works if the current locale is "C"; anything else
      * is a coincidence. */
-    return __mcapi_strcmp(str1, str2);
+    return strcmp(str1, str2);
 }
+cstdlib_implement(strcoll);
 
 
-char *__mcapi_strcpy(char *destination, const char *source) {
+char *strcpy(char *destination, const char *source) {
     char *p_dest = destination;
 
     do {
@@ -265,43 +274,47 @@ char *__mcapi_strcpy(char *destination, const char *source) {
 
     return destination;
 }
+cstdlib_implement(strcpy);
 
 
-size_t __mcapi_strcspn(const char *str1, const char *str2) {
+size_t strcspn(const char *str1, const char *str2) {
     size_t span;
 
     /**
      * @todo There must be a better way of implementing this than O(n^2).
      */
     for (span = 0; *str1 != '\0'; ++str1, ++span) {
-        if (__mcapi_strchr(str2, (int)*str1))
+        if (strchr(str2, (int)*str1))
             return span;
     }
     return span;
 }
+cstdlib_implement(strcspn);
 
 
-char *__mcapi_strerror(int errnum) {
+char *strerror(int errnum) {
     static char buffer[128];
 
     if ((errnum >= 0) && (errnum < __mcapi__MAX_ERRNO))
-        return __mcapi_strcpy(buffer, ERROR_STRINGS[errnum]);
+        return strcpy(buffer, ERROR_STRINGS[errnum]);
 
     __mcapi_sprintf(buffer, "Unknown error %d", errnum);
     return buffer;
 }
+cstdlib_implement(strerror);
 
 
-size_t __mcapi_strlen(const char *str) {
+size_t strlen(const char *str) {
     size_t length = 0;
 
     while (str[length] != '\0')
         ++length;
     return length;
 }
+cstdlib_implement(strlen);
 
 
-char *__mcapi_strncat(char *destination, const char *source, size_t num) {
+char *strncat(char *destination, const char *source, size_t num) {
     char *p_dest;
 
     /* Return early if `num` is 0 to avoid a potentially expensive call to
@@ -309,7 +322,7 @@ char *__mcapi_strncat(char *destination, const char *source, size_t num) {
     if (num == 0)
         return destination;
 
-    p_dest = destination + __mcapi_strlen(destination);
+    p_dest = destination + strlen(destination);
 
     for (; (num > 0) && (*source != '\0'); --num)
         *p_dest++ = *source++;
@@ -317,9 +330,10 @@ char *__mcapi_strncat(char *destination, const char *source, size_t num) {
     *p_dest = '\0';
     return destination;
 }
+cstdlib_implement(strncat);
 
 
-int __mcapi_strncmp(const char *str1, const char *str2, size_t num) {
+int strncmp(const char *str1, const char *str2, size_t num) {
     int diff = 0;
 
     while ((num > 0) && (*str1 != '\0') && (*str2 != '\0')) {
@@ -340,9 +354,10 @@ int __mcapi_strncmp(const char *str1, const char *str2, size_t num) {
         return 0;
     return (int)(*str1 - *str2);
 }
+cstdlib_implement(strncmp);
 
 
-char *__mcapi_strncpy(char *destination, const char *source, size_t num) {
+char *strncpy(char *destination, const char *source, size_t num) {
     char *p_dest = destination;
 
     for (; (num > 0) && (*source != '\0'); --num)
@@ -353,51 +368,56 @@ char *__mcapi_strncpy(char *destination, const char *source, size_t num) {
 
     return destination;
 }
+cstdlib_implement(strncpy);
 
 
-char *__mcapi_strpbrk(const char *str1, const char *str2) {
-    size_t span = __mcapi_strcspn(str1, str2);
+char *strpbrk(const char *str1, const char *str2) {
+    size_t span = strcspn(str1, str2);
 
     if (str1[span] == '\0')
         return NULL;
     return (char *)str1 + span;
 }
+cstdlib_implement(strpbrk);
 
 
-char *__mcapi_strrchr(const char *str, int character) {
+char *strrchr(const char *str, int character) {
     const char *p_end;
 
-    for (p_end = str + __mcapi_strlen(str); p_end != str; --p_end) {
+    for (p_end = str + strlen(str); p_end != str; --p_end) {
         if (*p_end == (char)character)
             return (char *)p_end;
     }
     return NULL;
 }
+cstdlib_implement(strrchr);
 
 
-size_t __mcapi_strspn(const char *str1, const char *str2) {
+size_t strspn(const char *str1, const char *str2) {
     size_t span = 0;
 
     for (; *str1 != '\0'; ++str1, ++span) {
-        if (__mcapi_strchr(str2, *str1) == NULL)
+        if (strchr(str2, *str1) == NULL)
             break;
     }
     return span;
 }
+cstdlib_implement(strspn);
 
 
-char *__mcapi_strstr(const char *str, const char *substr) {
-    size_t substr_length = __mcapi_strlen(substr);
+char *strstr(const char *str, const char *substr) {
+    size_t substr_length = strlen(substr);
 
     for (; *str != '\0'; ++str) {
-        if (__mcapi_strncmp(str, substr, substr_length) == 0)
+        if (strncmp(str, substr, substr_length) == 0)
             return (char *)str;
     }
     return NULL;
 }
+cstdlib_implement(strstr);
 
 
-char *__mcapi_strtok(char *str, const char *delimiters) {
+char *strtok(char *str, const char *delimiters) {
     size_t token_length;
     static char *start = NULL;
 
@@ -415,7 +435,7 @@ char *__mcapi_strtok(char *str, const char *delimiters) {
     /* Search for the first character in `start` that *isn't* a delimiter. If we
      * hit EOS, bail and return NULL forevermore. */
     for (; *start != '\0'; ++start) {
-        if (__mcapi_strchr(delimiters, *start) == NULL)
+        if (strchr(delimiters, *start) == NULL)
             break;
     }
 
@@ -425,16 +445,18 @@ char *__mcapi_strtok(char *str, const char *delimiters) {
 
     /* else: Found the beginning of the next token. Now search for the next
      * delimiter. */
-    token_length = __mcapi_strcspn(start, delimiters);
+    token_length = strcspn(start, delimiters);
 
     /* Found the first delimiter or hit EOS. Stomp over it with a null. */
     start[token_length] = '\0';
     return start;
 }
+cstdlib_implement(strtok);
 
 
-size_t __mcapi_strxfrm(char *destination, const char *source, size_t num) {
+size_t strxfrm(char *destination, const char *source, size_t num) {
     if ((destination != NULL) && (num != 0))
-        __mcapi_strncpy(destination, source, num);
-    return __mcapi_strlen(source);
+        strncpy(destination, source, num);
+    return strlen(source);
 }
+cstdlib_implement(strxfrm);

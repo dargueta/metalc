@@ -12,13 +12,10 @@
 #include <metalc/string.h>
 
 
-#pragma pack(push, 2)
 struct PointerEntry {
     void *base;
     uintptr_t size;
-};
-#pragma pack(pop)
-
+} __attribute__((aligned(4)));
 
 extern MetalCRuntimeInfo *__mclib_runtime_info;
 
@@ -161,7 +158,7 @@ METALC_API_INTERNAL int malloc_init(void) {
         return __mcapi_ENOMEM;
     }
 
-    __mcapi_memset(g_heap_pages, 0, __mclib_runtime_info->page_size);
+    memset(g_heap_pages, 0, __mclib_runtime_info->page_size);
 
     g_heap_pages[1] = _allocate_pages(1);
     if (g_heap_pages[1] == NULL) {
@@ -213,7 +210,7 @@ void *__mcapi_calloc(size_t n_elements, size_t element_size) {
     if (pointer == NULL)
         return pointer;
 
-    __mcapi_memset(pointer, 0, total_size);
+    memset(pointer, 0, total_size);
     return pointer;
 }
 
@@ -244,7 +241,7 @@ void *__mcapi_realloc(void *pointer, size_t new_size) {
         /* errno already set by malloc(), no need to do it here. */
         return NULL;
 
-    __mcapi_memcpy(new_pointer, pointer, old_size);
+    memcpy(new_pointer, pointer, old_size);
     __mcapi_free(pointer);
     return new_pointer;
 }
