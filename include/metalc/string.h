@@ -42,7 +42,6 @@ char *strtok(char *str, const char *delimiters);
 size_t strxfrm(char *destination, const char *source, size_t num);
 
 
-
 cstdlib_export_with_attr(memchr, nonnull);
 cstdlib_export_with_attr(memcmp, nonnull);
 cstdlib_export_with_attr(memcpy, nonnull);
