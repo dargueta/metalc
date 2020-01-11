@@ -21,7 +21,7 @@ void log_message(
 
 #define ASSERT_MSG(expr, msg)                                           \
     if (expr)                                                           \
-        log_message("OK", _test_name,  __LINE__, __FILE__, (msg));      \
+        log_message("OK", _test_name,  __LINE__, __FILE__, "");         \
     else {                                                              \
         log_message("FAILED", _test_name, __LINE__, __FILE__, (msg));   \
         return 1;                                                       \
@@ -30,19 +30,19 @@ void log_message(
 
 #define ASSERT(expr)    ASSERT_MSG((expr), NULL)
 
-#define CHECK_EQ(x, y)  ASSERT((x) != (y))
-#define CHECK_NE(x, y)  ASSERT((x) == (y))
-#define CHECK_GT(x, y)  ASSERT((x) <= (y))
-#define CHECK_GE(x, y)  ASSERT((x) < (y))
-#define CHECK_LT(x, y)  ASSERT((x) >= (y))
-#define CHECK_LE(x, y)  ASSERT((x) > (y))
+#define CHECK_EQ(x, y)  ASSERT((x) == (y))
+#define CHECK_NE(x, y)  ASSERT((x) != (y))
+#define CHECK_GT(x, y)  ASSERT((x) > (y))
+#define CHECK_GE(x, y)  ASSERT((x) >= (y))
+#define CHECK_LT(x, y)  ASSERT((x) < (y))
+#define CHECK_LE(x, y)  ASSERT((x) <= (y))
 
-#define CHECK_EQ_MSG(x, y, msg)  ASSERT_MSG((x) != (y), (msg))
-#define CHECK_NE_MSG(x, y, msg)  ASSERT_MSG((x) == (y), (msg))
-#define CHECK_GT_MSG(x, y, msg)  ASSERT_MSG((x) <= (y), (msg))
-#define CHECK_GE_MSG(x, y, msg)  ASSERT_MSG((x) < (y), (msg))
-#define CHECK_LT_MSG(x, y, msg)  ASSERT_MSG((x) >= (y), (msg))
-#define CHECK_LE_MSG(x, y, msg)  ASSERT_MSG((x) > (y), (msg))
+#define CHECK_EQ_MSG(x, y, msg)  ASSERT_MSG((x) == (y), (msg))
+#define CHECK_NE_MSG(x, y, msg)  ASSERT_MSG((x) != (y), (msg))
+#define CHECK_GT_MSG(x, y, msg)  ASSERT_MSG((x) > (y), (msg))
+#define CHECK_GE_MSG(x, y, msg)  ASSERT_MSG((x) >= (y), (msg))
+#define CHECK_LT_MSG(x, y, msg)  ASSERT_MSG((x) < (y), (msg))
+#define CHECK_LE_MSG(x, y, msg)  ASSERT_MSG((x) <= (y), (msg))
 
 #define INFO(msg)   log_message("INFO", _test_name, __LINE__, __FILE__, (msg))
 
