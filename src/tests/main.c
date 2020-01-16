@@ -36,7 +36,7 @@ void *krnlhook_brk(void *new_brk, void *udata) {
     struct FakeOSState *state = (struct FakeOSState *)udata;
 
     if (new_brk == NULL) {
-        printf("# Requested current break: %p\n", state->current_brk);
+        /* printf("# DEBUG: Requested current break: %p\n", state->current_brk); */
         return state->current_brk;
     }
 
@@ -45,8 +45,9 @@ void *krnlhook_brk(void *new_brk, void *udata) {
         ((char *)new_brk < state->data_area)
         || ((char *)new_brk >= (state->data_area + DATA_AREA_SIZE))
     ) {
-        printf(
-            "# ERROR: new_brk out of bounds: %p not in [%p, %p)\n",
+        fprintf(
+            stderr,
+            "\nERROR: new_brk out of bounds: %p not in [%p, %p)\n\n",
             new_brk, state->data_area, state->data_area + DATA_AREA_SIZE
         );
         __mcapi_errno = __mcapi_EINVAL;
@@ -54,7 +55,7 @@ void *krnlhook_brk(void *new_brk, void *udata) {
     }
 
     state->current_brk = new_brk;
-    printf("# DEBUG: Setting data break to %p\n", new_brk);
+    /* printf("# DEBUG: Setting data break to %p\n", new_brk); */
     return new_brk;
 }
 
@@ -76,13 +77,14 @@ int main(int argc, char **argv) {
     os_state->current_brk = os_state->data_area;
 
     n_failed = n_succeeded = n_errored = 0;
+    initialize_test_log();
 
     for (i_group = 0; kAllUnitTestGroups[i_group] != NULL; ++i_group) {
         group = kAllUnitTestGroups[i_group];
         for (i_test = 0; group[i_test].name != NULL; ++i_test) {
             current_test = &group[i_test];
 
-            printf("# DEBUG: Running test: %s\n", current_test->name);
+            fprintf(stderr, "Running test: %s\n", current_test->name);
             memset(&rti, 0, sizeof(rti));
 
             rti.main = current_test->function;
@@ -102,10 +104,8 @@ int main(int argc, char **argv) {
             }
             else
                 ++n_errored;
-            printf("# DEBUG: Finished test: %p\n", current_test->name);
         }
     }
-    printf("# DEBUG: Finished all tests.\n");
 
     free(os_state);
 

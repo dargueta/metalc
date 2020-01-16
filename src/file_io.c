@@ -105,6 +105,12 @@ int __mcint_mode_string_to_flags(const char *mode) {
     if (truncate)
         result |= O_TRUNC;
 
+    /* "x" flag can only be used with "w" */
+    if (!create && excl) {
+        __mcapi_errno = __mcapi_EINVAL;
+        return -1;
+    }
+
     return result;
 }
 

@@ -93,6 +93,8 @@ if (METALC_COMPILE_FOR_TESTING)
     target_compile_options(
         test_executable PRIVATE
         -Wextra
+        -pedantic
+        -pedantic-errors
         -Wno-declaration-after-statement    # TODO: This should not be necessary
         -Wno-unused-variable                # Triggered by some macros we use
     )

@@ -1,5 +1,8 @@
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+extern int __mcapi_errno;
 
 extern FILE *test_output_fd;
 
@@ -21,26 +24,39 @@ void write_csv_string(const char *text) {
 }
 
 
+void initialize_test_log(void) {
+    fprintf(
+        test_output_fd,
+        "status\ttest_name\ttest_file\tassertion_line\tmetalc_errno\tassertion_text\n"
+    );
+}
+
+
 void log_message(
     const char *level,
     const char *test_name,
     unsigned line,
     const char *filename,
-    const char *message
+    const char *message,
+    ...
 ) {
+    va_list args;
+
     write_csv_string(level);
-    fputc(',', test_output_fd);
+    fputc('\t', test_output_fd);
 
     write_csv_string(test_name);
-    fputc(',', test_output_fd);
+    fputc('\t', test_output_fd);
 
     if (filename != NULL)
         write_csv_string(filename);
-    fputc(',', test_output_fd);
+    fputc('\t', test_output_fd);
 
-    fprintf(test_output_fd, "%u,", line);
+    fprintf(test_output_fd, "%u\t%d\t", line, __mcapi_errno);
 
-    if (message != NULL)
-        write_csv_string(message);
+    if (message != NULL) {
+        va_start(args, message);
+        vfprintf(test_output_fd, message, args);
+    }
     fputc('\n', test_output_fd);
 }

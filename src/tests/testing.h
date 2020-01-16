@@ -10,39 +10,42 @@ struct UnitTestEntry {
 };
 
 
+void initialize_test_log(void);
+
 void log_message(
     const char *level,
     const char *test_name,
     unsigned line,
     const char *filename,
-    const char *message
+    const char *message,
+    ...
 );
 
 
-#define ASSERT_MSG(expr, msg)                                           \
+#define ASSERT_MSG(expr, msg, ...)                                      \
     if (expr)                                                           \
         log_message("OK", _test_name,  __LINE__, __FILE__, "");         \
     else {                                                              \
-        log_message("FAILED", _test_name, __LINE__, __FILE__, (msg));   \
+        log_message("FAILED", _test_name, __LINE__, __FILE__, (msg), __VA_ARGS__);   \
         return 1;                                                       \
     }
 
 
 #define ASSERT(expr)    ASSERT_MSG((expr), NULL)
 
-#define CHECK_EQ(x, y)  ASSERT((x) == (y))
-#define CHECK_NE(x, y)  ASSERT((x) != (y))
-#define CHECK_GT(x, y)  ASSERT((x) > (y))
-#define CHECK_GE(x, y)  ASSERT((x) >= (y))
-#define CHECK_LT(x, y)  ASSERT((x) < (y))
-#define CHECK_LE(x, y)  ASSERT((x) <= (y))
+#define CHECK_EQ(x, y)  ASSERT_MSG((x) == (y), "Assertion failed: %s == %s", #x, #y)
+#define CHECK_NE(x, y)  ASSERT_MSG((x) != (y), "Assertion failed: %s != %s", #x, #y)
+#define CHECK_GT(x, y)  ASSERT_MSG((x) > (y), "Assertion failed: %s > %s", #x, #y)
+#define CHECK_GE(x, y)  ASSERT_MSG((x) >= (y), "Assertion failed: %s >= %s", #x, #y)
+#define CHECK_LT(x, y)  ASSERT_MSG((x) < (y), "Assertion failed: %s < %s", #x, #y)
+#define CHECK_LE(x, y)  ASSERT_MSG((x) <= (y), "Assertion failed: %s <= %s", #x, #y)
 
-#define CHECK_EQ_MSG(x, y, msg)  ASSERT_MSG((x) == (y), (msg))
-#define CHECK_NE_MSG(x, y, msg)  ASSERT_MSG((x) != (y), (msg))
-#define CHECK_GT_MSG(x, y, msg)  ASSERT_MSG((x) > (y), (msg))
-#define CHECK_GE_MSG(x, y, msg)  ASSERT_MSG((x) >= (y), (msg))
-#define CHECK_LT_MSG(x, y, msg)  ASSERT_MSG((x) < (y), (msg))
-#define CHECK_LE_MSG(x, y, msg)  ASSERT_MSG((x) <= (y), (msg))
+#define CHECK_EQ_MSG(x, y, msg)  ASSERT_MSG((x) == (y), "%s", (msg))
+#define CHECK_NE_MSG(x, y, msg)  ASSERT_MSG((x) != (y), "%s", (msg))
+#define CHECK_GT_MSG(x, y, msg)  ASSERT_MSG((x) > (y), "%s", (msg))
+#define CHECK_GE_MSG(x, y, msg)  ASSERT_MSG((x) >= (y), "%s", (msg))
+#define CHECK_LT_MSG(x, y, msg)  ASSERT_MSG((x) < (y), "%s", (msg))
+#define CHECK_LE_MSG(x, y, msg)  ASSERT_MSG((x) <= (y), "%s", (msg))
 
 #define INFO(msg)   log_message("INFO", _test_name, __LINE__, __FILE__, (msg))
 
