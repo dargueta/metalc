@@ -4,6 +4,7 @@
 #include <metalc/signal.h>
 #include <metalc/stddef.h>
 #include <metalc/stdint.h>
+#include <metalc/stdio.h>
 
 
 extern __mcapi_jmp_buf __mclib_abort_target;
@@ -50,14 +51,14 @@ int krnlhook_close(intptr_t fdesc, void *udata) {
 }
 
 
-__mcapi_ssize_t krnlhook_write(intptr_t fdesc, const void *data, size_t size, void *udata) {
+ssize_t krnlhook_write(intptr_t fdesc, const void *data, size_t size, void *udata) {
     (void)fdesc, (void)data, (void)size, (void)udata;
     __mcapi_errno = __mcapi_ENOSYS;
     return -1;
 }
 
 
-__mcapi_ssize_t krnlhook_read(intptr_t fdesc, void *buffer, size_t size, void *udata) {
+ssize_t krnlhook_read(intptr_t fdesc, void *buffer, size_t size, void *udata) {
     (void)fdesc, (void)buffer, (void)size, (void)udata;
     __mcapi_errno = __mcapi_ENOSYS;
     return -1;

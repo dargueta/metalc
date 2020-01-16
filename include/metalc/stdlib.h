@@ -1,10 +1,8 @@
 #ifndef INCLUDE_METALC_STDLIB_H_
 #define INCLUDE_METALC_STDLIB_H_
 
-#include <limits.h>
-#include <stddef.h>
-
 #include <metalc/metalc.h>
+#include <metalc/stddef.h>
 
 
 #define __mcapi_RAND_MAX    INT_MAX
@@ -20,46 +18,64 @@ typedef struct {
 } __mcapi_ldiv_t;
 
 
-METALC_API_EXPORT double __mcapi_atof(const char *str);
-METALC_API_EXPORT int __mcapi_atoi(const char *str);
-METALC_API_EXPORT long __mcapi_atol(const char *str);
-METALC_API_EXPORT long __mcapi_strtol(const char *str, const char **endptr, int base);
-METALC_API_EXPORT unsigned long __mcapi_strtoul(const char *str, const char **endptr, int base);
-METALC_API_EXPORT double __mcapi_strtod(const char *str, const char **endptr);
-METALC_API_EXPORT void __mcapi_abort(void);  /* done */
-METALC_API_EXPORT void __mcapi_atexit(void (*func)(void));
-METALC_API_EXPORT void __mcapi_exit(int status);
-METALC_API_EXPORT char *__mcapi_getenv(const char *name);
-METALC_API_EXPORT int __mcapi_system(const char *string);
-METALC_API_EXPORT void *__mcapi_bsearch(
-    const void *key,
-    const void *base,
-    size_t nitems,
-    size_t size,
-    int (*cmp)(const void *, const void *)
-);
-METALC_API_EXPORT void __mcapi_qsort(
-    void *base,
-    size_t nitems,
-    size_t size,
-    int (*cmp)(const void *, const void *)
-);
-METALC_API_EXPORT int __mcapi_abs(int x);                        /* done */
-METALC_API_EXPORT long __mcapi_labs(long x);                     /* done */
-METALC_API_EXPORT __mcapi_div_t __mcapi_div(int numer, int denom);       /* done */
-METALC_API_EXPORT __mcapi_ldiv_t __mcapi_ldiv(long numer, long denom);   /* done */
-METALC_API_EXPORT int __mcapi_rand(void);
-METALC_API_EXPORT void __mcapi_srand(unsigned seed);             /* done */
-METALC_API_EXPORT int __mcapi_mblen(const char *str, size_t n);
-METALC_API_EXPORT size_t __mcapi_mbstowcs(wchar_t *pwcs, const char *str, size_t n);
-METALC_API_EXPORT int __mcapi_mbtowc(wchar_t *pwc, const char *str, size_t n);
-METALC_API_EXPORT size_t __mcapi_wcstombs(char *str, const wchar_t *pwcs, size_t n);
-METALC_API_EXPORT int __mcapi_wctomb(char *str, wchar_t wchar);
+double atof(const char *str);
+int atoi(const char *str);
+long atol(const char *str);
+long strtol(const char *str, const char **endptr, int base);
+unsigned long strtoul(const char *str, const char **endptr, int base);
+double strtod(const char *str, const char **endptr);
+void abort(void);  /* done */
+void atexit(void (*func)(void));
+void exit(int status);
+char *getenv(const char *name);
+int system(const char *string);
+void *bsearch(const void *key, const void *base, size_t nitems, size_t size, int (*cmp)(const void *, const void *));
+void qsort(void *base, size_t nitems, size_t size, int (*cmp)(const void *, const void *));
+int abs(int x);                        /* done */
+long labs(long x);                     /* done */
+__mcapi_div_t div(int numer, int denom);       /* done */
+__mcapi_ldiv_t ldiv(long numer, long denom);   /* done */
+int rand(void);
+void srand(unsigned seed);             /* done */
+int mblen(const char *str, size_t n);
+size_t mbstowcs(wchar_t *pwcs, const char *str, size_t n);
+int mbtowc(wchar_t *pwc, const char *str, size_t n);
+size_t wcstombs(char *str, const wchar_t *pwcs, size_t n);
+int wctomb(char *str, wchar_t wchar);
+void *malloc(size_t size);
+void *calloc(size_t n_elements, size_t element_size);
+void *realloc(void *ptr, size_t size);
+void free(void *ptr);
 
-METALC_API_EXPORT void *__mcapi_malloc(size_t size);
-METALC_API_EXPORT void *__mcapi_calloc(size_t n_elements, size_t element_size);
-METALC_API_EXPORT void *__mcapi_realloc(void *ptr, size_t size);
-METALC_API_EXPORT void __mcapi_free(void *ptr);
+
+cstdlib_export_with_attr(atof, nonnull, pure);
+cstdlib_export_with_attr(atoi, nonnull, pure);
+cstdlib_export_with_attr(atol, nonnull, pure);
+cstdlib_export_with_attr(strtol, nonnull(1));
+cstdlib_export_with_attr(strtoul, nonnull(1));
+cstdlib_export_with_attr(strtod, nonnull(1));
+cstdlib_export_with_attr(abort, noreturn);
+cstdlib_export_with_attr(atexit, nonnull);
+cstdlib_export_with_attr(exit, noreturn);
+cstdlib_export_with_attr(getenv, nonnull, error("Function requires OS support."));
+cstdlib_export_with_attr(system, nonnull, error("Function requires OS support."));
+cstdlib_export(bsearch);
+cstdlib_export(qsort);
+cstdlib_export_with_attr(abs, const);
+cstdlib_export_with_attr(labs, const);
+cstdlib_export_with_attr(div, const);
+cstdlib_export_with_attr(ldiv, const);
+cstdlib_export(rand);
+cstdlib_export(srand);
+cstdlib_export_with_attr(mblen, pure);
+cstdlib_export(mbstowcs);
+cstdlib_export(mbtowc);
+cstdlib_export(wcstombs);
+cstdlib_export(wctomb);
+cstdlib_export_with_attr(malloc, malloc, warn_unused_result);
+cstdlib_export_with_attr(calloc, malloc, warn_unused_result);
+cstdlib_export_with_attr(realloc, warn_unused_result);
+cstdlib_export(free);
 
 
 #if METALC_HAVE_LONG_LONG
@@ -67,21 +83,34 @@ METALC_API_EXPORT void __mcapi_free(void *ptr);
         long long quot, rem;
     } __mcapi_lldiv_t;
 
-    METALC_API_EXPORT long long __mcapi_llabs(long long x);      /* done */
-    METALC_API_EXPORT long long __mcapi_atoll(const char *str);
-    METALC_API_EXPORT long long __mcapi_strtoll(const char *str, const char **endptr, int base);
-    METALC_API_EXPORT unsigned long long __mcapi_strtoull(const char *str, const char **endptr, int base);
-    METALC_API_EXPORT __mcapi_lldiv_t __mcapi_lldiv(long long numer, long long denom);
+    long long llabs(long long x);      /* done */
+    long long atoll(const char *str);
+    long long strtoll(const char *str, const char **endptr, int base);
+    unsigned long long strtoull(const char *str, const char **endptr, int base);
+    __mcapi_lldiv_t lldiv(long long numer, long long denom);
 
     /* Nonstandard */
-    METALC_API_EXPORT char *__mcapi_lltoa(long long value, char *buf, int base);
-    METALC_API_EXPORT char *__mcapi_ulltoa(unsigned long long value, char *str, int base);
+    char *lltoa(long long value, char *buf, int base);
+    char *ulltoa(unsigned long long value, char *str, int base);
+
+    cstdlib_export_with_attr(llabs, const);
+    cstdlib_export_with_attr(atoll, pure);
+    cstdlib_export_with_attr(strtoll, pure);
+    cstdlib_export_with_attr(strtoull, pure);
+    cstdlib_export_with_attr(lldiv, const);
+    cstdlib_export(lltoa);
+    cstdlib_export(ulltoa);
 #endif
 
 /* Nonstandard functions */
-METALC_API_EXPORT char *__mcapi_itoa(int value, char *str, int base);
-METALC_API_EXPORT char *__mcapi_utoa(unsigned value, char *buf, int base);
-METALC_API_EXPORT char *__mcapi_ltoa(long value, char *buf, int base);
-METALC_API_EXPORT char *__mcapi_ultoa(unsigned long value, char *str, int base);
+char *itoa(int value, char *str, int base);
+char *utoa(unsigned value, char *buf, int base);
+char *ltoa(long value, char *buf, int base);
+char *ultoa(unsigned long value, char *str, int base);
+
+cstdlib_export(itoa);
+cstdlib_export(utoa);
+cstdlib_export(ltoa);
+cstdlib_export(ultoa);
 
 #endif  /* INCLUDE_METALC_STDLIB_H_ */

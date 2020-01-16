@@ -9,9 +9,12 @@
 
 
 extern const struct UnitTestEntry kStringUnitTests[];
+extern const struct UnitTestEntry kFileIOUnitTests[];
+
 
 const struct UnitTestEntry *kAllUnitTestGroups[] = {
     kStringUnitTests,
+    kFileIOUnitTests,
     NULL
 };
 

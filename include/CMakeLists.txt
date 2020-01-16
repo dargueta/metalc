@@ -31,7 +31,61 @@ configure_file(
 )
 
 
-file(GLOB METALC_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/metalc/*.h")
-file(COPY ${METALC_HEADER_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/metalc")
+set(HEADER_FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/assert.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/atomic.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/crtinit.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/ctype.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/errno.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/fcntl.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/float.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/iso646.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/kernel_hooks.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/limits.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/locale.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/math.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/posix.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/setjmp.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/signal.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/stdarg.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/stdbool.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/stddef.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/stdint.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/stdio.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/stdlib.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/string.h"
+)
+
+set(BITS_FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/bits/stddef.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/bits/stdio.h"
+)
+
+list(
+    TRANSFORM
+    HEADER_FILES
+    REPLACE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}"
+    OUTPUT_VARIABLE HEADER_OUTPUT_FILES
+)
+
+list(
+    TRANSFORM
+    BITS_FILES
+    REPLACE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}"
+    OUTPUT_VARIABLE BITS_OUTPUT_FILES
+)
+
+
+add_custom_target(
+    metalc_headers ALL
+    "${CMAKE_COMMAND}" -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/metalc" "${CMAKE_CURRENT_BINARY_DIR}/metalc/bits" "${CMAKE_CURRENT_BINARY_DIR}/metalc/x86"
+    COMMAND "${CMAKE_COMMAND}" -E copy ${HEADER_FILES} "${CMAKE_CURRENT_BINARY_DIR}/metalc"
+    COMMAND "${CMAKE_COMMAND}" -E copy ${BITS_FILES} "${CMAKE_CURRENT_BINARY_DIR}/metalc/bits"
+    COMMENT "Generating target header files"
+    DEPENDS ${HEADER_FILES} ${BITS_FILES}
+    BYPRODUCTS ${HEADER_OUTPUT_FILES} ${BITS_OUTPUT_FILES}
+    COMMAND_EXPAND_LISTS
+    VERBATIM
+)
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")

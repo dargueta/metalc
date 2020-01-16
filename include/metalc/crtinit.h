@@ -4,7 +4,6 @@
 #include <metalc/metalc.h>
 #include <metalc/stddef.h>
 #include <metalc/stdint.h>
-#include <metalc/stdio.h>
 
 
 typedef int (* cmetal_main_fn)(int argc, char **argv, char **env);
@@ -59,14 +58,11 @@ typedef struct {
     intptr_t stderr_handle;
 
     /**
-     * A pointer to the first byte past the end of this process' writable data
-     * segment.
+     * The original data break address when the library was first initialized.
      *
-     * MetalC will not modify the value it receives here, and expects it not to
-     * change after the library's initialized. It's used by @ref sbrk and
-     * @ref malloc to allocate/free writable memory to use for the heap.
+     * @warning Internal use only. Do not modify.
      */
-    void *original_brk;
+    void *_original_brk;
 } MetalCRuntimeInfo;
 
 

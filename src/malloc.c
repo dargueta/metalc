@@ -46,7 +46,7 @@ static void _malloc_assert(int expression, const char *message, ...) {
     out = (__mcapi_stderr != NULL) ? __mcapi_stderr : __mcapi_stdout;
     if (out) {
         va_start(args, message);
-        __mcapi_vfprintf(out, "malloc() assertion failed: %s\n", args);
+        vfprintf(out, "malloc() assertion failed: %s\n", args);
         va_end(args);
     }
 
@@ -145,6 +145,8 @@ static uintptr_t _size_of_allocation(const void *pointer) {
 
 
 METALC_API_INTERNAL int malloc_init(void) {
+    __mclib_runtime_info->_original_brk = krnlhook_brk(NULL, __mclib_runtime_info->udata);
+
     if (__mclib_runtime_info->page_size == 0)
         return __mcapi_ENOSYS;
 
@@ -175,13 +177,12 @@ METALC_API_INTERNAL int malloc_init(void) {
 
 
 METALC_API_INTERNAL int malloc_teardown(void) {
-    krnlhook_brk(__mclib_runtime_info->original_brk, __mclib_runtime_info->udata);
+    krnlhook_brk(__mclib_runtime_info->_original_brk, __mclib_runtime_info->udata);
     return 0;
 }
 
 
-__attribute__((malloc, warn_unused_result))
-void *__mcapi_malloc(size_t size) {
+void *malloc(size_t size) {
     if (size == 0)
         return NULL;
 
@@ -190,8 +191,7 @@ void *__mcapi_malloc(size_t size) {
 }
 
 
-__attribute__((malloc, warn_unused_result))
-void *__mcapi_calloc(size_t n_elements, size_t element_size) {
+void *calloc(size_t n_elements, size_t element_size) {
     size_t total_size;
     void *pointer;
 
@@ -206,7 +206,7 @@ void *__mcapi_calloc(size_t n_elements, size_t element_size) {
         return NULL;
     }
 
-    pointer = __mcapi_malloc(total_size);
+    pointer = malloc(total_size);
     if (pointer == NULL)
         return pointer;
 
@@ -215,17 +215,16 @@ void *__mcapi_calloc(size_t n_elements, size_t element_size) {
 }
 
 
-__attribute__((warn_unused_result))
-void *__mcapi_realloc(void *pointer, size_t new_size) {
+void *realloc(void *pointer, size_t new_size) {
     uintptr_t old_size;
     void *new_pointer;
 
     if (new_size == 0) {
-        __mcapi_free(pointer);
+        free(pointer);
         return NULL;
     }
     else if (pointer == NULL)
-        return __mcapi_malloc(new_size);
+        return malloc(new_size);
 
     /* Inefficient implementation. The smart way to do it is to try and resize
      * the current block, and if the block can be resized, then update the
@@ -236,18 +235,18 @@ void *__mcapi_realloc(void *pointer, size_t new_size) {
      * falsely claim it's run out of memory because we're holding two copies of
      * the same block in memory at once. */
     old_size = _size_of_allocation(pointer);
-    new_pointer = __mcapi_malloc(new_size);
+    new_pointer = malloc(new_size);
     if (new_pointer == NULL)
         /* errno already set by malloc(), no need to do it here. */
         return NULL;
 
     memcpy(new_pointer, pointer, old_size);
-    __mcapi_free(pointer);
+    free(pointer);
     return new_pointer;
 }
 
 
-void __mcapi_free(void *pointer) {
+void free(void *pointer) {
     struct PointerEntry *info;
 
     /* Ignore attempt to free a null pointer. */

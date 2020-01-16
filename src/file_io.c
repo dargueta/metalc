@@ -45,7 +45,6 @@ METALC_API_INTERNAL int fileio_init(void) {
 }
 
 
-__attribute__((nonnull))
 int __mcint_mode_string_to_flags(const char *mode) {
     int can_read, can_write, append, binary, truncate, create, excl, i, result;
 
@@ -110,35 +109,30 @@ int __mcint_mode_string_to_flags(const char *mode) {
 }
 
 
-__attribute__((nonnull))
-void __mcapi_clearerr(__mcapi_FILE *stream) {
+void clearerr(__mcapi_FILE *stream) {
     stream->last_error = 0;
     stream->eof = 0;
 }
 
 
-__attribute__((nonnull))
-void __mcapi_fclose(__mcapi_FILE *stream) {
+void fclose(__mcapi_FILE *stream) {
     krnlhook_fsync(stream->descriptor, __mclib_runtime_info->udata);
     krnlhook_close(stream->descriptor, __mclib_runtime_info->udata);
-    __mcapi_free(stream);
+    free(stream);
 }
 
 
-__attribute__((nonnull))
-int __mcapi_feof(__mcapi_FILE *stream) {
+int feof(__mcapi_FILE *stream) {
     return stream->eof;
 }
 
 
-__attribute__((nonnull))
-int __mcapi_ferror(__mcapi_FILE *stream) {
+int ferror(__mcapi_FILE *stream) {
     return stream->last_error;
 }
 
 
-__attribute__((nonnull, warn_unused_result))
-__mcapi_FILE *__mcapi_fopen(const char *path, const char *mode) {
+__mcapi_FILE *fopen(const char *path, const char *mode) {
     __mcapi_FILE *stream;
     int io_flags;
 
@@ -150,7 +144,7 @@ __mcapi_FILE *__mcapi_fopen(const char *path, const char *mode) {
         return NULL;
     }
 
-    stream = __mcapi_malloc(sizeof(*stream));
+    stream = malloc(sizeof(*stream));
     if (stream == NULL)
         return NULL;
 
@@ -159,7 +153,7 @@ __mcapi_FILE *__mcapi_fopen(const char *path, const char *mode) {
         path, io_flags, 0644, __mclib_runtime_info->udata
     );
     if (stream->descriptor == -1) {
-        __mcapi_free(stream);
+        free(stream);
         return NULL;
     }
 
@@ -170,8 +164,7 @@ __mcapi_FILE *__mcapi_fopen(const char *path, const char *mode) {
 }
 
 
-__attribute__((nonnull))
-size_t __mcapi_fwrite(const void *ptr, size_t size, size_t count, __mcapi_FILE *stream) {
+size_t fwrite(const void *ptr, size_t size, size_t count, __mcapi_FILE *stream) {
     /* Complain if we're trying to write to a read-only stream. */
     if ((stream->io_flags & O_ACCMODE) == O_RDONLY) {
         __mcapi_errno = __mcapi_EPERM;
@@ -180,7 +173,7 @@ size_t __mcapi_fwrite(const void *ptr, size_t size, size_t count, __mcapi_FILE *
 
     /* Seek to the end of the stream if we opened the file in append mode. */
     if (stream->io_flags & O_APPEND)
-        __mcapi_fseek(stream, 0, __mcapi_SEEK_END);
+        fseek(stream, 0, __mcapi_SEEK_END);
 
     return krnlhook_write(
         stream->descriptor, ptr, size * count, __mclib_runtime_info->udata
@@ -188,8 +181,7 @@ size_t __mcapi_fwrite(const void *ptr, size_t size, size_t count, __mcapi_FILE *
 }
 
 
-__attribute__((nonnull))
-size_t __mcapi_fread(void *ptr, size_t size, size_t count, __mcapi_FILE *stream) {
+size_t fread(void *ptr, size_t size, size_t count, __mcapi_FILE *stream) {
     /* Complain if we're trying to read from a write-only stream. */
     if ((stream->io_flags & O_ACCMODE) == O_WRONLY) {
         __mcapi_errno = __mcapi_EPERM;
@@ -202,9 +194,18 @@ size_t __mcapi_fread(void *ptr, size_t size, size_t count, __mcapi_FILE *stream)
 }
 
 
-__attribute__((nonnull))
-__mcapi_fpos_t __mcapi_fseek(__mcapi_FILE *stream, long offset, int whence) {
+__mcapi_fpos_t fseek(__mcapi_FILE *stream, long offset, int whence) {
     return krnlhook_seek(
         stream->descriptor, offset, whence, __mclib_runtime_info->udata
     );
 }
+
+
+cstdlib_implement(clearerr);
+cstdlib_implement(fclose);
+cstdlib_implement(feof);
+cstdlib_implement(ferror);
+cstdlib_implement(fopen);
+cstdlib_implement(fwrite);
+cstdlib_implement(fread);
+cstdlib_implement(fseek);

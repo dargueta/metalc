@@ -298,7 +298,7 @@ char *strerror(int errnum) {
     if ((errnum >= 0) && (errnum < __mcapi__MAX_ERRNO))
         return strcpy(buffer, ERROR_STRINGS[errnum]);
 
-    __mcapi_sprintf(buffer, "Unknown error %d", errnum);
+    sprintf(buffer, "Unknown error %d", errnum);
     return buffer;
 }
 cstdlib_implement(strerror);

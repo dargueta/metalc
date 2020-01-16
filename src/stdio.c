@@ -68,7 +68,7 @@ static size_t _copy_buffer(const char *temp, char **buffer) {
 }
 
 
-int __mcapi_vsprintf(char *buffer, const char *format, va_list arg_list) {
+int vsprintf(char *buffer, const char *format, va_list arg_list) {
     struct MCFormatSpecifier format_info;
     int format_error, n_chars_written, buffer_size, i;
     char temp[256];
@@ -101,7 +101,7 @@ int __mcapi_vsprintf(char *buffer, const char *format, va_list arg_list) {
                 break;
             case 'd':
             case 'i':
-                __mcapi_itoa(va_arg(arg_list, int), temp, 10);
+                itoa(va_arg(arg_list, int), temp, 10);
                 n_chars_written += _copy_buffer(temp, &buffer);
                 break;
             case 'h':
@@ -112,14 +112,14 @@ int __mcapi_vsprintf(char *buffer, const char *format, va_list arg_list) {
                 switch (*format) {
                     case 'd':
                     case 'i':
-                        __mcapi_itoa(va_arg(arg_list, int), temp, 10);
+                        itoa(va_arg(arg_list, int), temp, 10);
                         break;
                     case 'u':
-                        __mcapi_utoa(va_arg(arg_list, unsigned), temp, 10);
+                        utoa(va_arg(arg_list, unsigned), temp, 10);
                         break;
                     case 'x':
                     case 'X':
-                        __mcapi_utoa(va_arg(arg_list, unsigned), temp, 16);
+                        utoa(va_arg(arg_list, unsigned), temp, 16);
                         buffer_size = (int)strlen(temp);
                         if (*format == 'X') {
                             for (i = 0; i < buffer_size; ++i)
@@ -149,16 +149,16 @@ int __mcapi_vsprintf(char *buffer, const char *format, va_list arg_list) {
                         switch (*format) {
                             case 'd':
                             case 'i':
-                                __mcapi_lltoa(va_arg(arg_list, long long), temp, 10);
+                                lltoa(va_arg(arg_list, long long), temp, 10);
                                 break;
                             case 'u':
-                                __mcapi_ulltoa(
+                                ulltoa(
                                     va_arg(arg_list, unsigned long long), temp, 10
                                 );
                                 break;
                             case 'x':
                             case 'X':
-                                __mcapi_ulltoa(
+                                ulltoa(
                                     va_arg(arg_list, unsigned long long), temp, 16
                                 );
                                 buffer_size = (int)strlen(temp);
@@ -177,10 +177,10 @@ int __mcapi_vsprintf(char *buffer, const char *format, va_list arg_list) {
                         switch (*format) {
                             case 'd':
                             case 'i':
-                                __mcapi_ltoa(va_arg(arg_list, long), temp, 10);
+                                ltoa(va_arg(arg_list, long), temp, 10);
                                 break;
                             case 'u':
-                                __mcapi_ultoa(
+                                ultoa(
                                     va_arg(arg_list, unsigned long), temp, 10
                                 );
                                 break;
@@ -202,10 +202,10 @@ int __mcapi_vsprintf(char *buffer, const char *format, va_list arg_list) {
                     switch (*format) {
                         case 'd':
                         case 'i':
-                            __mcapi_ltoa(va_arg(arg_list, long), temp, 10);
+                            ltoa(va_arg(arg_list, long), temp, 10);
                             break;
                         case 'u':
-                            __mcapi_ultoa(va_arg(arg_list, unsigned long), temp, 10);
+                            ultoa(va_arg(arg_list, unsigned long), temp, 10);
                             break;
                         case 'x':
                         case 'X':
@@ -225,12 +225,12 @@ int __mcapi_vsprintf(char *buffer, const char *format, va_list arg_list) {
                 *va_arg(arg_list, int *) = n_chars_written;
                 break;
             case 'u':
-                __mcapi_utoa(va_arg(arg_list, unsigned), temp, 10);
+                utoa(va_arg(arg_list, unsigned), temp, 10);
                 n_chars_written += _copy_buffer(temp, &buffer);
                 break;
             case 'x':
             case 'X':
-                __mcapi_utoa(va_arg(arg_list, unsigned), temp, 16);
+                utoa(va_arg(arg_list, unsigned), temp, 16);
                 buffer_size = (int)strlen(temp);
                 if (*format == 'X') {
                     for (i = 0; i < buffer_size; ++i)
@@ -265,63 +265,66 @@ int __mcapi_vsprintf(char *buffer, const char *format, va_list arg_list) {
 }
 
 
-__attribute__((nonnull))
-int __mcapi_sprintf(char *buffer, const char *format, ...) {
+int sprintf(char *buffer, const char *format, ...) {
     va_list arg_list;
     int result;
 
     va_start(arg_list, format);
-    result = __mcapi_vsprintf(buffer, format, arg_list);
+    result = vsprintf(buffer, format, arg_list);
     va_end(arg_list);
     return result;
 }
 
 
-__attribute__((nonnull))
-int __mcapi_vfprintf(__mcapi_FILE *stream, const char *format, va_list arg_list) {
+int vfprintf(__mcapi_FILE *stream, const char *format, va_list arg_list) {
     char *buffer;
     int n_chars_written;
 
-    n_chars_written = __mcapi_vsprintf(NULL, format, arg_list);
+    n_chars_written = vsprintf(NULL, format, arg_list);
     if (n_chars_written < 0)
         return n_chars_written;
 
-    buffer = __mcapi_malloc(n_chars_written);
+    buffer = malloc(n_chars_written);
     if (buffer == NULL)
         return -1;
 
-    __mcapi_vsprintf(buffer, format, arg_list);
-    __mcapi_fwrite(buffer, n_chars_written - 1, 1, stream);
-    __mcapi_free(buffer);
+    vsprintf(buffer, format, arg_list);
+    fwrite(buffer, n_chars_written - 1, 1, stream);
+    free(buffer);
     return n_chars_written - 1;
 }
 
 
-__attribute__((nonnull))
-int __mcapi_fprintf(__mcapi_FILE *stream, const char *format, ...) {
+int fprintf(__mcapi_FILE *stream, const char *format, ...) {
     va_list arg_list;
     int result;
 
     va_start(arg_list, format);
-    result = __mcapi_vfprintf(stream, format, arg_list);
+    result = vfprintf(stream, format, arg_list);
     va_end(arg_list);
     return result;
 }
 
 
-__attribute__((nonnull))
-int __mcapi_vprintf(const char *format, va_list arg_list) {
-    return __mcapi_vfprintf(__mcapi_stdout, format, arg_list);
+int vprintf(const char *format, va_list arg_list) {
+    return vfprintf(__mcapi_stdout, format, arg_list);
 }
 
 
-__attribute__((nonnull))
-int __mcapi_printf(const char *format, ...) {
+int printf(const char *format, ...) {
     va_list arg_list;
     int result;
 
     va_start(arg_list, format);
-    result = __mcapi_vprintf(format, arg_list);
+    result = vprintf(format, arg_list);
     va_end(arg_list);
     return result;
 }
+
+
+cstdlib_implement(vsprintf);
+cstdlib_implement(sprintf);
+cstdlib_implement(vprintf);
+cstdlib_implement(printf);
+cstdlib_implement(vfprintf);
+cstdlib_implement(fprintf);
