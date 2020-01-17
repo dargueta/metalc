@@ -5,61 +5,67 @@
 #include "testing.h"
 
 
-BEGIN_TEST(test_mode_string_to_flags__w)
-    CHECK_EQ(__mcint_mode_string_to_flags("w"), O_WRONLY | O_TRUNC | O_CREAT);
-END_TEST()
+struct ModeStringTestCase {
+    const char *mode_string;
+    int expected_flags;
+    int errno_value;
+};
 
 
-BEGIN_TEST(test_mode_string_to_flags__wb)
-    CHECK_EQ(__mcint_mode_string_to_flags("wb"), O_WRONLY | O_TRUNC | O_CREAT | O_BINARY);
-END_TEST()
+struct ModeStringTestCase mode_string_to_flags_cases[] = {
+    {"w", O_WRONLY | O_TRUNC | O_CREAT, 0},
+    {"wb", O_WRONLY | O_TRUNC | O_CREAT | O_BINARY, 0},
+    {"w+", O_RDWR | O_TRUNC | O_CREAT, 0},
+    {"w+b", O_RDWR | O_CREAT | O_TRUNC | O_BINARY, 0},
+    {"wb+", O_RDWR | O_CREAT | O_TRUNC | O_BINARY, 0},
+    {"wx", O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, 0},
+    {"w+x", O_RDWR | O_CREAT | O_EXCL | O_TRUNC, 0},
+    {"wx+", O_RDWR | O_CREAT | O_EXCL | O_TRUNC, 0},
+    {"w+xb", O_RDWR | O_CREAT | O_EXCL | O_TRUNC | O_BINARY, 0},
+    {"w+bx", O_RDWR | O_CREAT | O_EXCL | O_TRUNC | O_BINARY, 0},
+    {"wbx+", O_RDWR | O_CREAT | O_EXCL | O_TRUNC | O_BINARY, 0},
+    {"r", O_RDONLY, 0},
+    {"r+", O_RDWR, 0},
+    {"rb", O_RDONLY | O_BINARY, 0},
+    {"rb+", O_RDWR | O_BINARY, 0},
+    {"r+b", O_RDWR | O_BINARY, 0},
+    {"a", O_WRONLY | O_CREAT | O_APPEND, 0},
+    {"a+", O_RDWR | O_CREAT | O_APPEND, 0},
+    {"ab", O_WRONLY | O_CREAT | O_APPEND | O_BINARY, 0},
+    {"a+b", O_RDWR | O_CREAT | O_APPEND | O_BINARY, 0},
+    {"ab+", O_RDWR | O_CREAT | O_APPEND | O_BINARY, 0},
+    {"R", -1, __mcapi_EINVAL},
+    {"", -1, __mcapi_EINVAL},
+    {"r+x", -1, __mcapi_EINVAL},
+    {"ax", -1, __mcapi_EINVAL},
+    {"a+x", -1, __mcapi_EINVAL},
+    {NULL, 0, 0}
+};
 
 
-BEGIN_TEST(test_mode_string_to_flags__wplus)
-    CHECK_EQ(__mcint_mode_string_to_flags("w+"), O_RDWR | O_TRUNC | O_CREAT);
-END_TEST()
 
+BEGIN_TEST(test_mode_string_to_flags__all)
+    struct ModeStringTestCase *testcase;
 
-BEGIN_TEST(test_mode_string_to_flags__wplusb)
-    CHECK_EQ(__mcint_mode_string_to_flags("w+b"), O_RDWR | O_CREAT | O_TRUNC | O_BINARY);
-END_TEST()
+    for (testcase = mode_string_to_flags_cases; testcase->mode_string != NULL; ++testcase) {
+        info_message(
+            "Testing mode string `%s`, expecting output %d and errno %d.",
+            testcase->mode_string,
+            testcase->expected_flags,
+            testcase->errno_value
+        );
 
-
-BEGIN_TEST(test_mode_string_to_flags__wbplus)
-    CHECK_EQ(__mcint_mode_string_to_flags("wb+"), O_RDWR | O_CREAT | O_TRUNC | O_BINARY);
-END_TEST()
-
-
-BEGIN_TEST(test_mode_string_to_flags__wplusx)
-    CHECK_EQ(__mcint_mode_string_to_flags("w+x"), O_RDWR | O_CREAT | O_EXCL | O_TRUNC);
-END_TEST()
-
-
-BEGIN_TEST(test_mode_string_to_flags__r)
-    CHECK_EQ(__mcint_mode_string_to_flags("r"), O_RDONLY);
-END_TEST()
-
-
-BEGIN_TEST(test_mode_string_to_flags__rplus)
-    CHECK_EQ(__mcint_mode_string_to_flags("r+"), O_RDWR);
-END_TEST()
-
-
-BEGIN_TEST(test_mode_string_to_flags__rplusx_is_bad)
-    CHECK_EQ(__mcint_mode_string_to_flags("r+x"), -1);
-    CHECK_EQ(__mcapi_errno, __mcapi_EINVAL);
+        __mcapi_errno = 0;
+        CHECK_EQ(
+            __mcint_mode_string_to_flags(testcase->mode_string),
+            testcase->expected_flags
+        );
+        CHECK_EQ(__mcapi_errno, testcase->errno_value);
+    }
 END_TEST()
 
 
 const struct UnitTestEntry kFileIOUnitTests[] = {
-    {test_mode_string_to_flags__w, "mode_string_to_flags: \"w\""},
-    {test_mode_string_to_flags__wb, "mode_string_to_flags: \"wb\""},
-    {test_mode_string_to_flags__wplus, "mode_string_to_flags: \"w+\""},
-    {test_mode_string_to_flags__wplusb, "mode_string_to_flags: \"w+b\""},
-    {test_mode_string_to_flags__wbplus, "mode_string_to_flags: \"wb+\""},
-    {test_mode_string_to_flags__wplusx, "mode_string_to_flags: \"w+x\""},
-    {test_mode_string_to_flags__r, "mode_string_to_flags: \"r\""},
-    {test_mode_string_to_flags__rplus, "mode_string_to_flags: \"r+\""},
-    {test_mode_string_to_flags__rplusx_is_bad, "mode_string_to_flags: \"r+x\" fails"},
+    {test_mode_string_to_flags__all, "mode_string_to_flags: all"},
     {NULL, NULL}
 };

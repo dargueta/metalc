@@ -62,7 +62,6 @@ int __mcint_mode_string_to_flags(const char *mode) {
             break;
         case 'a':
             can_write = 1;
-            can_read = 1;
             create = 1;
             append = 1;
             break;
@@ -106,7 +105,7 @@ int __mcint_mode_string_to_flags(const char *mode) {
         result |= O_TRUNC;
     if (excl) {
         /* "x" flag can only be used with "w" */
-        if (!create) {
+        if (mode[0] != 'w') {
             __mcapi_errno = __mcapi_EINVAL;
             return -1;
         }
