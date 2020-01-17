@@ -33,12 +33,12 @@ void log_message(
 
 #define ASSERT(expr)    ASSERT_MSG((expr), NULL)
 
-#define CHECK_EQ(x, y)  ASSERT_MSG((x) == (y), "Assertion failed: %s == %s", #x, #y)
-#define CHECK_NE(x, y)  ASSERT_MSG((x) != (y), "Assertion failed: %s != %s", #x, #y)
-#define CHECK_GT(x, y)  ASSERT_MSG((x) > (y), "Assertion failed: %s > %s", #x, #y)
-#define CHECK_GE(x, y)  ASSERT_MSG((x) >= (y), "Assertion failed: %s >= %s", #x, #y)
-#define CHECK_LT(x, y)  ASSERT_MSG((x) < (y), "Assertion failed: %s < %s", #x, #y)
-#define CHECK_LE(x, y)  ASSERT_MSG((x) <= (y), "Assertion failed: %s <= %s", #x, #y)
+#define CHECK_EQ(x, y)  ASSERT_MSG((x) == (y), "Assertion failed: %s == %s -- left=%d, right=%d", #x, #y, x, y)
+#define CHECK_NE(x, y)  ASSERT_MSG((x) != (y), "Assertion failed: %s != %s -- left=%d, right=%d", #x, #y, x, y)
+#define CHECK_GT(x, y)  ASSERT_MSG((x) > (y), "Assertion failed: %s > %s -- left=%d, right=%d", #x, #y, x, y)
+#define CHECK_GE(x, y)  ASSERT_MSG((x) >= (y), "Assertion failed: %s >= %s -- left=%d, right=%d", #x, #y, x, y)
+#define CHECK_LT(x, y)  ASSERT_MSG((x) < (y), "Assertion failed: %s < %s -- left=%d, right=%d", #x, #y, x, y)
+#define CHECK_LE(x, y)  ASSERT_MSG((x) <= (y), "Assertion failed: %s <= %s -- left=%d, right=%d", #x, #y, x, y)
 
 #define CHECK_EQ_MSG(x, y, msg)  ASSERT_MSG((x) == (y), "%s", (msg))
 #define CHECK_NE_MSG(x, y, msg)  ASSERT_MSG((x) != (y), "%s", (msg))
