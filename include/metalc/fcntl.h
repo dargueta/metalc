@@ -16,6 +16,33 @@
 #define O_CREAT     0x00000200  /**< Create file if it doesn't exist. */
 #define O_TRUNC     0x00000400  /**< Truncate file to zero length. */
 #define O_EXCL      0x00000800  /**< Fail if file already exists. */
+
+/**
+ * Flag marking a file as open for binary I/O.
+ *
+ * This is a nonstandard POSIX flag and mostly used as a crutch.
+ */
+#define O_BINARY    0x00001000
+
+/**
+ * Signal the OS to create a temporary file in the specified directory.
+ *
+ * Added in Linux 3.11
+ */
+#define O_TMPFILE   0x00002000
+
+/**
+ * Get a file descriptor.
+ *
+ * File descriptors can be used for two purposes: to indicate a location in the
+ * filesystem tree, and to perform operations that act purely at the file
+ * descriptor level, like changing the current directory or fstat().
+ *
+ * The file isn't opened and most file operations will fail on it. No permission
+ * is required to get a descriptor to a file, but operations using the descriptor
+ * might fail.
+ */
+#define O_PATH      0x00004000
 #define O_NOCTTY    0x00008000  /**< Don't assign a controlling terminal. */
 #define O_SYNC      O_FSYNC     /**< Same as @ref O_SYNC. */
 #define O_DSYNC     0x00010000  /**< Synchronize data. */
@@ -28,6 +55,9 @@
 #define O_NONBLOCK  0x0004      /**< Non-blocking I/O. */
 #define O_NDELAY    O_NONBLOCK  /**< Same as @ref O_NONBLOCK */
 #define O_APPEND    0x0008      /**< Writes append to the file. */
+
+
+
 
 
 /* Mask for determining file access modes. */
