@@ -23,9 +23,24 @@ typedef struct {
 } atomic_object_t;
 
 
+/**
+ * Read the byte stored in the data area of the lock object.
+ */
 uint8_t atomic_load_8(const atomic_object_t *object);
+
+/**
+ * Read the 16-bit integer stored in the data area of the lock object.
+ */
 uint16_t atomic_load_16(const atomic_object_t *object);
+
+/**
+ * Read the 32-bit integer stored in the data area of the lock object.
+ */
 uint32_t atomic_load_32(const atomic_object_t *object);
+
+/**
+ * Read the 64-bit integer stored in the data area of the lock object.
+ */
 uint64_t atomic_load_64(const atomic_object_t *object);
 void atomic_store_8(atomic_object_t *object, uint8_t value);
 void atomic_store_16(atomic_object_t *object, uint16_t value);

@@ -20,7 +20,8 @@
 /**
  * Flag marking a file as open for binary I/O.
  *
- * This is a nonstandard POSIX flag and mostly used as a crutch.
+ * This is not an actual POSIX flag and mostly used as a crutch for @ref fopen to be
+ * able to signal its backing code that the file should be treated as binary.
  */
 #define O_BINARY    0x00001000
 
