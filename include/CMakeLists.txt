@@ -57,6 +57,9 @@ set(HEADER_FILES
 )
 
 set(BITS_FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/bits/errno.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/bits/printf.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/metalc/bits/signal.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/metalc/bits/stddef.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/metalc/bits/stdio.h"
 )

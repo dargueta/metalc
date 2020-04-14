@@ -144,4 +144,6 @@ extern int __mcapi_errno;
 
 #define __mcapi__MAX_ERRNO  133
 
+#include <metalc/bits/errno.h>
+
 #endif  /* INCLUDE_METALC_ERRNO_H_ */
