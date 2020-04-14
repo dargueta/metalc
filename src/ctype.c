@@ -1,47 +1,48 @@
 #include <metalc/ctype.h>
+#include <metalc/metalc.h>
 
 
-int __mcapi_isalnum(int c) {
-    return __mcapi_isalpha(c) || __mcapi_isdigit(c);
+int isalnum(int c) {
+    return isalpha(c) || isdigit(c);
 }
 
 
-int __mcapi_isalpha(int c) {
-    return __mcapi_islower(c) || __mcapi_isupper(c);
+int isalpha(int c) {
+    return islower(c) || isupper(c);
 }
 
 
-int __mcapi_isblank(int c) {
+int isblank(int c) {
     return (c == 0x20) || (c == 0x09);
 }
 
 
-int __mcapi_iscntrl(int c) {
+int iscntrl(int c) {
     return c < 0x20;
 }
 
 
-int __mcapi_isdigit(int c) {
+int isdigit(int c) {
     return (c >= 0x30) && (c <= 0x39);
 }
 
 
-int __mcapi_isgraph(int c) {
+int isgraph(int c) {
     return (c >= 0x21) && (c < 0x7f);
 }
 
 
-int __mcapi_islower(int c) {
+int islower(int c) {
     return (c >= 0x61) && (c <= 0x7a);
 }
 
 
-int __mcapi_isprint(int c) {
+int isprint(int c) {
     return (c >= 0x20) && (c < 0x7f);
 }
 
 
-int __mcapi_ispunct(int c) {
+int ispunct(int c) {
     return ((c >= 0x21) && (c <= 0x2f))     \
            || ((c >= 0x3a) && (c <= 0x40))  \
            || ((c >= 0x5b) && (c <= 0x60))  \
@@ -49,26 +50,42 @@ int __mcapi_ispunct(int c) {
 }
 
 
-int __mcapi_isspace(int c) {
+int isspace(int c) {
     return ((c >= 0x09) && (c <= 0x0d)) || (c == 0x20);
 }
 
 
-int __mcapi_isupper(int c) {
+int isupper(int c) {
     return (c >= 0x41) && (c <= 0x5a);
 }
 
 
-int __mcapi_isxdigit(int c) {
-    return __mcapi_isdigit(c) || ((c >= 0x41) && (c <= 0x46)) || ((c >= 0x61) && (c <= 0x66));
+int isxdigit(int c) {
+    return isdigit(c) || ((c >= 0x41) && (c <= 0x46)) || ((c >= 0x61) && (c <= 0x66));
 }
 
 
-int __mcapi_tolower(int c) {
-    return __mcapi_isupper(c) ? c + 32 : c;
+int tolower(int c) {
+    return isupper(c) ? c + 32 : c;
 }
 
 
-int __mcapi_toupper(int c) {
-    return __mcapi_islower(c) ? c - 32 : c;
+int toupper(int c) {
+    return islower(c) ? c - 32 : c;
 }
+
+
+cstdlib_implement(isalnum);
+cstdlib_implement(isalpha);
+cstdlib_implement(isblank);
+cstdlib_implement(iscntrl);
+cstdlib_implement(isdigit);
+cstdlib_implement(isgraph);
+cstdlib_implement(islower);
+cstdlib_implement(isprint);
+cstdlib_implement(ispunct);
+cstdlib_implement(isspace);
+cstdlib_implement(isupper);
+cstdlib_implement(isxdigit);
+cstdlib_implement(tolower);
+cstdlib_implement(toupper);

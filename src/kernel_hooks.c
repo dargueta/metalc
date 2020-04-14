@@ -12,24 +12,24 @@ extern __mcapi_jmp_buf __mclib_abort_target;
 
 void krnlhook_suspend(int sig, void *udata) {
     (void)sig, (void)udata;
-    __mcapi_raise(__mcapi_SIGSYS);
+    raise(__mcapi_SIGSYS);
 }
 
 void krnlhook_resume(int sig, void *udata) {
     (void)sig, (void)udata;
-    __mcapi_raise(__mcapi_SIGSYS);
+    raise(__mcapi_SIGSYS);
 }
 
 
 void krnlhook_core_dump(int sig, void *udata) {
     (void)udata;
-    __mcapi_longjmp(__mclib_abort_target, sig);
+    longjmp(__mclib_abort_target, sig);
 }
 
 
 void *krnlhook_brk(void *new_brk, void *udata) {
     (void)new_brk, (void)udata;
-    __mcapi_raise(__mcapi_SIGSYS);
+    raise(__mcapi_SIGSYS);
 
     /* We should never get here unless there's a bug in our implementation of raise().*/
     __mcapi_errno = __mcapi_ENOSYS;
@@ -65,7 +65,9 @@ ssize_t krnlhook_read(intptr_t fdesc, void *buffer, size_t size, void *udata) {
 }
 
 
-__mcapi_off_t krnlhook_seek(intptr_t fdesc, __mcapi_off_t offset, int whence, void *udata) {
+__mcapi_off_t krnlhook_seek(
+    intptr_t fdesc, __mcapi_off_t offset, int whence, void *udata
+) {
     (void)fdesc, (void)offset, (void)whence, (void)udata;
     __mcapi_errno = __mcapi_ENOSYS;
     return 0;

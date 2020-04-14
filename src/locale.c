@@ -4,7 +4,7 @@
 #include <metalc/string.h>
 
 
-static const struct __mcapi_lconv kDefaultCLocale = {
+static const struct __mcapi_lconv _default_c_locale = {
    ".",        /* decimal_point */
    "",         /* thousands_sep */
    "",         /* grouping */
@@ -32,7 +32,7 @@ static const struct __mcapi_lconv kDefaultCLocale = {
 };
 
 
-static struct __mcapi_lconv gCurrentCLocale;
+static struct __mcapi_lconv _current_c_locale;
 
 
 struct LocaleEntry {
@@ -41,17 +41,17 @@ struct LocaleEntry {
 };
 
 
-const struct LocaleEntry gSupportedLocales[] = {
-    {&kDefaultCLocale, "C"},
-    {&kDefaultCLocale, ""},
+const struct LocaleEntry _supported_locales[] = {
+    {&_default_c_locale, "C"},
+    {&_default_c_locale, ""},
     {NULL, NULL}
 };
 
 
 static const struct __mcapi_lconv *_find_locale(const char *name) {
-    const struct LocaleEntry *ptr = gSupportedLocales;
+    const struct LocaleEntry *ptr = _supported_locales;
 
-    while (ptr->name != NULL) {
+    for (ptr = _supported_locales; ptr->name != NULL; ++ptr) {
         if (strcmp(ptr->name, name) == 0)
             return ptr->locale;
     }
@@ -59,14 +59,14 @@ static const struct __mcapi_lconv *_find_locale(const char *name) {
 }
 
 
-int __mcapi_setlocale(int what, const char *name) {
+int setlocale(int what, const char *name) {
     const struct __mcapi_lconv *defaults = _find_locale(name);
     if (defaults == NULL)
         return __mcapi_EINVAL;
 
     switch (what) {
         case __mcapi_LC_ALL:
-            memcpy(&gCurrentCLocale, defaults, sizeof(struct __mcapi_lconv));
+            memcpy(&_current_c_locale, defaults, sizeof(*defaults));
             return 0;
         case __mcapi_LC_COLLATE:
         case __mcapi_LC_CTYPE:
@@ -82,6 +82,10 @@ int __mcapi_setlocale(int what, const char *name) {
 }
 
 
-struct __mcapi_lconv* __mcapi_localeconv(void) {
-    return &gCurrentCLocale;
+struct __mcapi_lconv* localeconv(void) {
+    return &_current_c_locale;
 }
+
+
+cstdlib_implement(setlocale);
+cstdlib_implement(localeconv);

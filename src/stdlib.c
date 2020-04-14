@@ -16,7 +16,7 @@ extern __mcapi_jmp_buf __mclib_abort_target;
 
 
 void abort(void) {
-    __mcapi_raise(__mcapi_SIGABRT);
+    raise(__mcapi_SIGABRT);
 
     /* Theoretically we should never get here; the program should exit once the
      * abort signal has been raised. On the off chance that doesn't happen... */
@@ -32,7 +32,7 @@ void srand(unsigned seed) {
 void exit(int code) {
     /* TODO: execute atexit handlers here */
     __mclib_runtime_info->main_return_value = code;
-    __mcapi_longjmp(__mclib_abort_target, INT_MIN);
+    longjmp(__mclib_abort_target, INT_MIN);
 }
 
 

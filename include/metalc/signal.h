@@ -10,8 +10,12 @@ typedef int32_t __mcapi_sig_atomic_t;
 typedef int64_t __mcapi_signal_mask_t;
 typedef void (*__mcapi_signal_handler_t)(int);
 
-METALC_API_EXPORT int __mcapi_raise(int sig);
-METALC_API_EXPORT __mcapi_signal_handler_t __mcapi_signal(int sig, __mcapi_signal_handler_t handler);
+int raise(int sig);
+__mcapi_signal_handler_t signal(int sig, __mcapi_signal_handler_t handler);
+
+cstdlib_export(raise);
+cstdlib_export(signal);
+
 
 #define __mcapi_SIGHUP       1
 #define __mcapi_SIGINT       2
@@ -59,5 +63,7 @@ METALC_API_EXPORT __mcapi_signal_handler_t __mcapi_signal(int sig, __mcapi_signa
 #define __mcapi_SIG_DFL     0
 #define __mcapi_SIG_IGN     1   /**< Ignore signal: The signal is ignored. */
 #define __mcapi_SIG_ERR     2   /**< The signal triggers an error. */
+
+#include <metalc/bits/signal.h>
 
 #endif  /* INCLUDE_METALC_SIGNAL_H_ */

@@ -23,7 +23,10 @@ typedef char __mcapi_jmp_buf[BUFSIZE] __attribute__((aligned (16)));
 
 #undef BUFSIZE
 
-METALC_API_EXPORT_FAST int __mcapi_setjmp(__mcapi_jmp_buf buf);
-METALC_API_EXPORT_FAST_WITH_ATTR(noreturn) int __mcapi_longjmp(__mcapi_jmp_buf buf, int code);
+int setjmp(__mcapi_jmp_buf buf);
+int longjmp(__mcapi_jmp_buf buf, int code);
+
+cstdlib_export(setjmp);
+cstdlib_export_with_attr(longjmp, noreturn);
 
 #endif  /* INCLUDE_METALC_SETJMP_H_ */

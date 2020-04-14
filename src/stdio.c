@@ -6,39 +6,11 @@
 #include <metalc/stdio.h>
 #include <metalc/stdlib.h>
 #include <metalc/string.h>
+#include <metalc/bits/printf.h>
 
 extern MetalCRuntimeInfo *__mclib_runtime_info;
 extern int fileio_init(void);
-
-
-enum MCArgumentType {
-    MC_AT_CHAR,
-    MC_AT_STRING,
-    MC_AT_SHORT,
-    MC_AT_INT,
-    MC_AT_LONG,
-    MC_AT_LONGLONG,
-    MC_AT_FLOAT,
-    MC_AT_DOUBLE,
-    MC_AT_LONGDOUBLE,
-    MC_AT_POINTER
-};
-
-
-struct MCFormatSpecifier {
-    int alignment;                  /* -1 for left, 1 for right */
-    enum MCArgumentType argument_type;
-    int width;
-    int radix;
-    int is_unsigned;
-    int is_zero_padded;
-    int has_radix_prefix;
-    int has_sign;
-    int use_scientific_notation;    /* -1 maybe (%g), 1 force (%e) */
-    int padding;
-    int fraction_zero_padding;
-    int fraction_digits;
-};
+extern int fileio_teardown(void);
 
 
 METALC_API_INTERNAL int stdio_init(void) {
@@ -47,7 +19,7 @@ METALC_API_INTERNAL int stdio_init(void) {
 
 
 METALC_API_INTERNAL int stdio_teardown(void) {
-    return 0;
+    return fileio_teardown();
 }
 
 
@@ -123,7 +95,7 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
                         buffer_size = (int)strlen(temp);
                         if (*format == 'X') {
                             for (i = 0; i < buffer_size; ++i)
-                                temp[i] = __mcapi_toupper(temp[i]);
+                                temp[i] = toupper(temp[i]);
                         }
                         break;
                     case 'e':
@@ -164,7 +136,7 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
                                 buffer_size = (int)strlen(temp);
                                 if (*format == 'X') {
                                     for (i = 0; i < buffer_size; ++i)
-                                        temp[i] = __mcapi_toupper(temp[i]);
+                                        temp[i] = toupper(temp[i]);
                                 }
                                 break;
                             default:
@@ -234,7 +206,7 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
                 buffer_size = (int)strlen(temp);
                 if (*format == 'X') {
                     for (i = 0; i < buffer_size; ++i)
-                        temp[i] = __mcapi_toupper(temp[i]);
+                        temp[i] = toupper(temp[i]);
                 }
                 if (buffer) {
                     strcpy(temp, buffer);

@@ -50,7 +50,7 @@ static void _malloc_assert(int expression, const char *message, ...) {
         va_end(args);
     }
 
-    __mcapi_raise(__mcapi_SIGABRT);
+    raise(__mcapi_SIGABRT);
 }
 
 

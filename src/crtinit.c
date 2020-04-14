@@ -23,7 +23,7 @@ static int crt_init(void) {
         return __mcapi_EFAULT;
 
     __mcapi_errno = 0;
-    __mcapi_setlocale(__mcapi_LC_ALL, "C");
+    setlocale(__mcapi_LC_ALL, "C");
     malloc_init();
     stdio_init();
     /* TODO (dargueta): Initialize atexit here. */
@@ -53,7 +53,7 @@ int cstdlib_start(MetalCRuntimeInfo *rti, int argc, char **argv, char **env) {
         return result;
     }
 
-    result = __mcapi_setjmp(__mclib_abort_target);
+    result = setjmp(__mclib_abort_target);
     if (result == 0) {
         /* Call main() using the three-argument form. It's up to the kernel to
          * provide a shim for main() implementations that take zero or two

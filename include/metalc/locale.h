@@ -39,8 +39,12 @@ struct __mcapi_lconv {
 };
 
 
-METALC_API_EXPORT int __mcapi_setlocale(int what, const char *name);
-METALC_API_EXPORT struct __mcapi_lconv* __mcapi_localeconv(void);
+int setlocale(int what, const char *name);
+struct __mcapi_lconv* localeconv(void);
+
+
+cstdlib_export_with_attr(setlocale, nonnull(2));
+cstdlib_export(localeconv);
 
 
 #endif  /* INCLUDE_METALC_LOCALE_H_ */

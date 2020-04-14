@@ -31,7 +31,7 @@ __attribute__((noreturn)) static void _sighandler_term(int sig) {
             break;
 
         default:
-            __mcapi_longjmp(__mclib_abort_target, sig);
+            longjmp(__mclib_abort_target, sig);
             break;
     };
 }
@@ -70,38 +70,38 @@ static signal_handler_t kHandlersByMaskValue[] = {
 
 static const __mcapi_signal_handler_t _default_signal_handlers[] = {
     /* Signal numbers begin at 1. Don't bother storing a handler for signal 0. */
-    _sighandler_term,       /* __mcapi_SIGHUP */
-    _sighandler_ignore,     /* __mcapi_SIGINT */
-    _sighandler_term,       /* __mcapi_SIGQUIT */
-    _sighandler_term,       /* __mcapi_SIGILL */
-    _sighandler_term,       /* __mcapi_SIGTRAP */
-    _sighandler_term,       /* __mcapi_SIGABRT, __mcapi_SIGIOT */
-    _sighandler_term,       /* __mcapi_SIGBUS */
-    _sighandler_term,       /* __mcapi_SIGFPE */
-    _sighandler_term,       /* __mcapi_SIGKILL */
-    _sighandler_term,       /* __mcapi_SIGUSR1 */
-    _sighandler_term,       /* __mcapi_SIGSEGV */
-    _sighandler_term,       /* __mcapi_SIGUSR2 */
-    _sighandler_term,       /* __mcapi_SIGPIPE */
-    _sighandler_term,       /* __mcapi_SIGALRM */
-    _sighandler_term,       /* __mcapi_SIGTERM */
-    /* -------- END OF __mcapi_SIGNALS REQUIRED BY POSIX -------- */
-    _sighandler_term,       /* __mcapi_SIGSTKFLT */
-    _sighandler_ignore,     /* __mcapi_SIGCHLD */
-    _sighandler_resume,     /* __mcapi_SIGCONT */
-    _sighandler_stop,       /* __mcapi_SIGSTOP */
-    _sighandler_stop,       /* __mcapi_SIGTSTP */
-    _sighandler_stop,       /* __mcapi_SIGTTIN */
-    _sighandler_stop,       /* __mcapi_SIGTTOU */
-    _sighandler_ignore,     /* __mcapi_SIGURG */
-    _sighandler_term,       /* __mcapi_SIGXCPU */
-    _sighandler_term,       /* __mcapi_SIGXFSZ */
-    _sighandler_term,       /* __mcapi_SIGVTALRM */
-    _sighandler_term,       /* __mcapi_SIGPROF */
-    _sighandler_ignore,     /* __mcapi_SIGWINCH */
-    _sighandler_term,       /* __mcapi_SIGIO, __mcapi_SIGPOLL */
-    _sighandler_ignore,     /* __mcapi_SIGPWR */
-    _sighandler_term,       /* __mcapi_SIGSYS, __mcapi_SIGUNUSED */
+    _sighandler_term,       /* SIGHUP */
+    _sighandler_ignore,     /* SIGINT */
+    _sighandler_term,       /* SIGQUIT */
+    _sighandler_term,       /* SIGILL */
+    _sighandler_term,       /* SIGTRAP */
+    _sighandler_term,       /* SIGABRT, SIGIOT */
+    _sighandler_term,       /* SIGBUS */
+    _sighandler_term,       /* SIGFPE */
+    _sighandler_term,       /* SIGKILL */
+    _sighandler_term,       /* SIGUSR1 */
+    _sighandler_term,       /* SIGSEGV */
+    _sighandler_term,       /* SIGUSR2 */
+    _sighandler_term,       /* SIGPIPE */
+    _sighandler_term,       /* SIGALRM */
+    _sighandler_term,       /* SIGTERM */
+    /* -------- END OF SIGNALS REQUIRED BY POSIX -------- */
+    _sighandler_term,       /* SIGSTKFLT */
+    _sighandler_ignore,     /* SIGCHLD */
+    _sighandler_resume,     /* SIGCONT */
+    _sighandler_stop,       /* SIGSTOP */
+    _sighandler_stop,       /* SIGTSTP */
+    _sighandler_stop,       /* SIGTTIN */
+    _sighandler_stop,       /* SIGTTOU */
+    _sighandler_ignore,     /* SIGURG */
+    _sighandler_term,       /* SIGXCPU */
+    _sighandler_term,       /* SIGXFSZ */
+    _sighandler_term,       /* SIGVTALRM */
+    _sighandler_term,       /* SIGPROF */
+    _sighandler_ignore,     /* SIGWINCH */
+    _sighandler_term,       /* SIGIO, SIGPOLL */
+    _sighandler_ignore,     /* SIGPWR */
+    _sighandler_term,       /* SIGSYS, SIGUNUSED */
 };
 
 
@@ -147,16 +147,17 @@ static __mcapi_signal_handler_t _current_signal_handlers[] = {
 };
 
 
-METALC_API_EXPORT int __mcapi_raise(int sig) {
+int raise(int sig) {
     if ((sig < 1) || (sig > 32))
         return __mcapi_EINVAL;
 
     _current_signal_handlers[sig - 1](sig);
     return 0;
 }
+cstdlib_implement(raise);
 
 
-METALC_API_EXPORT __mcapi_signal_handler_t __mcapi_signal(int sig, __mcapi_signal_handler_t handler) {
+__mcapi_signal_handler_t signal(int sig, __mcapi_signal_handler_t handler) {
     __mcapi_signal_handler_t original_handler;
 
     /* Ignore attempts to set signal handlers for signals that can't be overridden. */
@@ -183,3 +184,4 @@ METALC_API_EXPORT __mcapi_signal_handler_t __mcapi_signal(int sig, __mcapi_signa
 
     return original_handler;
 }
+cstdlib_implement(signal);

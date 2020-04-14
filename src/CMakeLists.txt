@@ -45,7 +45,13 @@ else()
     )
 endif()
 
+
 add_library(metalc_asm STATIC ${ASM_SOURCES})
+target_compile_definitions(
+    metalc_asm PRIVATE
+    -DMETALC_BUILDING_LIBC=1
+    -DMETALC_COMPILE_FOR_TESTING=${METALC_COMPILE_FOR_TESTING}
+)
 
 if (METALC_COMPILE_FOR_TESTING)
     add_compile_options(-O0 -g)
