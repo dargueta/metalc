@@ -43,7 +43,7 @@ size_t strxfrm(char *destination, const char *source, size_t num);
 
 
 cstdlib_export_with_attr(memchr, nonnull);
-cstdlib_export_with_attr(memcmp, nonnull);
+cstdlib_export_with_attr(memcmp, nonnull, pure);
 cstdlib_export_with_attr(memcpy, nonnull);
 cstdlib_export_with_attr(memmove, nonnull);
 cstdlib_export_with_attr(memset, nonnull);
@@ -54,7 +54,7 @@ cstdlib_export_with_attr(strcoll, nonnull);
 cstdlib_export_with_attr(strcpy, nonnull);
 cstdlib_export_with_attr(strcspn, nonnull);
 cstdlib_export(strerror);
-cstdlib_export_with_attr(strlen, nonnull);
+cstdlib_export_with_attr(strlen, nonnull, pure);
 cstdlib_export_with_attr(strncat, nonnull);
 cstdlib_export_with_attr(strncmp, nonnull);
 cstdlib_export_with_attr(strncpy, nonnull);
