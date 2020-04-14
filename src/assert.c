@@ -1,15 +1,15 @@
-#include <stdbool.h>
-
 #include <metalc/assert.h>
+#include <metalc/metalc.h>
 #include <metalc/signal.h>
+#include <metalc/stdbool.h>
 #include <metalc/stdio.h>
 #include <metalc/stdlib.h>
 
 
-extern const void *__mclib_abort_target;
-
-
-void __mcint_assert(int expression, int line, const char *function, const char *file) {
+void __mcint_assert(
+    int expression, int line, const char *function, const char *file,
+    const char* assert_text
+) {
     __mcapi_FILE *out;
 
     if (expression)
@@ -20,15 +20,17 @@ void __mcint_assert(int expression, int line, const char *function, const char *
     if (out) {
         fprintf(
             out,
-            "Debug assertion failed in function %s on line %d in file %s.\n",
+            "Debug assertion failed in function %s on line %d in file %s: %s\n",
             function,
             line,
-            file
+            file,
+            assert_text
         );
     }
 #else
-    (void)out, (void)line, (void)function, (void)file;
+    (void)out, (void)line, (void)function, (void)file, (void)assert_text;
 #endif
 
     abort();
 }
+cstdlib_implement(__mcint_assert);
