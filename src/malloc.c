@@ -36,22 +36,8 @@ static struct PointerEntry *g_bookkeeping_pages = NULL;
 #define _is_allocated(p)        ((uintptr_t)(p) & (uintptr_t)1)
 
 
-static void _malloc_assert(int expression, const char *message, ...) {
-    __mcapi_FILE *out;
-    va_list args;
-
-    if (expression)
-        return;
-
-    out = (__mcapi_stderr != NULL) ? __mcapi_stderr : __mcapi_stdout;
-    if (out) {
-        va_start(args, message);
-        vfprintf(out, "malloc() assertion failed: %s\n", args);
-        va_end(args);
-    }
-
-    raise(__mcapi_SIGABRT);
-}
+#define _malloc_assert(expression, message, ...) \
+    __mcint_assert(expression, __LINE__, __FUNCTION__, __FILE__, "malloc(): " ## message, __VA_ARGS__)
 
 
 static void *_allocate_pages(int count) {
@@ -73,7 +59,7 @@ static struct PointerEntry *_page_containing_index(size_t index) {
         if (current_page[0].size == 0) {
             _malloc_assert(
                 current_page[0].base == NULL,
-                "Heap corruption detected: Empty page should not point to a"
+                "Heap corruption detected -- Empty page should not point to a"
                 " subsequent page. Offending page %p points to %p.",
                 current_page, current_page[0].base
             );
