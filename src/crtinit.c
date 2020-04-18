@@ -19,6 +19,8 @@ __mcapi_jmp_buf __mclib_abort_target;
 
 
 static int crt_init(void) {
+    /* Die if cstdlib_start hasn't been called yet. We need the kernel to give us the
+     * runtime info first. */
     if (__mclib_runtime_info == NULL)
         return __mcapi_EFAULT;
 
