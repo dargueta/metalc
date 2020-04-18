@@ -7,8 +7,8 @@
 
 
 void __mcint_assert(
-    int expression, int line, const char *function, const char *file,
-    const char* assert_text, const char *message, ...
+    int expression, int line, const char *file, const char* assert_text,
+    const char *message, ...
 ) {
     __mcapi_FILE *out;
     va_list args;
@@ -21,8 +21,7 @@ void __mcint_assert(
         if (out) {
             fprintf(
                 out,
-                "Debug assertion failed in function %s on line %d in file %s: %s\n",
-                function,
+                "Debug assertion failed on line %d in file %s: %s\n",
                 line,
                 file,
                 assert_text
@@ -35,7 +34,7 @@ void __mcint_assert(
             }
         }
     #else
-        (void)out, (void)message, (void)args;
+        (void)out, (void)line, (void)file, (void)assert_text, (void)message, (void)args;
     #endif
 
     abort();

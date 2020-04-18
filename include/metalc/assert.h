@@ -6,7 +6,7 @@
 #ifdef NDEBUG
     #define __mcapi_assert(expression)
 #else
-    #define __mcapi_assert(expression)  __mcint_assert((expression), __LINE__, __FUNCTION__, __FILE__, #expression, NULL)
+    #define __mcapi_assert(expression)  __mcint_assert((expression), __LINE__, __FILE__, #expression, NULL)
 #endif
 
 
@@ -16,8 +16,8 @@
 
 
 void __mcint_assert(
-    int expression, int line, const char *function, const char *file,
-    const char* assert_text, const char *message, ...
+    int expression, int line, const char *file, const char* assert_text,
+    const char *message, ...
 );
 cstdlib_export(__mcint_assert);
 

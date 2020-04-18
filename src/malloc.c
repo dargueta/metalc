@@ -36,8 +36,8 @@ static struct PointerEntry *g_bookkeeping_pages = NULL;
 #define _is_allocated(p)        ((uintptr_t)(p) & (uintptr_t)1)
 
 
-#define _malloc_assert(expression, message, ...) \
-    __mcint_assert(expression, __LINE__, __FUNCTION__, __FILE__, "malloc(): " ## message, __VA_ARGS__)
+#define _malloc_assert(expr, msg, ...) \
+    __mcint_assert(expr, __LINE__, __FILE__, #expr, "malloc(): " #msg, __VA_ARGS__)
 
 
 static void *_allocate_pages(int count) {
@@ -112,7 +112,8 @@ static struct PointerEntry *_find_pointer(const void *pointer) {
          * the beginning again. Avoid that situation. */
         _malloc_assert(
             i != 0,
-            "Heap corruption detected: Cycle found in the heap bookkeeping list."
+            "Heap corruption detected: Cycle found in the heap bookkeeping list at"
+            " entry %d", i
         );
     } while(_extract_pointer(entry, const void) != pointer);
 
