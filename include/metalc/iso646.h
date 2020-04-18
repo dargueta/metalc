@@ -1,7 +1,7 @@
 /**
  * Dummy header for the C standard file iso646.h.
  *
- * This is provided
+ * This is provided for us by the compiler.
  */
 
 #ifndef METALC_INCLUDE_METALC_ISO646_H_

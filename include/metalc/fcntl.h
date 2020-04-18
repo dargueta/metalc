@@ -28,7 +28,7 @@
 /**
  * Signal the OS to create a temporary file in the specified directory.
  *
- * Added in Linux 3.11
+ * Added in Linux 3.11.
  */
 #define O_TMPFILE   0x00002000
 
@@ -56,9 +56,6 @@
 #define O_NONBLOCK  0x0004      /**< Non-blocking I/O. */
 #define O_NDELAY    O_NONBLOCK  /**< Same as @ref O_NONBLOCK */
 #define O_APPEND    0x0008      /**< Writes append to the file. */
-
-
-
 
 
 /* Mask for determining file access modes. */
