@@ -1,3 +1,62 @@
+include("CheckIncludeFile")
+
+check_include_file("float.h" METALC_HAVE_FLOAT_H)
+check_include_file("limits.h" METALC_HAVE_LIMITS_H)
+check_include_file("stdarg.h" METALC_HAVE_STDARG_H)
+check_include_file("stdbool.h" METALC_HAVE_STDBOOL_H)
+check_include_file("stddef.h" METALC_HAVE_STDDEF_H)
+check_include_file("stdint.h" METALC_HAVE_STDINT_H)
+
+
+set(INCLUDE_ROOT_DIR "${MetalC_SOURCE_DIR}/include/metalc")
+set(TEMPLATES_DIR "${MetalC_SOURCE_DIR}/templates")
+
+
+configure_file(
+    "${TEMPLATES_DIR}/include/metalc/metalc.h"
+    "${INCLUDE_ROOT_DIR}/metalc.h"
+    @ONLY
+)
+
+configure_file(
+    "${TEMPLATES_DIR}/include/metalc/x86/metalc.inc"
+    "${INCLUDE_ROOT_DIR}/x86/metalc.inc"
+    @ONLY
+)
+
+
+set(HEADER_FILES
+    "${INCLUDE_ROOT_DIR}/assert.h"
+    "${INCLUDE_ROOT_DIR}/atomic.h"
+    "${INCLUDE_ROOT_DIR}/crtinit.h"
+    "${INCLUDE_ROOT_DIR}/ctype.h"
+    "${INCLUDE_ROOT_DIR}/errno.h"
+    "${INCLUDE_ROOT_DIR}/fcntl.h"
+    "${INCLUDE_ROOT_DIR}/float.h"
+    "${INCLUDE_ROOT_DIR}/iso646.h"
+    "${INCLUDE_ROOT_DIR}/kernel_hooks.h"
+    "${INCLUDE_ROOT_DIR}/limits.h"
+    "${INCLUDE_ROOT_DIR}/locale.h"
+    "${INCLUDE_ROOT_DIR}/math.h"
+    "${INCLUDE_ROOT_DIR}/metalc.h"
+    "${INCLUDE_ROOT_DIR}/posix.h"
+    "${INCLUDE_ROOT_DIR}/setjmp.h"
+    "${INCLUDE_ROOT_DIR}/signal.h"
+    "${INCLUDE_ROOT_DIR}/stdarg.h"
+    "${INCLUDE_ROOT_DIR}/stdbool.h"
+    "${INCLUDE_ROOT_DIR}/stddef.h"
+    "${INCLUDE_ROOT_DIR}/stdint.h"
+    "${INCLUDE_ROOT_DIR}/stdio.h"
+    "${INCLUDE_ROOT_DIR}/stdlib.h"
+    "${INCLUDE_ROOT_DIR}/string.h"
+    "${INCLUDE_ROOT_DIR}/bits/errno.h"
+    "${INCLUDE_ROOT_DIR}/bits/printf.h"
+    "${INCLUDE_ROOT_DIR}/bits/signal.h"
+    "${INCLUDE_ROOT_DIR}/bits/stddef.h"
+    "${INCLUDE_ROOT_DIR}/bits/stdio.h"
+)
+
+
 set(LIBRARY_C_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/assert.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/crtinit.c"
@@ -46,7 +105,7 @@ else()
 endif()
 
 
-add_library(metalc_asm STATIC ${ASM_SOURCES})
+add_library(metalc_asm STATIC ${ASM_SOURCES} ${HEADER_FILES})
 target_compile_definitions(
     metalc_asm PRIVATE
     -DMETALC_BUILDING_LIBC=1
@@ -62,8 +121,8 @@ endif()
 # that the major selling point of this library is that you'll used on bare metal
 # or UEFI, you'll only need this as your system's standard C library when loading
 # other programs. Your kernel won't be using this.
-add_library(metalc SHARED ${LIBRARY_C_SOURCES})
-add_dependencies(metalc metalc_asm metalc_headers)
+add_library(metalc SHARED ${LIBRARY_C_SOURCES} ${HEADER_FILES})
+add_dependencies(metalc metalc_asm)
 target_compile_options(metalc PRIVATE -ffreestanding -Wextra -pedantic -pedantic-errors)
 target_compile_definitions(
     metalc PRIVATE
@@ -77,8 +136,8 @@ target_link_libraries(metalc metalc_asm)
 # MetalC, compiled as a static library. You'll probably want to use this with
 # your kernel or bootloader, since you'd need to write a dynamic linker to be
 # able to use the shared one.
-add_library(metalcstatic STATIC ${LIBRARY_C_SOURCES})
-add_dependencies(metalcstatic metalc_asm metalc_headers)
+add_library(metalcstatic STATIC ${LIBRARY_C_SOURCES} ${HEADER_FILES})
+add_dependencies(metalcstatic metalc_asm)
 target_compile_options(metalcstatic PRIVATE -Wextra -ffreestanding -pedantic -pedantic-errors)
 target_compile_definitions(
     metalcstatic PRIVATE
@@ -88,11 +147,12 @@ target_compile_definitions(
 )
 target_link_libraries(metalcstatic metalc_asm)
 
+include_directories("${MetalC_SOURCE_DIR}/include")
 
 # Unit testing
 if (METALC_COMPILE_FOR_TESTING)
-    add_executable(test_executable ${TEST_SOURCE_FILES})
-    add_dependencies(test_executable metalc metalc_headers)
+    add_executable(test_executable ${TEST_SOURCE_FILES} ${HEADER_FILES})
+    add_dependencies(test_executable metalc)
     target_link_libraries(test_executable metalc)
 
     # Disable linking the executable with the OS's C standard library and use our
