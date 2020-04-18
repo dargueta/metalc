@@ -170,7 +170,7 @@ def build_toolchain_params(args):
 
 
 def templatize_cmake_file(params, basename):
-    with open(basename + "-template.cmake", "r") as fd:
+    with open(os.path.join("templates/", basename + ".cmake"), "r") as fd:
         text = fd.read()
 
     template = string.Template(text)
