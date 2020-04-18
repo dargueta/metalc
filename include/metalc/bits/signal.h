@@ -1,7 +1,7 @@
 #ifndef INCLUDE_METALC_BITS_SIGNAL_H_
 #define INCLUDE_METALC_BITS_SIGNAL_H_
 
-#if !defined METALC_DISABLE_STDLIB_DEFS
+#ifndef METALC_DISABLE_STDLIB_DEFS
     #define SIGHUP      __mcapi_SIGHUP
     #define SIGINT      __mcapi_SIGINT
     #define SIGQUIT     __mcapi_SIGQUIT

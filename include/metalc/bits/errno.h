@@ -5,8 +5,9 @@
  */
 
 #ifndef INCLUDE_METALC_BITS_ERRNO_H_
+#define INCLUDE_METALC_BITS_ERRNO_H_
 
-#if !defined METALC_DISABLE_STDLIB_DEFS
+#ifndef METALC_DISABLE_STDLIB_DEFS
     #define EPERM   __mcapi_EPERM
     #define ENOENT  __mcapi_ENOENT
     #define ESRCH   __mcapi_ESRCH
