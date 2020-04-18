@@ -82,6 +82,11 @@ int __mcint_mode_string_to_flags(const char *mode) {
                 binary = 1;
                 break;
             case 'x':
+                /* `x` is only valid with `w` */
+                if (mode[0] != 'w') {
+                    __mcapi_errno = __mcapi_EINVAL;
+                    return -1;
+                }
                 excl = 1;
                 break;
             default:
@@ -103,14 +108,8 @@ int __mcint_mode_string_to_flags(const char *mode) {
         result |= O_CREAT;
     if (truncate)
         result |= O_TRUNC;
-    if (excl) {
-        /* "x" flag can only be used with "w" */
-        if (mode[0] != 'w') {
-            __mcapi_errno = __mcapi_EINVAL;
-            return -1;
-        }
+    if (excl)
         result |= O_EXCL;
-    }
     if (binary)
         result |= O_BINARY;
 
