@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from __future__ import print_function
-
 import argparse
 import datetime
 import collections
@@ -133,8 +131,7 @@ TOOLCHAIN_NAMES = {
 
 
 def build_toolchain_params(args):
-    """Build a list of key-value pairs to write to the CMake toolchain file.
-    """
+    """Build a list of key-value pairs to write to the CMake toolchain file."""
     if "efi" in args.feature_flags and args.arch not in ("x86_32", "x86_64"):
         raise ErrorExit(
             "Cannot use architecture `%s` with UEFI. You can only use x86_32 or x86_64"
@@ -202,8 +199,8 @@ def parse_arguments():
         choices=("debug", "release", "test"),
         help="The mode to compile the library in. Debug mode includes debug symbols in"
         " the output binary and disables all optimizations. Test mode disables aliasing"
-        " so that MetalC can be used alongside the standard library to test it."
-        " Release mode enables aliasing and optimizations, and strips out debug info.",
+        " so that MetalC can be used alongside the standard library to test it. Release"
+        " mode enables aliasing and optimizations, and strips out debug info.",
         default="test",
     )
     parser.add_argument(
