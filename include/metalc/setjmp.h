@@ -23,6 +23,10 @@ typedef char __mcapi_jmp_buf[BUFSIZE] __attribute__((aligned (16)));
 
 #undef BUFSIZE
 
+#if !defined METALC_DISABLE_STDLIB_DEFS
+    typedef __mcapi_jmp_buf jmp_buf;
+#endif
+
 int setjmp(__mcapi_jmp_buf buf);
 int longjmp(__mcapi_jmp_buf buf, int code);
 
