@@ -45,6 +45,14 @@ METALC_API_INTERNAL int fileio_init(void) {
 }
 
 
+METALC_API_INTERNAL int fileio_teardown(void) {
+    fclose(__mcapi_stdin);
+    fclose(__mcapi_stdout);
+    fclose(__mcapi_stderr);
+    return 0;
+}
+
+
 int __mcint_mode_string_to_flags(const char *mode) {
     int can_read, can_write, append, binary, truncate, create, excl, i, result;
 
