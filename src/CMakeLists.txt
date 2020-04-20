@@ -54,6 +54,9 @@ set(HEADER_FILES
     "${INCLUDE_ROOT_DIR}/bits/signal.h"
     "${INCLUDE_ROOT_DIR}/bits/stddef.h"
     "${INCLUDE_ROOT_DIR}/bits/stdio.h"
+    "${INCLUDE_ROOT_DIR}/bits/stdlib_longlong.h"
+    "${INCLUDE_ROOT_DIR}/charsets/common.h"
+    "${INCLUDE_ROOT_DIR}/charsets/utf8.h"
 )
 
 
@@ -68,6 +71,7 @@ set(LIBRARY_C_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/malloc.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/math.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/posix.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/printf.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/signal.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/stdio.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/stdlib.c"
@@ -123,7 +127,7 @@ endif()
 # other programs. Your kernel won't be using this.
 add_library(metalc SHARED ${LIBRARY_C_SOURCES} ${HEADER_FILES})
 add_dependencies(metalc metalc_asm)
-target_compile_options(metalc PRIVATE -ffreestanding -Wextra -pedantic -pedantic-errors)
+target_compile_options(metalc PRIVATE -ffreestanding -Wextra -Wpedantic)
 target_compile_definitions(
     metalc PRIVATE
     -DMETALC_BUILDING_LIBC=1
@@ -138,7 +142,7 @@ target_link_libraries(metalc metalc_asm)
 # able to use the shared one.
 add_library(metalcstatic STATIC ${LIBRARY_C_SOURCES} ${HEADER_FILES})
 add_dependencies(metalcstatic metalc_asm)
-target_compile_options(metalcstatic PRIVATE -Wextra -ffreestanding -pedantic -pedantic-errors)
+target_compile_options(metalcstatic PRIVATE -ffreestanding -Wextra -Wpedantic)
 target_compile_definitions(
     metalcstatic PRIVATE
     -DMETALC_BUILDING_LIBC=1
