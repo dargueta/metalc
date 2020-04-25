@@ -17,7 +17,7 @@ typedef ssize_t __mcapi_fpos_t;
 
 /* Only define the real values if we're not compiling for testing so that they
  * don't collide with the host OS's C library. */
-#if !defined METALC_DISABLE_STDLIB_DEFS
+#ifndef METALC_DISABLE_STDLIB_DEFS
     #define BUFSIZ          __mcapi_BUFSIZ
     #define EOF             __mcapi_EOF
     #define FILENAME_MAX    __mcapi_FILENAME_MAX

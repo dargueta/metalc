@@ -1,3 +1,5 @@
+#include <mcinternal/printf.h>
+#include <mcinternal/string.h>
 #include <metalc/crtinit.h>
 #include <metalc/ctype.h>
 #include <metalc/errno.h>
@@ -6,9 +8,9 @@
 #include <metalc/stdio.h>
 #include <metalc/stdlib.h>
 #include <metalc/string.h>
-#include <metalc/bits/printf.h>
 
-extern MetalCRuntimeInfo *__mclib_runtime_info;
+
+extern MetalCRuntimeInfo *__mcint_runtime_info;
 extern int fileio_init(void);
 extern int fileio_teardown(void);
 
@@ -20,23 +22,6 @@ METALC_API_INTERNAL int stdio_init(void) {
 
 METALC_API_INTERNAL int stdio_teardown(void) {
     return fileio_teardown();
-}
-
-
-static int _determine_format(const char *format, struct MCFormatSpecifier *info) {
-    (void)format; (void)info;
-    return __mcapi_ENOSYS;
-}
-
-
-static size_t _copy_buffer(const char *temp, char **buffer) {
-    size_t buffer_size = strlen(temp);
-
-    if (*buffer) {
-        strcpy(*buffer, temp);
-        *buffer += buffer_size;
-    }
-    return buffer_size;
 }
 
 
@@ -74,7 +59,7 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
             case 'd':
             case 'i':
                 itoa(va_arg(arg_list, int), temp, 10);
-                n_chars_written += _copy_buffer(temp, &buffer);
+                n_chars_written += strcpy_and_update_buffer(temp, &buffer);
                 break;
             case 'h':
                 /* Half size; this is either a `short int` or a `float`. We don't
@@ -107,7 +92,7 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
                         __mcapi_errno = __mcapi_EINVAL;
                         return -n_chars_written;
                 }
-                n_chars_written += _copy_buffer(temp, &buffer);
+                n_chars_written += strcpy_and_update_buffer(temp, &buffer);
                 ++format;
                 break;
             case 'l':
@@ -190,7 +175,7 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
                     }
                 #endif
 
-                n_chars_written += _copy_buffer(temp, &buffer);
+                n_chars_written += strcpy_and_update_buffer(temp, &buffer);
                 ++format;
                 break;
             case 'n':
@@ -198,7 +183,7 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
                 break;
             case 'u':
                 utoa(va_arg(arg_list, unsigned), temp, 10);
-                n_chars_written += _copy_buffer(temp, &buffer);
+                n_chars_written += strcpy_and_update_buffer(temp, &buffer);
                 break;
             case 'x':
             case 'X':

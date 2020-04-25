@@ -14,14 +14,14 @@ extern int stdio_init(void);
 extern int stdio_teardown(void);
 
 
-MetalCRuntimeInfo *__mclib_runtime_info __attribute__((visibility("hidden"))) = NULL;
-__mcapi_jmp_buf __mclib_abort_target;
+MetalCRuntimeInfo *__mcint_runtime_info __attribute__((visibility("hidden"))) = NULL;
+__mcapi_jmp_buf __mcint_abort_target;
 
 
 static int crt_init(void) {
     /* Die if cstdlib_start hasn't been called yet. We need the kernel to give us the
      * runtime info first. */
-    if (__mclib_runtime_info == NULL)
+    if (__mcint_runtime_info == NULL)
         return __mcapi_EFAULT;
 
     __mcapi_errno = 0;
@@ -44,7 +44,7 @@ static int crt_teardown(void) {
 int cstdlib_start(MetalCRuntimeInfo *rti, int argc, char **argv, char **env) {
     int result;
 
-    __mclib_runtime_info = rti;
+    __mcint_runtime_info = rti;
 
     result = crt_init();
     if (result != 0) {
@@ -55,7 +55,7 @@ int cstdlib_start(MetalCRuntimeInfo *rti, int argc, char **argv, char **env) {
         return result;
     }
 
-    result = setjmp(__mclib_abort_target);
+    result = setjmp(__mcint_abort_target);
     if (result == 0) {
         /* Call main() using the three-argument form. It's up to the kernel to
          * provide a shim for main() implementations that take zero or two

@@ -10,7 +10,7 @@
 #endif
 
 
-#if !defined METALC_DISABLE_STDLIB_DEFS
+#ifndef METALC_DISABLE_STDLIB_DEFS
     #define assert  __mcapi_assert
 #endif
 

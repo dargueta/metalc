@@ -17,7 +17,7 @@ struct PointerEntry {
     uintptr_t size;
 } __attribute__((aligned(4)));
 
-extern MetalCRuntimeInfo *__mclib_runtime_info;
+extern MetalCRuntimeInfo *__mcint_runtime_info;
 
 static void **g_heap_pages = NULL;
 static struct PointerEntry *g_bookkeeping_pages = NULL;
@@ -41,9 +41,9 @@ static struct PointerEntry *g_bookkeeping_pages = NULL;
 
 
 static void *_allocate_pages(int count) {
-    void *original_top = __mclib_sbrk(0);
+    void *original_top = __mcint_sbrk(0);
 
-    if (__mclib_sbrk(count * __mclib_runtime_info->page_size) != (void *)-1)
+    if (__mcint_sbrk(count * __mcint_runtime_info->page_size) != (void *)-1)
         return original_top;
     return NULL;
 }
@@ -132,9 +132,9 @@ static uintptr_t _size_of_allocation(const void *pointer) {
 
 
 METALC_API_INTERNAL int malloc_init(void) {
-    __mclib_runtime_info->_original_brk = krnlhook_brk(NULL, __mclib_runtime_info->udata);
+    __mcint_runtime_info->_original_brk = krnlhook_brk(NULL, __mcint_runtime_info->udata);
 
-    if (__mclib_runtime_info->page_size == 0)
+    if (__mcint_runtime_info->page_size == 0)
         return __mcapi_ENOSYS;
 
     g_heap_pages = _allocate_pages(1);
@@ -147,7 +147,7 @@ METALC_API_INTERNAL int malloc_init(void) {
         return __mcapi_ENOMEM;
     }
 
-    memset(g_heap_pages, 0, __mclib_runtime_info->page_size);
+    memset(g_heap_pages, 0, __mcint_runtime_info->page_size);
 
     g_heap_pages[1] = _allocate_pages(1);
     if (g_heap_pages[1] == NULL) {
@@ -158,13 +158,13 @@ METALC_API_INTERNAL int malloc_init(void) {
     g_bookkeeping_pages[0].base = NULL;
     g_bookkeeping_pages[0].size = 1;
     g_bookkeeping_pages[1].base = g_heap_pages[1];
-    g_bookkeeping_pages[1].size = __mclib_runtime_info->page_size;
+    g_bookkeeping_pages[1].size = __mcint_runtime_info->page_size;
     return 0;
 }
 
 
 METALC_API_INTERNAL int malloc_teardown(void) {
-    krnlhook_brk(__mclib_runtime_info->_original_brk, __mclib_runtime_info->udata);
+    krnlhook_brk(__mcint_runtime_info->_original_brk, __mcint_runtime_info->udata);
     return 0;
 }
 

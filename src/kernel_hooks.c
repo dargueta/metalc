@@ -7,7 +7,7 @@
 #include <metalc/stdio.h>
 
 
-extern __mcapi_jmp_buf __mclib_abort_target;
+extern __mcapi_jmp_buf __mcint_abort_target;
 
 
 void krnlhook_suspend(int sig, void *udata) {
@@ -23,7 +23,7 @@ void krnlhook_resume(int sig, void *udata) {
 
 void krnlhook_core_dump(int sig, void *udata) {
     (void)udata;
-    longjmp(__mclib_abort_target, sig);
+    longjmp(__mcint_abort_target, sig);
 }
 
 

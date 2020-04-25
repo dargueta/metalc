@@ -3,6 +3,7 @@
 
 #include <metalc/metalc.h>
 #include <metalc/stddef.h>
+#include <metalc/wchar.h>
 
 
 #define __mcapi_RAND_MAX    INT_MAX
@@ -16,6 +17,13 @@ typedef struct {
 typedef struct {
     long quot, rem;
 } __mcapi_ldiv_t;
+
+
+#ifndef METALC_DISABLE_STDLIB_DEFS
+    #define RAND_MAX __mcapi_RAND_MAX
+    #define div_t __mcapi_div_t
+    #define ldiv_t __mcapi_ldiv_t
+#endif
 
 
 double atof(const char *str);
@@ -38,10 +46,10 @@ __mcapi_ldiv_t ldiv(long numer, long denom);   /* done */
 int rand(void);
 void srand(unsigned seed);             /* done */
 int mblen(const char *str, size_t n);
-size_t mbstowcs(wchar_t *pwcs, const char *str, size_t n);
-int mbtowc(wchar_t *pwc, const char *str, size_t n);
-size_t wcstombs(char *str, const wchar_t *pwcs, size_t n);
-int wctomb(char *str, wchar_t wchar);
+size_t mbstowcs(__mcapi_wchar_t *pwcs, const char *str, size_t n);
+int mbtowc(__mcapi_wchar_t *pwc, const char *str, size_t n);
+size_t wcstombs(char *str, const __mcapi_wchar_t *pwcs, size_t n);
+int wctomb(char *str, __mcapi_wchar_t wchar);
 void *malloc(size_t size);
 void *calloc(size_t n_elements, size_t element_size);
 void *realloc(void *ptr, size_t size);

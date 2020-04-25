@@ -1,18 +1,23 @@
-#include <limits.h>
-
 #include <metalc/ctype.h>
 #include <metalc/errno.h>
+#include <metalc/limits.h>
+#include <metalc/locale.h>
 #include <metalc/metalc.h>
 #include <metalc/setjmp.h>
 #include <metalc/stdbool.h>
 #include <metalc/stdlib.h>
 #include <metalc/signal.h>
+#include <metalc/bits/charsets.h>
+
 
 static unsigned g_rand_seed = 0;
 static const char *kIntAlphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-extern MetalCRuntimeInfo *__mclib_runtime_info;
-extern __mcapi_jmp_buf __mclib_abort_target;
+extern MetalCRuntimeInfo *__mcint_runtime_info;
+extern __mcapi_jmp_buf __mcint_abort_target;
+
+extern const struct __mcapi_lconv *_current_lconv_info;
+extern const struct __mcint_charset_info *_current_charset;
 
 
 void abort(void) {
@@ -31,8 +36,8 @@ void srand(unsigned seed) {
 
 void exit(int code) {
     /* TODO: execute atexit handlers here */
-    __mclib_runtime_info->main_return_value = code;
-    longjmp(__mclib_abort_target, INT_MIN);
+    __mcint_runtime_info->main_return_value = code;
+    longjmp(__mcint_abort_target, INT_MIN);
 }
 
 
@@ -163,6 +168,78 @@ __mcapi_ldiv_t ldiv(long numer, long denom) {
 }
 
 
+int mblen(const char *str, size_t n) {
+    return _current_charset->f_mblen(str, n);
+}
+
+
+int wctomb(char *str, wchar_t wchar) {
+    return _current_charset->f_wctomb(str, wchar);
+}
+
+
+int mbtowc(wchar_t *pwc, const char *str, size_t n) {
+    return _current_charset->f_mbtowc(pwc, str, n);
+}
+
+
+size_t mbstowcs(wchar_t *pwcs, const char *str, size_t n) {
+    size_t out_position;
+    ptrdiff_t current_char_len;
+
+    for (out_position = 0; out_position < n; ++out_position) {
+        current_char_len = mbtowc(pwcs + out_position, str, current_char_len);
+
+        if (current_char_len < 0) {
+            __mcapi_errno = __mcapi_EILSEQ;
+            return out_position;
+        }
+        else if (current_char_len == 0)
+            return out_position;
+
+        str += current_char_len;
+    }
+
+    /* If we get out here then we wrote the maximum number of allowed wide characters
+     * before hitting the end of the input string. */
+    return out_position;
+}
+
+
+size_t wcstombs(char *str, const wchar_t *pwcs, size_t n) {
+    size_t out_position;
+    char buffer[4];
+    int wchar_length;
+
+    out_position = 0;
+    while (out_position < n) {
+        if (*pwcs == 0) {
+            *str = '\0';
+            return out_position;
+        }
+
+        wchar_length = wctomb(*pwcs, buffer, 4);
+        if (wchar_length < 0) {
+            __mcapi_errno = __mcapi_EILSEQ;
+            return (size_t)-1;
+        }
+
+        if ((out_position + (size_t)wchar_length) > n) {
+            /* Not enough space left to write this last character. */
+            return out_position;
+        }
+
+        memcpy(str, buffer, wchar_length);
+        out_position += (size_t)wchar_length;
+        ++pwcs;
+    }
+
+    /* If we get out here then we wrote exactly the maximum number of bytes allowed
+     * before hitting the end of the wchar string. */
+    return out_position;
+}
+
+
 #if METALC_HAVE_LONG_LONG
     __mcapi_lldiv_t lldiv(long long numer, long long denom) {
         __mcapi_lldiv_t result;
@@ -245,3 +322,8 @@ cstdlib_implement(ltoa);
 cstdlib_implement(ultoa);
 cstdlib_implement(div);
 cstdlib_implement(ldiv);
+cstdlib_implement(mblen);
+cstdlib_implement(mbstowcs);
+cstdlib_implement(mbtowc);
+cstdlib_implement(wcstombs);
+cstdlib_implement(wctomb);

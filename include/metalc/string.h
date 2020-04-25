@@ -7,6 +7,7 @@
 
 #include <metalc/metalc.h>
 #include <metalc/stddef.h>
+#include <mcinternal/string.h>
 
 
 void *memchr(const void *ptr, int value, size_t num);

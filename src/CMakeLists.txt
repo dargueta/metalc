@@ -109,16 +109,21 @@ else()
 endif()
 
 
+if (METALC_COMPILE_FOR_TESTING)
+    add_compile_options(-O0 -g)
+    set(METALC_DISABLE_STDLIB_DEFS 1)
+else()
+    set(METALC_DISABLE_STDLIB_DEFS 0)
+endif()
+
+
 add_library(metalc_asm STATIC ${ASM_SOURCES} ${HEADER_FILES})
 target_compile_definitions(
     metalc_asm PRIVATE
     -DMETALC_BUILDING_LIBC=1
     -DMETALC_COMPILE_FOR_TESTING=${METALC_COMPILE_FOR_TESTING}
+    -DMETALC_DISABLE_STDLIB_DEFS=${METALC_DISABLE_STDLIB_DEFS}
 )
-
-if (METALC_COMPILE_FOR_TESTING)
-    add_compile_options(-O0 -g)
-endif()
 
 
 # MetalC, compiled as a dynamic library for linking with other programs. Given
@@ -133,6 +138,7 @@ target_compile_definitions(
     -DMETALC_BUILDING_LIBC=1
     -DMETALC_BUILD_KIND_SHARED=1
     -DMETALC_COMPILE_FOR_TESTING=${METALC_COMPILE_FOR_TESTING}
+    -DMETALC_DISABLE_STDLIB_DEFS=${METALC_DISABLE_STDLIB_DEFS}
 )
 target_link_libraries(metalc metalc_asm)
 
@@ -148,6 +154,7 @@ target_compile_definitions(
     -DMETALC_BUILDING_LIBC=1
     -DMETALC_BUILD_KIND_STATIC=1
     -DMETALC_COMPILE_FOR_TESTING=${METALC_COMPILE_FOR_TESTING}
+    -DMETALC_DISABLE_STDLIB_DEFS=${METALC_DISABLE_STDLIB_DEFS}
 )
 target_link_libraries(metalcstatic metalc_asm)
 
@@ -171,7 +178,7 @@ if (METALC_COMPILE_FOR_TESTING)
     )
     target_compile_definitions(
         test_executable PRIVATE
-        -DMETALC_COMPILE_FOR_TESTING=1
-        -DMETALC_DISABLE_STDLIB_DEFS=1
+        -DMETALC_COMPILE_FOR_TESTING=${METALC_COMPILE_FOR_TESTING}
+        -DMETALC_DISABLE_STDLIB_DEFS=${METALC_DISABLE_STDLIB_DEFS}
     )
 endif()

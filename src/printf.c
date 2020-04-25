@@ -1,5 +1,8 @@
 #include <metalc/errno.h>
-#include <metalc/bits/printf.h>
+#include <metalc/stddef.h>
+#include <metalc/stdlib.h>
+#include <metalc/string.h>
+#include <mcinternal/printf.h>
 
 
 /**
@@ -9,7 +12,8 @@
  * the number will be negative and errno will be set. The absolute value of the
  * return value is still the number of characters read.
  */
-static int _read_flags(const char *format, struct MCFormatSpecifier *info) {
+METALC_API_INTERNAL
+int parse_printf_format_flags(const char *format, struct MCFormatSpecifier *info) {
     int i;
 
     for (i = 0; format[i] != '\0'; ++i) {
@@ -18,10 +22,10 @@ static int _read_flags(const char *format, struct MCFormatSpecifier *info) {
                 info->justify = -1;
                 break;
             case '+':
-                info->sign_rep = MCSignRepr::MCFMT_SIGN__FORCE_POSITIVE;
+                info->sign_representation = MCFMT_SIGN__FORCE_POSITIVE;
                 break;
             case ' ':
-                info->sign_rep = MCSignRepr::MCFMT_SIGN__SPACE_FOR_POSITIVE;
+                info->sign_representation = MCFMT_SIGN__SPACE_FOR_POSITIVE;
                 break;
             case '#':
                 info->has_radix_prefix = 1;
@@ -37,33 +41,234 @@ static int _read_flags(const char *format, struct MCFormatSpecifier *info) {
 }
 
 
-static int _read_width(const char *format, struct MCFormatSpecifier *info) {
+/**
+ * Examine a format string and read the field width.
+ *
+ * This function must be called after all flags are read. Thus, the width (if
+ * present) will be a positive integer not starting with `0`.
+ *
+ * The function returns the number of characters read. If the width isn't present,
+ * the return value will be 0 and `info->width` will also be 0.
+ */
+METALC_API_INTERNAL
+int parse_printf_format_width(const char *format, struct MCFormatSpecifier *info) {
+    unsigned long width;
+    const char *end;
 
+    __mcapi_errno = 0;
+    width = strtoul(format, &end, 10);
+
+    if (__mcapi_errno != 0)
+        return -1;
+
+    info->width = (int)width;
+    return (int)(end - format);
 }
 
 
-static int _read_precision(const char *format, struct MCFormatSpecifier *info) {
+/**
+ * Examine a format string and determine the floating-point precision.
+ *
+ * This must be called immediately after @ref _read_width. It expects `.` to be
+ * the first character. If not, it assumes there is no precision specifier and
+ * returns immediately.
+ */
+METALC_API_INTERNAL
+int parse_printf_format_precision(const char *format, struct MCFormatSpecifier *info) {
+    unsigned long precision;
+    const char *end;
+    intptr_t n_read;
 
-}
-
-
-static int _read_length(const char *format, struct MCFormatSpecifier *info) {
-
-}
-
-
-static int _determine_format(const char *format, struct MCFormatSpecifier *info) {
-    (void)format; (void)info;
-    return ENOSYS;
-}
-
-
-static size_t _copy_buffer(const char *temp, char **buffer) {
-    size_t buffer_size = strlen(temp);
-
-    if (*buffer) {
-        strcpy(*buffer, temp);
-        *buffer += buffer_size;
+    /* If there's no leading period then assume there's no defined precision. */
+    if (format[0] != '.') {
+        info->fraction_zero_padding = 0;
+        info->fraction_precision = 0;
+        return 1;
     }
-    return buffer_size;
+
+    if (format[1] == '0') {
+        info->fraction_zero_padding = 1;
+        n_read = 2;
+    }
+    else
+        n_read = 1;
+
+    __mcapi_errno = 0;
+    precision = strtoul(format + n_read, &end, 10);
+
+    if (__mcapi_errno != 0)
+        return -1;
+
+    info->fraction_precision = precision;
+    return (int)(end - format);
 }
+
+
+METALC_API_INTERNAL
+enum MCArgumentType int_argtype_from_width(enum MCArgumentWidth width_kind) {
+    switch (width_kind) {
+        case MCAW_BYTE:
+            return MC_AT_CHAR;
+        case MCAW_SHORT:
+            return MC_AT_SHORT;
+        case MCAW_DEFAULT:
+            return MC_AT_INT;
+        case MCAW_LONG:
+            return MC_AT_LONG;
+        case MCAW_LONGLONG:
+            return MC_AT_LONGLONG;
+        default:
+            __mcapi_errno = __mcapi_EINVAL;
+            return -1;
+    }
+}
+
+
+METALC_API_INTERNAL
+enum MCArgumentType float_argtype_from_width(enum MCArgumentWidth width_kind) {
+    if (width_kind == MCAW_DEFAULT)
+        return MC_AT_DOUBLE;
+    if (width_kind == MCAW_LONG_DOUBLE)
+        return MC_AT_LONGDOUBLE;
+
+    __mcapi_errno = __mcapi_EINVAL;
+    return -1;
+}
+
+
+METALC_API_INTERNAL
+int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info) {
+    enum MCArgumentWidth width;
+    int n_read = 0;
+
+    width = MCAW_DEFAULT;
+    n_read = 0;
+
+    switch(format[0]) {
+        case '\0':
+            /* Hit the end of the format string early -- fail. */
+            __mcapi_errno = __mcapi_EINVAL;
+            return -1;
+        case 'h':
+            /* Check for `hh` */
+            if (format[1] == 'h') {
+                width = MCAW_BYTE;
+                n_read = 2;
+            }
+            else {
+                width = MCAW_SHORT;
+                n_read = 1;
+            }
+            break;
+        case 'j':
+            width = MCAW_INTMAX;
+            n_read = 1;
+            break;
+        case 'l':
+            /* Check for `ll` *if* we have long long support */
+            #if METALC_COMPILE_OPTION_ENABLE_LONGLONG
+                if(format[1] == 'l') {
+                    width = MCAW_LONGLONG;
+                    n_read = 2;
+                }
+                else {
+                    width = MCAW_LONG;
+                    n_read = 1;
+                }
+            #else
+                width = MCAW_LONG;
+                n_read = 1;
+            #endif
+            break;
+        case 'L':
+            width = MCAW_LONG_DOUBLE;
+            n_read = 1;
+            break;
+        case 't':
+            width = MCAW_PTRDIFF;
+            n_read = 1;
+            break;
+        case 'z':
+            width = MCAW_SIZE_T;
+            n_read = 1;
+            break;
+        default:
+            width_kind = MCAW_DEFAULT;
+            n_read = 0;
+            break;
+    }
+
+    switch(format[n_read]) {
+        case 'c':
+            info->argument_type = MC_AT_CHAR;
+            break;
+        case 'd':
+        case 'i':
+        case 'u':
+            info->radix = 10;
+            info->argument_type = int_argtype_from_width(width);
+            break;
+        case 'o':
+            info->radix = 8;
+            info->argument_type = int_argtype_from_width(width);
+            break;
+        case 'x':
+        case 'X':
+            info->radix = 16;
+            info->argument_type = int_argtype_from_width(width);
+            break;
+        case 'a':
+        case 'A':
+        case 'e':
+        case 'E':
+        case 'f':
+        case 'F':
+        case 'g':
+        case 'G':
+            info->radix = 0;
+            info->argument_type = float_argtype_from_width(width);
+            break;
+        case 'n':
+        case 'p':
+        case 's':
+            __mcapi_errno = __mcapi_ENOSYS;
+            return -1;
+        default:
+            __mcapi_errno = __mcapi_EINVAL;
+            return -1;
+    }
+
+    return n_read;
+}
+
+
+
+/**
+ *
+ */
+METALC_API_INTERNAL
+int parse_printf_format_specifier(const char *format, struct MCFormatSpecifier *info) {
+    int total_read;
+    int current_read;
+
+    total_read = current_read = 0;
+
+    current_read = parse_printf_format_flags(format, info);
+    if (current_read < 0)
+        return -total_read;
+    total_read = current_read;
+
+    current_read = parse_printf_format_width(format + total_read, info);
+    if (current_read < 0)
+        return -total_read;
+    total_read += current_read;
+
+    current_read = parse_printf_format_precision(format + total_read, info);
+    if (current_read < 0)
+        return -total_read;
+    total_read += current_read;
+
+
+}
+
+

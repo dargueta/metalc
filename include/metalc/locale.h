@@ -39,6 +39,11 @@ struct __mcapi_lconv {
 };
 
 
+#ifdef METALC_DISABLE_STDLIB_DEFS
+    #define lconv __mcapi_lconv
+#endif
+
+
 int setlocale(int what, const char *name);
 struct __mcapi_lconv* localeconv(void);
 

@@ -6,8 +6,8 @@
 #include <metalc/stddef.h>
 
 
-extern MetalCRuntimeInfo *__mclib_runtime_info;
-extern __mcapi_jmp_buf __mclib_abort_target;
+extern MetalCRuntimeInfo *__mcint_runtime_info;
+extern __mcapi_jmp_buf __mcint_abort_target;
 
 
 __attribute__((noreturn)) static void _sighandler_term(int sig) {
@@ -27,11 +27,11 @@ __attribute__((noreturn)) static void _sighandler_term(int sig) {
              * crt_teardown() will *not* be called and no resources are released.
              * It's up to the operating system to release memory, file handles,
              * etc. */
-            krnlhook_core_dump(sig, __mclib_runtime_info->udata);
+            krnlhook_core_dump(sig, __mcint_runtime_info->udata);
             break;
 
         default:
-            longjmp(__mclib_abort_target, sig);
+            longjmp(__mcint_abort_target, sig);
             break;
     };
 }
@@ -45,13 +45,13 @@ static void _sighandler_ignore(int sig) {
 
 /* Signal handler pauses the current process. */
 static void _sighandler_stop(int sig) {
-    krnlhook_suspend(sig, __mclib_runtime_info->udata);
+    krnlhook_suspend(sig, __mcint_runtime_info->udata);
 }
 
 
 /* Signal handler resumes the current process. */
 static void _sighandler_resume(int sig) {
-    krnlhook_resume(sig, __mclib_runtime_info->udata);
+    krnlhook_resume(sig, __mcint_runtime_info->udata);
 }
 
 

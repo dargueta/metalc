@@ -11,7 +11,7 @@ METALC_API_INTERNAL int __mcint_utf8_mblen(const char *str, size_t n) {
         return 0;
 
     if (n == 0) {
-        __mcint_errno = __mcapi_EINVAL;
+        __mcapi_errno = __mcapi_EINVAL;
         return -1;
     }
 
@@ -26,13 +26,13 @@ METALC_API_INTERNAL int __mcint_utf8_mblen(const char *str, size_t n) {
     else if (str[0] & 0xf8 == 0xf0)
         return 4;
 
-    __mcint_errno = __mcapi_EILSEQ;
+    __mcapi_errno = __mcapi_EILSEQ;
     return -1;
 }
 
 
-METALC_API_INTERNAL int __mcint_utf8_mbtowc(wchar_t *pwc, const char *str, size_t n) {
-    wchar_t result;
+METALC_API_INTERNAL int __mcint_utf8_mbtowc(__mcapi_wchar_t *pwc, const char *str, size_t n) {
+    __mcapi_wchar_t result;
     int current_char_len;
 
     /* Caller is asking if this encoding is state-dependent (it isn't). */
@@ -62,7 +62,7 @@ METALC_API_INTERNAL int __mcint_utf8_mbtowc(wchar_t *pwc, const char *str, size_
                    | ((unsigned)str[3] & 0x3f);
             break;
         default:
-            __mcint_errno = __mcapi_EILSEQ;
+            __mcapi_errno = __mcapi_EILSEQ;
             return -1;
     }
 
@@ -72,7 +72,7 @@ METALC_API_INTERNAL int __mcint_utf8_mbtowc(wchar_t *pwc, const char *str, size_
 }
 
 
-METALC_API_INTERNAL int __mcint_utf8_wctomb(char *str, wchar_t wchar) {
+METALC_API_INTERNAL int __mcint_utf8_wctomb(char *str, __mcapi_wchar_t wchar) {
     /* Caller is asking if this encoding is state-dependent. It isn't. */
     if (str == NULL)
         return 0;
@@ -100,7 +100,7 @@ METALC_API_INTERNAL int __mcint_utf8_wctomb(char *str, wchar_t wchar) {
         return 3;
     }
     else {
-        __mcint_errno = __mcapi_EILSEQ;
+        __mcapi_errno = __mcapi_EILSEQ;
         return -1;
     }
 }

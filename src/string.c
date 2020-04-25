@@ -1,7 +1,14 @@
 #include <metalc/errno.h>
+#include <metalc/metalc.h>
 #include <metalc/stdio.h>
 #include <metalc/stdlib.h>
 #include <metalc/string.h>
+
+extern /**
+ *
+ */
+static
+
 
 
 /* These are copied and pasted from the Linux headers on Ubuntu 19.10. */
@@ -460,3 +467,12 @@ size_t strxfrm(char *destination, const char *source, size_t num) {
     return strlen(source);
 }
 cstdlib_implement(strxfrm);
+
+
+size_t strcpy_and_update_buffer(const char *source, void **buffer) {
+    size_t buffer_size = strlen(source);
+
+    strcpy(*(char **)buffer, source);
+    *(char **)buffer += buffer_size;
+    return buffer_size;
+}

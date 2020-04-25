@@ -9,7 +9,7 @@
 #include <metalc/string.h>
 
 
-extern MetalCRuntimeInfo *__mclib_runtime_info;
+extern MetalCRuntimeInfo *__mcint_runtime_info;
 
 struct __mcint_FILE {
     intptr_t descriptor;
@@ -33,13 +33,13 @@ METALC_API_INTERNAL int fileio_init(void) {
     memset(&_internal_stdout, 0, sizeof(_internal_stdout));
     memset(&_internal_stderr, 0, sizeof(_internal_stderr));
 
-    _internal_stdin.descriptor = __mclib_runtime_info->stdin_handle;
+    _internal_stdin.descriptor = __mcint_runtime_info->stdin_handle;
     _internal_stdin.io_flags = O_RDONLY;
 
-    _internal_stdout.descriptor = __mclib_runtime_info->stdout_handle;
+    _internal_stdout.descriptor = __mcint_runtime_info->stdout_handle;
     _internal_stdout.io_flags = O_WRONLY;
 
-    _internal_stderr.descriptor = __mclib_runtime_info->stderr_handle;
+    _internal_stderr.descriptor = __mcint_runtime_info->stderr_handle;
     _internal_stderr.io_flags = O_WRONLY;
     return 0;
 }
@@ -132,8 +132,8 @@ void clearerr(__mcapi_FILE *stream) {
 
 
 void fclose(__mcapi_FILE *stream) {
-    krnlhook_fsync(stream->descriptor, __mclib_runtime_info->udata);
-    krnlhook_close(stream->descriptor, __mclib_runtime_info->udata);
+    krnlhook_fsync(stream->descriptor, __mcint_runtime_info->udata);
+    krnlhook_close(stream->descriptor, __mcint_runtime_info->udata);
     free(stream);
 }
 
@@ -166,7 +166,7 @@ __mcapi_FILE *fopen(const char *path, const char *mode) {
 
     /* Open the file, always using mode 0644 if we're creating a new file. */
     stream->descriptor = krnlhook_open(
-        path, io_flags, 0644, __mclib_runtime_info->udata
+        path, io_flags, 0644, __mcint_runtime_info->udata
     );
     if (stream->descriptor == -1) {
         free(stream);
@@ -192,7 +192,7 @@ size_t fwrite(const void *ptr, size_t size, size_t count, __mcapi_FILE *stream) 
         fseek(stream, 0, __mcapi_SEEK_END);
 
     return krnlhook_write(
-        stream->descriptor, ptr, size * count, __mclib_runtime_info->udata
+        stream->descriptor, ptr, size * count, __mcint_runtime_info->udata
     );
 }
 
@@ -205,14 +205,14 @@ size_t fread(void *ptr, size_t size, size_t count, __mcapi_FILE *stream) {
     }
 
     return krnlhook_read(
-        stream->descriptor, ptr, size * count, __mclib_runtime_info->udata
+        stream->descriptor, ptr, size * count, __mcint_runtime_info->udata
     );
 }
 
 
 __mcapi_fpos_t fseek(__mcapi_FILE *stream, long offset, int whence) {
     return krnlhook_seek(
-        stream->descriptor, offset, whence, __mclib_runtime_info->udata
+        stream->descriptor, offset, whence, __mcint_runtime_info->udata
     );
 }
 
