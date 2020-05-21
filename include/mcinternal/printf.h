@@ -7,6 +7,8 @@
 #ifndef INCLUDE_MCINTERNAL_PRINTF_H_
 #define INCLUDE_MCINTERNAL_PRINTF_H_
 
+#include <metalc/metalc.h>
+
 
 /**
  * The data type of the element in the format string.
@@ -33,6 +35,7 @@ enum MCArgumentWidth {
     MCAW_DEFAULT,
     MCAW_BYTE,
     MCAW_SHORT,
+    MCAW_INT,
     MCAW_LONG,
     MCAW_LONGLONG,
     MCAW_INTPTR,
@@ -40,6 +43,9 @@ enum MCArgumentWidth {
     MCAW_PTRDIFF,
     MCAW_LONG_DOUBLE
 };
+
+
+#define MCAW_INTMAX MCAW_INTPTR
 
 
 enum MCSignRepr {

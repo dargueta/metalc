@@ -1,11 +1,23 @@
+/**
+ * Definitions of important types and data structures for the C library startup code.
+ *
+ * @file crtinit.h
+ */
+
 #ifndef INCLUDE_METALC_CRTINIT_H_
 #define INCLUDE_METALC_CRTINIT_H_
 
+#include <mcinternal/efi.h>
 #include <metalc/metalc.h>
 #include <metalc/stddef.h>
 #include <metalc/stdint.h>
 
 
+/**
+ * A pointer to the (nonstandard) three-argument variant of the C `main()` function.
+ *
+ * Code taking
+ */
 typedef int (* cmetal_main_fn)(int argc, char **argv, char **env);
 
 
@@ -49,7 +61,7 @@ typedef struct {
     int signal_code;
 
     /**
-     *
+     * A pointer to the main() function the C library will execute.
      */
     cmetal_main_fn main;
 
@@ -63,6 +75,21 @@ typedef struct {
      * @warning Internal use only. Do not modify.
      */
     void *_original_brk;
+
+
+    /**
+     * On UEFI-aware builds, the EFI image handle.
+     *
+     * Typedefed to a void pointer on bare metal builds.
+     */
+    EFI_HANDLE efi_image_handle;
+
+    /**
+     * On UEFI-aware builds, a pointer to the EFI system table.
+     *
+     * Typedefed to a void pointer on bare metal builds.
+     */
+    EFI_SYSTEM_TABLE *efi_system_table;
 } MetalCRuntimeInfo;
 
 

@@ -8,7 +8,7 @@
     /* Always defer to the platform's header file if present. GCC-compatible
      * compilers will provide this for us. */
     #include <stdint.h>
-#elif METALC_COMPILER_MS_COMPATIBLE
+#elif defined _MSC_VER
     /* No stdint.h but Microsoft-compatible compilers provide some non-standard
      * predefined types for us. */
     typedef __int8 int8_t;

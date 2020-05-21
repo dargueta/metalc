@@ -3,6 +3,8 @@
  * Generating compiler: @CMAKE_C_COMPILER_ID@ @CMAKE_C_COMPILER_VERSION@
  *
  * DO NOT MODIFY.
+ *
+ * @file metalc.h
  */
 
 #ifndef INCLUDE_METALC_METALC_H_
@@ -10,6 +12,7 @@
 
 #cmakedefine01 METALC_COMPILER_GCC
 #cmakedefine01 METALC_COMPILER_MINGW
+#cmakedefine01 METALC_HAVE_EFI_H
 #cmakedefine01 METALC_HAVE_FLOAT_H
 #cmakedefine01 METALC_HAVE_LIMITS_H
 #cmakedefine01 METALC_HAVE_STDARG_H
@@ -23,6 +26,10 @@
 #cmakedefine01 METALC_ABI_MICROSOFT
 #cmakedefine01 METALC_ABI_GNU
 #cmakedefine01 METALC_INTERNALS_USE_FASTCALL
+#cmakedefine01 METALC_PLATFORM_UEFI_FULL
+#cmakedefine01 METALC_PLATFORM_UEFI_RUNTIME_ONLY
+
+#define METALC_PLATFORM_NO_UEFI (!(METALC_PLATFORM_UEFI_FULL || METALC_PLATFORM_UEFI_RUNTIME_ONLY))
 
 
 #define METALC_TARGET_ARCHITECTURE_X86_16   0
@@ -55,6 +62,26 @@
     #endif
 #else
     #define METALC_HAVE_LONG_DOUBLE 0
+#endif
+
+
+/**
+ * Is this compiler compatible with GCC?
+ */
+#define METALC_COMPILER_GCC_COMPATIBLE      (METALC_COMPILER_GCC || METALC_COMPILER_MINGW)
+
+
+#if defined _MSC_VER
+    /**
+     * Is this compiler compatible with the Windows family of compilers?
+     *
+     * This is mostly used to determine the calling convention the code written
+     * in assembly language is supposed to use. It also determines how @ref stdint.h
+     * works, since Windows doesn't provide it.
+     */
+    #define METALC_COMPILER_MS_COMPATIBLE 1
+#else
+    #define METALC_COMPILER_MS_COMPATIBLE 0
 #endif
 
 

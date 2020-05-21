@@ -6,57 +6,63 @@ check_include_file("stdarg.h" METALC_HAVE_STDARG_H)
 check_include_file("stdbool.h" METALC_HAVE_STDBOOL_H)
 check_include_file("stddef.h" METALC_HAVE_STDDEF_H)
 check_include_file("stdint.h" METALC_HAVE_STDINT_H)
+check_include_file("efi.h" METALC_HAVE_EFI_H)
+check_include_file("efilib.h" METALC_HAVE_EFILIB_H)
 
 
-set(INCLUDE_ROOT_DIR "${MetalC_SOURCE_DIR}/include/metalc")
+set(INCLUDE_ROOT_DIR "${MetalC_SOURCE_DIR}/include")
+set(INCLUDE_CLIB_DIR "${INCLUDE_ROOT_DIR}/metalc")
 set(TEMPLATES_DIR "${MetalC_SOURCE_DIR}/templates")
 
 
 configure_file(
     "${TEMPLATES_DIR}/include/metalc/metalc.h"
-    "${INCLUDE_ROOT_DIR}/metalc.h"
+    "${INCLUDE_CLIB_DIR}/metalc.h"
     @ONLY
 )
 
 configure_file(
     "${TEMPLATES_DIR}/include/metalc/x86/metalc.inc"
-    "${INCLUDE_ROOT_DIR}/x86/metalc.inc"
+    "${INCLUDE_CLIB_DIR}/x86/metalc.inc"
     @ONLY
 )
 
 
 set(HEADER_FILES
-    "${INCLUDE_ROOT_DIR}/assert.h"
-    "${INCLUDE_ROOT_DIR}/atomic.h"
-    "${INCLUDE_ROOT_DIR}/crtinit.h"
-    "${INCLUDE_ROOT_DIR}/ctype.h"
-    "${INCLUDE_ROOT_DIR}/errno.h"
-    "${INCLUDE_ROOT_DIR}/fcntl.h"
-    "${INCLUDE_ROOT_DIR}/float.h"
-    "${INCLUDE_ROOT_DIR}/iso646.h"
-    "${INCLUDE_ROOT_DIR}/kernel_hooks.h"
-    "${INCLUDE_ROOT_DIR}/limits.h"
-    "${INCLUDE_ROOT_DIR}/locale.h"
-    "${INCLUDE_ROOT_DIR}/math.h"
-    "${INCLUDE_ROOT_DIR}/metalc.h"
-    "${INCLUDE_ROOT_DIR}/posix.h"
-    "${INCLUDE_ROOT_DIR}/setjmp.h"
-    "${INCLUDE_ROOT_DIR}/signal.h"
-    "${INCLUDE_ROOT_DIR}/stdarg.h"
-    "${INCLUDE_ROOT_DIR}/stdbool.h"
-    "${INCLUDE_ROOT_DIR}/stddef.h"
-    "${INCLUDE_ROOT_DIR}/stdint.h"
-    "${INCLUDE_ROOT_DIR}/stdio.h"
-    "${INCLUDE_ROOT_DIR}/stdlib.h"
-    "${INCLUDE_ROOT_DIR}/string.h"
-    "${INCLUDE_ROOT_DIR}/bits/errno.h"
-    "${INCLUDE_ROOT_DIR}/bits/printf.h"
-    "${INCLUDE_ROOT_DIR}/bits/signal.h"
-    "${INCLUDE_ROOT_DIR}/bits/stddef.h"
-    "${INCLUDE_ROOT_DIR}/bits/stdio.h"
-    "${INCLUDE_ROOT_DIR}/bits/stdlib_longlong.h"
-    "${INCLUDE_ROOT_DIR}/charsets/common.h"
-    "${INCLUDE_ROOT_DIR}/charsets/utf8.h"
+    "${INCLUDE_CLIB_DIR}/assert.h"
+    "${INCLUDE_CLIB_DIR}/atomic.h"
+    "${INCLUDE_CLIB_DIR}/crtinit.h"
+    "${INCLUDE_CLIB_DIR}/ctype.h"
+    "${INCLUDE_CLIB_DIR}/errno.h"
+    "${INCLUDE_CLIB_DIR}/fcntl.h"
+    "${INCLUDE_CLIB_DIR}/float.h"
+    "${INCLUDE_CLIB_DIR}/iso646.h"
+    "${INCLUDE_CLIB_DIR}/kernel_hooks.h"
+    "${INCLUDE_CLIB_DIR}/limits.h"
+    "${INCLUDE_CLIB_DIR}/locale.h"
+    "${INCLUDE_CLIB_DIR}/math.h"
+    "${INCLUDE_CLIB_DIR}/metalc.h"
+    "${INCLUDE_CLIB_DIR}/posix.h"
+    "${INCLUDE_CLIB_DIR}/setjmp.h"
+    "${INCLUDE_CLIB_DIR}/signal.h"
+    "${INCLUDE_CLIB_DIR}/stdarg.h"
+    "${INCLUDE_CLIB_DIR}/stdbool.h"
+    "${INCLUDE_CLIB_DIR}/stddef.h"
+    "${INCLUDE_CLIB_DIR}/stdint.h"
+    "${INCLUDE_CLIB_DIR}/stdio.h"
+    "${INCLUDE_CLIB_DIR}/stdlib.h"
+    "${INCLUDE_CLIB_DIR}/string.h"
+    "${INCLUDE_CLIB_DIR}/bits/errno.h"
+    "${INCLUDE_CLIB_DIR}/bits/signal.h"
+    "${INCLUDE_CLIB_DIR}/bits/stddef.h"
+    "${INCLUDE_CLIB_DIR}/bits/stdio.h"
+    "${INCLUDE_CLIB_DIR}/bits/stdlib_longlong.h"
+    "${INCLUDE_CLIB_DIR}/charsets/common.h"
+    "${INCLUDE_CLIB_DIR}/charsets/utf8.h"
+
+    "${INCLUDE_ROOT_DIR}/mcinternal/efi.h"
+    "${INCLUDE_ROOT_DIR}/mcinternal/printf.h"
+    "${INCLUDE_ROOT_DIR}/mcinternal/string.h"
 )
 
 

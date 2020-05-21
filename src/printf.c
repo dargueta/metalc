@@ -193,7 +193,7 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
             n_read = 1;
             break;
         default:
-            width_kind = MCAW_DEFAULT;
+            width = MCAW_DEFAULT;
             n_read = 0;
             break;
     }
@@ -269,6 +269,7 @@ int parse_printf_format_specifier(const char *format, struct MCFormatSpecifier *
     total_read += current_read;
 
 
+    return total_read;
 }
 
 

@@ -17,7 +17,7 @@ void __mcint_assert(
         return;
 
     #if METALC_COMPILE_OPTION_ENABLE_FILE_IO
-        out = (stderr != NULL) ? stderr : stdout;
+        out = (__mcapi_stderr != NULL) ? __mcapi_stderr : __mcapi_stdout;
         if (out) {
             fprintf(
                 out,
@@ -29,7 +29,7 @@ void __mcint_assert(
 
             if (message) {
                 va_start(args, message);
-                vfprintf(out, args);
+                vfprintf(out, message, args);
                 va_end(args);
             }
         }

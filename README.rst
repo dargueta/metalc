@@ -34,12 +34,13 @@ Compilation Modes
 This library can be compiled in one of several modes, depending on the needs of
 the program linking to it.
 
-* **Bare:** No OS support. A number of features are missing, but this is still
-  useful for writing an OS kernel.
-* **Partial:** Features missing in "bare" mode are present, but the host program
-  (e.g. a kernel) must implement some hooks.
-* **UEFI:** Uses the UEFI API to provide I/O, memory allocation, etc. Useful for
-  writing OS bootloaders.
+* **Bare:** Assumes no underlying system system support. Many features such as I/O
+  require hooks to be implemented by the code using the library.
+* **UEFI Application:** Uses the UEFI boot services to provide I/O, memory
+  allocation, etc. Useful for writing OS bootloaders and UEFI applications, but
+  not OS kernels.
+* **Kernel:** Uses the UEFI runtime API. Useful for OS kernels that rely on UEFI
+  for certain hardware access.
 
 Build Requirements
 ------------------
@@ -49,7 +50,8 @@ To build this library you'll need:
 * CMake 3.8 or higher
 * A compiler supporting ANSI C99 or later, such as GCC or MinGW. Visual Studio
   cannot cross-compile and so is not supported.
-* (UEFI mode only) A UEFI library implementation, such as `GNU_EFI`_ or `TianoCore`_.
+* (UEFI modes only) A UEFI cross-compiler, such as `GNU_EFI`_ or `TianoCore`_.
+  Clang/LLVM has this built in.
 
 License
 -------

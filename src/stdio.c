@@ -59,7 +59,7 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
             case 'd':
             case 'i':
                 itoa(va_arg(arg_list, int), temp, 10);
-                n_chars_written += strcpy_and_update_buffer(temp, &buffer);
+                n_chars_written += strcpy_and_update_buffer(temp, (void **)&buffer);
                 break;
             case 'h':
                 /* Half size; this is either a `short int` or a `float`. We don't
@@ -92,7 +92,7 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
                         __mcapi_errno = __mcapi_EINVAL;
                         return -n_chars_written;
                 }
-                n_chars_written += strcpy_and_update_buffer(temp, &buffer);
+                n_chars_written += strcpy_and_update_buffer(temp, (void **)&buffer);
                 ++format;
                 break;
             case 'l':
@@ -175,7 +175,7 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
                     }
                 #endif
 
-                n_chars_written += strcpy_and_update_buffer(temp, &buffer);
+                n_chars_written += strcpy_and_update_buffer(temp, (void **)&buffer);
                 ++format;
                 break;
             case 'n':
@@ -183,7 +183,7 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
                 break;
             case 'u':
                 utoa(va_arg(arg_list, unsigned), temp, 10);
-                n_chars_written += strcpy_and_update_buffer(temp, &buffer);
+                n_chars_written += strcpy_and_update_buffer(temp, (void **)&buffer);
                 break;
             case 'x':
             case 'X':

@@ -9,7 +9,7 @@
     #include <metalc/stdint.h>
 
     /* FIXME (dargueta): These predefined constants are pretty specific to GCC and may
-     * not work on MinGW. */
+     * not work on MinGW or clang. */
     #if __SIZEOF_SIZE_T__ == 8
         typedef int64_t ssize_t;
     #elif __SIZEOF_SIZE_T__ == 4

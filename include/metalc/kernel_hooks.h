@@ -10,10 +10,9 @@
 /**
  * A hook function that suspends the calling process.
  *
- * Used to implement the default behavior of signals @ref SIGSTOP,
- * @ref SIGTSTP, @ref SIGTTIN, and @ref SIGTTOU. If this hook is not implemented,
- * any of the above signals will trigger @ref SIGSYS instead and terminate the
- * process.
+ * Used to implement the default behavior of signals @ref SIGSTOP, @ref SIGTSTP,
+ * @ref SIGTTIN, and @ref SIGTTOU. If this hook is not implemented, any of the
+ * above signals will trigger @ref SIGSYS instead and terminate the process.
  */
 void krnlhook_suspend(int sig, void *udata) __attribute__((weak));
 
