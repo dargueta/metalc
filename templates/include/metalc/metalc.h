@@ -29,18 +29,67 @@
 #cmakedefine01 METALC_PLATFORM_UEFI_FULL
 #cmakedefine01 METALC_PLATFORM_UEFI_RUNTIME_ONLY
 
-#define METALC_PLATFORM_NO_UEFI (!(METALC_PLATFORM_UEFI_FULL || METALC_PLATFORM_UEFI_RUNTIME_ONLY))
+/**
+ * Was this implementation of the C standard library built without UEFI support?
+ */
+#define METALC_PLATFORM_NEED_UEFI (METALC_PLATFORM_UEFI_FULL || METALC_PLATFORM_UEFI_RUNTIME_ONLY)
+
+#if METALC_COMPILE_OPTION_USE_EFI && (!METALC_HAVE_EFI_H)
+    #error "Library was built needing UEFI support but doesn't appear to have `efi.h`."
+#endif
 
 
+/**
+ * Architecture type indicator: the target architecture is a 16-bit Intel processor.
+ */
 #define METALC_TARGET_ARCHITECTURE_X86_16   0
+
+/**
+ * Architecture type indicator: the target architecture is a 32-bit Intel processor.
+ */
 #define METALC_TARGET_ARCHITECTURE_X86_32   1
+
+/**
+ * Architecture type indicator: the target architecture is a 64-bit Intel processor.
+ */
 #define METALC_TARGET_ARCHITECTURE_X86_64   2
+
+/**
+ * Architecture type indicator: the target architecture is a 32-bit MIPS processor.
+ */
 #define METALC_TARGET_ARCHITECTURE_MIPS32   3
+
+/**
+ * Architecture type indicator: the target architecture is a 64-bit MIPS processor.
+ */
 #define METALC_TARGET_ARCHITECTURE_MIPS64   4
+
+
+/**
+ * Architecture type indicator: this indicates the target system this was compiled
+ * with.
+ *
+ * This is only included for documentation purposes. You can ignore the specific
+ * value of this macro that appears in the documentation, as it only reflects the
+ * architecture of the system that the documentation was built on.
+ */
 #define METALC_TARGET_ARCHITECTURE_ID       @METALC_TARGET_ARCHITECTURE_ID@
+
+/**
+ * The size of a pointer in the target architecture.
+ *
+ * This is only included for documentation purposes. You can ignore the specific
+ * value of this macro that appears in the documentation, as it only reflects the
+ * architecture of the system that the documentation was built on.
+ */
 #define METALC_ARCH_BITS    @METALC_TARGET_ARCHITECTURE_BITS@
 
 
+/**
+ * @def METALC_HAVE_LONG_LONG
+ *
+ * Does the target platform support the `long long` integer type?
+ */
 #if METALC_HAVE_LIMITS_H
     #include <limits.h>
     #ifdef LLONG_MAX
@@ -53,6 +102,11 @@
 #endif
 
 
+/**
+ * @def METALC_HAVE_LONG_DOUBLE
+ *
+ * Does the target platform support the `long double` floating-point type?
+ */
 #if METALC_HAVE_FLOAT_H
     #include <float.h>
     #ifdef LDBL_MAX
@@ -71,14 +125,16 @@
 #define METALC_COMPILER_GCC_COMPATIBLE      (METALC_COMPILER_GCC || METALC_COMPILER_MINGW)
 
 
+/**
+ * @def METALC_COMPILER_MS_COMPATIBLE
+ *
+ * Is this compiler compatible with the Windows family of compilers?
+ *
+ * This is mostly used to determine the calling convention the code written in
+ * assembly language is supposed to use. It also determines how @ref stdint.h
+ * works, since Windows doesn't provide it.
+ */
 #if defined _MSC_VER
-    /**
-     * Is this compiler compatible with the Windows family of compilers?
-     *
-     * This is mostly used to determine the calling convention the code written
-     * in assembly language is supposed to use. It also determines how @ref stdint.h
-     * works, since Windows doesn't provide it.
-     */
     #define METALC_COMPILER_MS_COMPATIBLE 1
 #else
     #define METALC_COMPILER_MS_COMPATIBLE 0
@@ -141,7 +197,7 @@
 #endif
 
 
-#if METALC_COMPILE_OPTION_ENABLE_UEFI
+#if METALC_COMPILE_OPTION_USE_EFI
     #define METALC_COMPILE_OPTION_ENABLE_FILE_IO   1
     #define METALC_COMPILE_OPTION_ENABLE_DISK_IO   1
     #ifndef METALC_COMPILE_OPTION_HAVE_TERMINAL

@@ -20,7 +20,7 @@ char *strchr(const char *str, int character);
 int strcmp(const char *str1, const char *str2);
 
 /**
- * @warn Standards violation: Identical to @ref strcmp.
+ * @warning Standards violation: Identical to @ref strcmp.
  */
 int strcoll(const char *str1, const char *str2);
 char *strcpy(char *destination, const char *source);
@@ -38,11 +38,12 @@ char *strtok(char *str, const char *delimiters);
 
 
 /**
- * @warn Standards violation: Performs no transform, nearly identical to @ref strncpy.
+ * @warning Standards violation: Performs no transform, nearly identical to @ref strncpy.
  */
 size_t strxfrm(char *destination, const char *source, size_t num);
 
 
+/** @cond DECL */
 cstdlib_export_with_attr(memchr, nonnull);
 cstdlib_export_with_attr(memcmp, nonnull, pure);
 cstdlib_export_with_attr(memcpy, nonnull);
@@ -65,6 +66,7 @@ cstdlib_export_with_attr(strspn, nonnull);
 cstdlib_export_with_attr(strstr, nonnull);
 cstdlib_export_with_attr(strtok, nonnull(2));
 cstdlib_export_with_attr(strxfrm, nonnull(2));
+/** @endcond */
 
 
 #endif  /* INCLUDE_METALC_STRING_H_ */

@@ -4,6 +4,7 @@
 #include <metalc/metalc.h>
 
 
+/** @cond INTERNAL_MACRO */
 #if METALC_TARGET_ARCHITECTURE_ID == METALC_TARGET_ARCHITECTURE_X86_16
     #define BUFSIZE 548
 #elif METALC_TARGET_ARCHITECTURE_ID == METALC_TARGET_ARCHITECTURE_X86_32
@@ -17,6 +18,7 @@
 #else
     #error "Unrecognized target architecture -- did you forget to update this list?"
 #endif
+/** @endcond */
 
 
 typedef char __mcapi_jmp_buf[BUFSIZE] __attribute__((aligned (16)));
@@ -33,7 +35,9 @@ int longjmp(__mcapi_jmp_buf buf, int code);
 #endif
 
 
+/** @cond DECL */
 cstdlib_export(setjmp);
 cstdlib_export_with_attr(longjmp, noreturn);
+/** @endcond */
 
 #endif  /* INCLUDE_METALC_SETJMP_H_ */
