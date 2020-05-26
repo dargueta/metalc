@@ -11,8 +11,8 @@
 #ifndef INCLUDE_MCINTERNAL_STRING_H_
 #define INCLUDE_MCINTERNAL_STRING_H_
 
-#include <metalc/metalc.h>
-#include <metalc/stddef.h>
+#include "../metalc.h"
+#include "../stddef.h"
 
 
 /**

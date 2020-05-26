@@ -1,7 +1,7 @@
 #ifndef INCLUDE_METALC_ASSERT_H_
 #define INCLUDE_METALC_ASSERT_H_
 
-#include <metalc/metalc.h>
+#include "metalc.h"
 
 #ifdef NDEBUG
     #define __mcapi_assert(expression)

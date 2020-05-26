@@ -4,9 +4,9 @@
  * about the ABI. Good enough for a first pass.
  */
 
-#include <metalc/errno.h>
-#include <metalc/float.h>
-#include <metalc/math.h>
+#include "metalc/errno.h"
+#include "metalc/float.h"
+#include "metalc/math.h"
 
 
 #define LOOP_PRECISION  6

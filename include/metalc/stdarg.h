@@ -1,7 +1,7 @@
 #ifndef INCLUDE_METALC_STDARG_H_
 #define INCLUDE_METALC_STDARG_H_
 
-#include <metalc/metalc.h>
+#include "metalc.h"
 
 #if METALC_HAVE_STDARG_H
     #include <stdarg.h>

@@ -6,8 +6,8 @@
 #ifndef INCLUDE_METALC_CHARSETS_COMMON_H_
 #define INCLUDE_METALC_CHARSETS_COMMON_H_
 
-#include <metalc/stddef.h>
-#include <metalc/wchar.h>
+#include "../stddef.h"
+#include "../wchar.h"
 
 
 typedef int (*fptr_mblen)(const char *str, size_t n);

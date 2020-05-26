@@ -1,8 +1,8 @@
 #ifndef INCLUDE_METALC_STDDEF_H_
 #define INCLUDE_METALC_STDDEF_H_
 
-#include <metalc/metalc.h>
-#include <metalc/bits/stddef.h>
+#include "metalc.h"
+#include "bits/stddef.h"
 #include <stddef.h>
 
 

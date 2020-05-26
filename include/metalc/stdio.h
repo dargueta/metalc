@@ -1,10 +1,10 @@
 #ifndef INCLUDE_METALC_STDIO_H_
 #define INCLUDE_METALC_STDIO_H_
 
-#include <metalc/bits/stdio.h>
-#include <metalc/metalc.h>
-#include <metalc/stdarg.h>
-#include <metalc/stddef.h>
+#include "bits/stdio.h"
+#include "metalc.h"
+#include "stdarg.h"
+#include "stddef.h"
 
 
 struct __mcint_FILE;

@@ -1,12 +1,12 @@
 /* Implements fopen, fread, fwrite, etc. */
 
-#include <metalc/crtinit.h>
-#include <metalc/errno.h>
-#include <metalc/fcntl.h>
-#include <metalc/kernel_hooks.h>
-#include <metalc/stdio.h>
-#include <metalc/stdlib.h>
-#include <metalc/string.h>
+#include "metalc/crtinit.h"
+#include "metalc/errno.h"
+#include "metalc/fcntl.h"
+#include "metalc/kernel_hooks.h"
+#include "metalc/stdio.h"
+#include "metalc/stdlib.h"
+#include "metalc/string.h"
 
 
 extern MetalCRuntimeInfo *__mcint_runtime_info;

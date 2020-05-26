@@ -1,7 +1,6 @@
 #ifndef INCLUDE_METALC_ERRNO_H_
 #define INCLUDE_METALC_ERRNO_H_
 
-#include <metalc/metalc.h>
 
 extern int __mcapi_errno;
 
@@ -144,6 +143,6 @@ extern int __mcapi_errno;
 
 #define __mcapi__MAX_ERRNO  133
 
-#include <metalc/bits/errno.h>
+#include "bits/errno.h"
 
 #endif  /* INCLUDE_METALC_ERRNO_H_ */

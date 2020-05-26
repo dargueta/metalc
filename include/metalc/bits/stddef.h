@@ -6,7 +6,7 @@
  * testing, when we need the host OS's C library as well. */
 
 #if !defined METALC_DISABLE_STDLIB_DEFS || defined __STRICT_ANSI__
-    #include <metalc/stdint.h>
+    #include "../stdint.h"
 
     /* FIXME (dargueta): These predefined constants are pretty specific to GCC and may
      * not work on MinGW or clang. */

@@ -1,8 +1,8 @@
-#include <metalc/crtinit.h>
-#include <metalc/errno.h>
-#include <metalc/metalc.h>
-#include <metalc/kernel_hooks.h>
-#include <metalc/posix.h>
+#include "metalc/crtinit.h"
+#include "metalc/errno.h"
+#include "metalc/kernel_hooks.h"
+#include "metalc/metalc.h"
+#include "metalc/posix.h"
 
 extern MetalCRuntimeInfo *__mcint_runtime_info;
 

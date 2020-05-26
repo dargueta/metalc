@@ -1,9 +1,9 @@
-#include <metalc/errno.h>
-#include <metalc/kernel_hooks.h>
-#include <metalc/setjmp.h>
-#include <metalc/signal.h>
-#include <metalc/stdbool.h>
-#include <metalc/stddef.h>
+#include "metalc/errno.h"
+#include "metalc/kernel_hooks.h"
+#include "metalc/setjmp.h"
+#include "metalc/signal.h"
+#include "metalc/stdbool.h"
+#include "metalc/stddef.h"
 
 
 extern MetalCRuntimeInfo *__mcint_runtime_info;

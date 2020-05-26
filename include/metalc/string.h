@@ -5,9 +5,9 @@
 #ifndef INCLUDE_METALC_STRING_H_
 #define INCLUDE_METALC_STRING_H_
 
-#include <metalc/metalc.h>
-#include <metalc/stddef.h>
-#include <mcinternal/string.h>
+#include "metalc.h"
+#include "stddef.h"
+#include "internal/string.h"
 
 
 void *memchr(const void *ptr, int value, size_t num);

@@ -1,7 +1,7 @@
 #ifndef INCLUDE_METALC_BITS_STDIO_H_
 #define INCLUDE_METALC_BITS_STDIO_H_
 
-#include <metalc/stddef.h>
+#include "../stddef.h"
 
 #define __mcapi_BUFSIZ          8192    /* glibc uses this value so we might as well */
 #define __mcapi_EOF             -1

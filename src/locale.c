@@ -1,9 +1,9 @@
-#include <metalc/errno.h>
-#include <metalc/limits.h>
-#include <metalc/locale.h>
-#include <metalc/string.h>
-#include <metalc/charsets/common.h>
-#include <metalc/charsets/utf8.h>
+#include "metalc/charsets/common.h"
+#include "metalc/charsets/utf8.h"
+#include "metalc/errno.h"
+#include "metalc/limits.h"
+#include "metalc/locale.h"
+#include "metalc/string.h"
 
 
 static const struct __mcapi_lconv _default_lconv_info = {

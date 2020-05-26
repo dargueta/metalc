@@ -1,7 +1,7 @@
 #ifndef INCLUDE_METALC_LOCALE_H_
 #define INCLUDE_METALC_LOCALE_H_
 
-#include <metalc/metalc.h>
+#include "metalc.h"
 
 #define __mcapi_LC_ALL      0
 #define __mcapi_LC_COLLATE  1

@@ -1,7 +1,7 @@
 #ifndef INCLUDE_METALC_MATH_H_
 #define INCLUDE_METALC_MATH_H_
 
-#include <metalc/metalc.h>
+#include "metalc.h"
 
 
 METALC_API_EXPORT_ASM double __mcapi_cos(double x);

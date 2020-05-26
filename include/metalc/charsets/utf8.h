@@ -1,8 +1,8 @@
 #ifndef INCLUDE_METALC_CHARSETS_UTF8_H_
 #define INCLUDE_METALC_CHARSETS_UTF8_H_
 
-#include <metalc/stddef.h>
-#include <metalc/wchar.h>
+#include "stddef.h"
+#include "wchar.h"
 
 
 /**

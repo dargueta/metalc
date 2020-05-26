@@ -1,7 +1,7 @@
 #ifndef INCLUDE_METALC_CTYPE_H_
 #define INCLUDE_METALC_CTYPE_H_
 
-#include <metalc/metalc.h>
+#include "metalc.h"
 
 int isalnum(int c);
 int isalpha(int c);

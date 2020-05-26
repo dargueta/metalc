@@ -1,13 +1,14 @@
-#include <metalc/ctype.h>
-#include <metalc/errno.h>
-#include <metalc/limits.h>
-#include <metalc/locale.h>
-#include <metalc/metalc.h>
-#include <metalc/setjmp.h>
-#include <metalc/stdbool.h>
-#include <metalc/stdlib.h>
-#include <metalc/signal.h>
-#include <metalc/bits/charsets.h>
+#include "metalc/charsets/common.h"
+#include "metalc/ctype.h"
+#include "metalc/errno.h"
+#include "metalc/limits.h"
+#include "metalc/locale.h"
+#include "metalc/metalc.h"
+#include "metalc/setjmp.h"
+#include "metalc/signal.h"
+#include "metalc/stdbool.h"
+#include "metalc/stdlib.h"
+#include "metalc/string.h"
 
 
 static unsigned g_rand_seed = 0;
@@ -150,6 +151,109 @@ char *ultoa(unsigned long value, char *str, int base) {
 }
 
 
+unsigned long strtoul(const char *str, const char **endptr, int base) {
+    unsigned long value;
+    char next_char;
+    int n_digits_processed;
+    char *p_digit;
+
+    /* Skip leading whitespace */
+    while (isspace(*str))
+        ++str;
+
+    /* We allow a leading '+' (like strtol) but not a leading '-'. */
+    if (*str == '+')
+        ++str;
+
+    if (base == 0) {
+        /* Caller wants us to determine the radix on our own. If this starts with
+         * a '0' then it's either a radix or the entire value is 0. */
+        if (*str == '0') {
+            /* Starts with a 0; if it's followed by x then it's hexadecimal, if
+             * folowed by a digit then it's octal */
+            next_char = str[1];
+
+            if ((next_char == 'x') || (next_char == 'X'))
+                base = 16;
+            else if (isdigit(next_char))
+                base = 8;
+            else {
+                /* String is '0' followed by a non-digit character. This must be
+                 * just "0". */
+                if (endptr)
+                    *endptr = str + 1;
+                return 0;
+            }
+        }
+        else
+            /* String doesn't have an explicit radix, so assume it's base 10. */
+            base = 10;
+    }
+    else if ((base < 2) || (base > 36)) {
+        /* If a radix is passed in, it must be between 2 and 36, inclusive. */
+        __mcapi_errno = __mcapi_EINVAL;
+        if (endptr)
+            *endptr = str;
+        return 0;
+    }
+
+    value = 0;
+
+    for (n_digits_processed = 0; *str != '\0'; ++n_digits_processed, ++str) {
+        p_digit = strchr(kIntAlphabet, tolower(*str));
+        if (p_digit == NULL)
+            /* Hit something that's not a valid digit in the base we're operating in. */
+            break;
+
+        value += (unsigned long)((intptr_t)p_digit - (intptr_t)kIntAlphabet);
+        value *= base;
+    }
+
+    if (n_digits_processed == 0) {
+        /* If we haven't processed any digits then this isn't a valid string.
+         * Indicate this in @ref errno and return 0. */
+        __mcapi_errno = __mcapi_EINVAL;
+        value = 0;
+    }
+    else
+        __mcapi_errno = 0;
+
+    if (endptr)
+        *endptr = str;
+    return value;
+}
+
+
+long strtol(const char *str, const char **endptr, int base) {
+    unsigned long magnitude;
+    long sign;
+
+    while (isspace(*str))
+        ++str;
+
+    if (*str == '+') {
+        sign = 1;
+        ++str;
+    }
+    else if (*str == '-') {
+        sign = -1;
+        ++str;
+    }
+    else
+        sign = 1;
+
+    magnitude = strtoul(str, endptr, base);
+    if (__mcapi_errno != 0)
+        return 0;
+    if (magnitude > LONG_MAX) {
+        __mcapi_errno = __mcapi_EOVERFLOW;
+        return 0;
+    }
+
+    return sign * (long)magnitude;
+}
+
+
 __mcapi_div_t div(int numer, int denom) {
     __mcapi_div_t result;
 
@@ -173,17 +277,17 @@ int mblen(const char *str, size_t n) {
 }
 
 
-int wctomb(char *str, wchar_t wchar) {
+int wctomb(char *str, __mcapi_wchar_t wchar) {
     return _current_charset->f_wctomb(str, wchar);
 }
 
 
-int mbtowc(wchar_t *pwc, const char *str, size_t n) {
+int mbtowc(__mcapi_wchar_t *pwc, const char *str, size_t n) {
     return _current_charset->f_mbtowc(pwc, str, n);
 }
 
 
-size_t mbstowcs(wchar_t *pwcs, const char *str, size_t n) {
+size_t mbstowcs(__mcapi_wchar_t *pwcs, const char *str, size_t n) {
     size_t out_position;
     ptrdiff_t current_char_len;
 
@@ -206,7 +310,7 @@ size_t mbstowcs(wchar_t *pwcs, const char *str, size_t n) {
 }
 
 
-size_t wcstombs(char *str, const wchar_t *pwcs, size_t n) {
+size_t wcstombs(char *str, const __mcapi_wchar_t *pwcs, size_t n) {
     size_t out_position;
     char buffer[4];
     int wchar_length;
@@ -218,7 +322,7 @@ size_t wcstombs(char *str, const wchar_t *pwcs, size_t n) {
             return out_position;
         }
 
-        wchar_length = wctomb(*pwcs, buffer, 4);
+        wchar_length = wctomb(buffer, *pwcs);
         if (wchar_length < 0) {
             __mcapi_errno = __mcapi_EILSEQ;
             return (size_t)-1;

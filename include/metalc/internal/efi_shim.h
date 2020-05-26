@@ -9,14 +9,14 @@
  * datatypes defined in the EFI headers so we don't end up with hella "undeclared
  * identifier" errors in code that uses @ref MetalCRuntimeInfo.
  *
- * @file efi.h
+ * @file efi_shim.h
  */
 
-#ifndef INCLUDE_MCINTERNAL_EFI_H_
-#define INCLUDE_MCINTERNAL_EFI_H_
+#ifndef INCLUDE_METALC_INTERNAL_EFI_SHIM_H_
+#define INCLUDE_METALC_INTERNAL_EFI_SHIM_H_
 
 
-#include <metalc/metalc.h>
+#include "../metalc.h"
 
 
 #if METALC_HAVE_EFI_H
@@ -41,4 +41,4 @@
 #endif
 
 
-#endif  /* INCLUDE_MCINTERNAL_EFI_H_ */
+#endif  /* INCLUDE_METALC_INTERNAL_EFI_SHIM_H_ */

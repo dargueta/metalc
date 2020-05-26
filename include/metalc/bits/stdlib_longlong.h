@@ -7,7 +7,7 @@
 #ifndef METALC_BITS_STDLIB_LONGLONG_H_
 #define METALC_BITS_STDLIB_LONGLONG_H_
 
-#include <metalc/metalc.h>
+#include "../metalc.h"
 
 
 typedef struct {

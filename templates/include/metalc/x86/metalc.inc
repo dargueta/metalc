@@ -6,10 +6,36 @@
 %define INTERNALS_USE_FASTCALL  @METALC_INTERNALS_USE_FASTCALL@
 %define COMPILE_FOR_KERNEL      @METALC_COMPILE_FOR_KERNEL@
 %define USE_SHADOW_STACK        @METALC_COMPILE_OPTION_X86_USE_SHADOW_STACK@
-
+%define COMPILE_FOR_TESTING     @METALC_COMPILE_FOR_TESTING@
 
 %if !(ABI_MICROSOFT || ABI_GNU)
     %error "No calling convention specified."
+%endif
+
+
+%if COMPILE_FOR_TESTING
+    ; Building the C library for use by the testbench code
+    %macro decl_mcint 1
+        global %1:function hidden
+        global __mcint_%1:function
+        __mcint_%1 EQU %1
+    %endmacro
+
+    %macro decl_mcapi 1
+        global %1:function hidden
+        global __mcapi_%1:function
+    %endmacro
+%else
+    ; Building for production
+    %macro decl_mcint 1
+        global %1:function
+        __mcint_%1 EQU %1
+    %endmacro
+
+    %macro decl_mcapi 1
+        global %1:function
+        __mcapi_%1 EQU %1
+    %endmacro
 %endif
 
 

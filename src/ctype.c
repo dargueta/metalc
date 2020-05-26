@@ -1,5 +1,5 @@
-#include <metalc/ctype.h>
-#include <metalc/metalc.h>
+#include "metalc/ctype.h"
+#include "metalc/metalc.h"
 
 
 int isalnum(int c) {

@@ -1,8 +1,8 @@
 #ifndef INCLUDE_METALC_POSIX_H_
 #define INCLUDE_METALC_POSIX_H_
 
-#include <metalc/metalc.h>
-#include <metalc/stddef.h>
+#include "metalc.h"
+#include "stddef.h"
 
 
 METALC_API_INTERNAL int __mcint_brk(void *new_brk);

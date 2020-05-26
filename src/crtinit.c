@@ -1,12 +1,11 @@
-#include <stddef.h>
-#include <limits.h>
-
-#include <mcinternal/efi.h>
-#include <metalc/crtinit.h>
-#include <metalc/errno.h>
-#include <metalc/locale.h>
-#include <metalc/metalc.h>
-#include <metalc/setjmp.h>
+#include "metalc/crtinit.h"
+#include "metalc/errno.h"
+#include "metalc/internal/efi_shim.h"
+#include "metalc/limits.h"
+#include "metalc/locale.h"
+#include "metalc/metalc.h"
+#include "metalc/setjmp.h"
+#include "metalc/stddef.h"
 
 
 extern int malloc_init(void);

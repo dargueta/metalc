@@ -5,6 +5,8 @@
 
 
 METALC_API_INTERNAL int __mcint_utf8_mblen(const char *str, size_t n) {
+    unsigned uchr;
+
     /* A NULL pointer means the caller is asking if the character set is state-dependent.
      * It isn't, so we return 0. */
     if (str == NULL)
@@ -15,15 +17,17 @@ METALC_API_INTERNAL int __mcint_utf8_mblen(const char *str, size_t n) {
         return -1;
     }
 
-    if (str[0] == 0)
+    uchr = (unsigned)str[0];
+
+    if (uchr == 0)
         return 0;
-    else if ((str[0] >= 0) && (str[0] <= 127))
+    if (uchr <= 127)
         return 1;
-    else if (str[0] & 0xe0 == 0xc0)
+    if ((uchr & 0xe0) == 0xc0)
         return 2;
-    else if (str[0] & 0xf0 == 0xe0)
+    if ((uchr & 0xf0) == 0xe0)
         return 3;
-    else if (str[0] & 0xf8 == 0xf0)
+    if ((uchr & 0xf8) == 0xf0)
         return 4;
 
     __mcapi_errno = __mcapi_EILSEQ;
@@ -41,6 +45,14 @@ METALC_API_INTERNAL int __mcint_utf8_mbtowc(__mcapi_wchar_t *pwc, const char *st
 
     current_char_len = __mcint_utf8_mblen(str, 1);
 
+    /* We need to examine at least current_char_len bytes to correctly interpret
+     * the wide character. If we can't, then consider it an illegal byte sequence
+     * and complain. */
+    if (n < (size_t)current_char_len) {
+        __mcapi_errno = __mcapi_EILSEQ;
+        return -1;
+    }
+
     switch (current_char_len) {
         case 0:
             result = 0;
@@ -50,6 +62,7 @@ METALC_API_INTERNAL int __mcint_utf8_mbtowc(__mcapi_wchar_t *pwc, const char *st
             break;
         case 2:
             result = (((unsigned)str[0] & 0x1f) << 8) | ((unsigned)str[1] & 0x3f);
+            break;
         case 3:
             result = (((unsigned)str[0] & 0x0f) << 14)  \
                    | (((unsigned)str[1] & 0x3f) << 6)   \

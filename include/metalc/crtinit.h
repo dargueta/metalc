@@ -7,10 +7,10 @@
 #ifndef INCLUDE_METALC_CRTINIT_H_
 #define INCLUDE_METALC_CRTINIT_H_
 
-#include <mcinternal/efi.h>
-#include <metalc/metalc.h>
-#include <metalc/stddef.h>
-#include <metalc/stdint.h>
+#include "internal/efi_shim.h"
+#include "metalc.h"
+#include "stddef.h"
+#include "stdint.h"
 
 
 /**

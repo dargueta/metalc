@@ -1,13 +1,8 @@
-#include <metalc/errno.h>
-#include <metalc/metalc.h>
-#include <metalc/stdio.h>
-#include <metalc/stdlib.h>
-#include <metalc/string.h>
-
-extern /**
- *
- */
-static
+#include "metalc/errno.h"
+#include "metalc/metalc.h"
+#include "metalc/stdio.h"
+#include "metalc/stdlib.h"
+#include "metalc/string.h"
 
 
 

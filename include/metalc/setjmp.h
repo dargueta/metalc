@@ -1,7 +1,7 @@
 #ifndef INCLUDE_METALC_SETJMP_H_
 #define INCLUDE_METALC_SETJMP_H_
 
-#include <metalc/metalc.h>
+#include "metalc.h"
 
 
 /** @cond INTERNAL_MACRO */

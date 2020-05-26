@@ -1,8 +1,8 @@
-#include <metalc/errno.h>
-#include <metalc/stddef.h>
-#include <metalc/stdlib.h>
-#include <metalc/string.h>
-#include <mcinternal/printf.h>
+#include "metalc/errno.h"
+#include "metalc/internal/printf.h"
+#include "metalc/stddef.h"
+#include "metalc/stdlib.h"
+#include "metalc/string.h"
 
 
 /**
@@ -61,7 +61,7 @@ int parse_printf_format_width(const char *format, struct MCFormatSpecifier *info
     if (__mcapi_errno != 0)
         return -1;
 
-    info->width = (int)width;
+    info->minimum_field_width = (unsigned)width;
     return (int)(end - format);
 }
 
@@ -198,22 +198,31 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
             break;
     }
 
+    info->argument_width = width;
+
     switch(format[n_read]) {
         case 'c':
             info->argument_type = MC_AT_CHAR;
             break;
         case 'd':
         case 'i':
+            info->is_unsigned = 0;
+            info->radix = 10;
+            info->argument_type = int_argtype_from_width(width);
+            break;
         case 'u':
+            info->is_unsigned = 1;
             info->radix = 10;
             info->argument_type = int_argtype_from_width(width);
             break;
         case 'o':
+            info->is_unsigned = 1;
             info->radix = 8;
             info->argument_type = int_argtype_from_width(width);
             break;
         case 'x':
         case 'X':
+            info->is_unsigned = 1;
             info->radix = 16;
             info->argument_type = int_argtype_from_width(width);
             break;
@@ -243,11 +252,10 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
 
 
 
-/**
- *
- */
 METALC_API_INTERNAL
-int parse_printf_format_specifier(const char *format, struct MCFormatSpecifier *info) {
+int __mcint_parse_printf_format_specifier(
+    const char *format, struct MCFormatSpecifier *info
+) {
     int total_read;
     int current_read;
 

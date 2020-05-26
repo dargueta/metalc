@@ -4,10 +4,11 @@
  * @file printf.h
  */
 
-#ifndef INCLUDE_MCINTERNAL_PRINTF_H_
-#define INCLUDE_MCINTERNAL_PRINTF_H_
+#ifndef INCLUDE_METALC_INTERNAL_PRINTF_H_
+#define INCLUDE_METALC_INTERNAL_PRINTF_H_
 
-#include <metalc/metalc.h>
+#include "../metalc.h"
+#include "../stdarg.h"
 
 
 /**
@@ -16,7 +17,8 @@
 enum MCArgumentType {
     MC_AT_CHAR,     /**< For `%%c` */
     MC_AT_STRING,   /**< For `%%s` */
-    MC_AT_SHORT,    /**< For `%%hd`, `%%hi`, `%%hu`, or `%%hx` */
+    MC_AT_BYTE,     /**< For `%%hhd`, `%%hhi`, `%%hhu`, `%%hho`, or `%%hhx` */
+    MC_AT_SHORT,    /**< For `%%hd`, `%%hi`, `%%hu`, `%%ho`, or `%%hx` */
     MC_AT_INT,      /**< For `%%d`, `%%i`, `%%u`, or `%%x` */
     MC_AT_LONG,     /**< For `%%ld`, `%%li`, `%%lu`, or `%%lx` */
     /** For `%%lld`, `%%lli`, `%%llu`, or `%%llx`. Not supported on all platforms. */
@@ -72,7 +74,9 @@ struct MCFormatSpecifier {
     int justify;
     enum MCSignRepr sign_representation;
     enum MCArgumentType argument_type;
-    unsigned width;  /**< The minimum width of the field, or 0 if not defined. */
+    enum MCArgumentWidth argument_width;
+    /** The minimum width of the field, or 0 if not defined. */
+    unsigned minimum_field_width;
     unsigned radix;
     int is_unsigned;
     int is_zero_padded;
@@ -100,6 +104,19 @@ struct MCFormatSpecifier {
  *          value will be negative and @ref errno will be set accordingly.
  */
 METALC_API_INTERNAL
-int parse_printf_format_specifier(const char *format, struct MCFormatSpecifier *info);
+int __mcint_parse_printf_format_specifier(const char *format, struct MCFormatSpecifier *info);
 
-#endif  /* INCLUDE_MCINTERNAL_PRINTF_H_ */
+/**
+ * Given a format string, write a single value to the buffer.
+ *
+ * @todo Add support padding integer values with leading 0s.
+ * @todo Add support for %%p.
+ * @todo Add support for floating-point numbers.
+ * @todo Add support for left- and right-justifying values.
+ */
+METALC_API_INTERNAL
+int __mcint_evaluate_format_specifier(
+    const char **format, va_list arg_list, char **output, int n_chars_written
+);
+
+#endif  /* INCLUDE_METALC_INTERNAL_PRINTF_H_ */

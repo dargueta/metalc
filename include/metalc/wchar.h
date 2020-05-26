@@ -1,8 +1,8 @@
 #ifndef INCLUDE_METALC_WCHAR_H_
 #define INCLUDE_METALC_WCHAR_H_
 
-#include <metalc/metalc.h>
-#include <metalc/stdint.h>
+#include "metalc.h"
+#include "stdint.h"
 
 
 typedef uint32_t __mcapi_wchar_t;

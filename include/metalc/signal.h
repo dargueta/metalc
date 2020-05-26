@@ -1,9 +1,9 @@
 #ifndef INCLUDE_METALC_SIGNAL_H_
 #define INCLUDE_METALC_SIGNAL_H_
 
-#include <metalc/crtinit.h>
-#include <metalc/metalc.h>
-#include <metalc/stdint.h>
+#include "crtinit.h"
+#include "metalc.h"
+#include "stdint.h"
 
 
 typedef int32_t __mcapi_sig_atomic_t;
@@ -64,6 +64,6 @@ cstdlib_export(signal);
 #define __mcapi_SIG_IGN     1   /**< Ignore signal: The signal is ignored. */
 #define __mcapi_SIG_ERR     2   /**< The signal triggers an error. */
 
-#include <metalc/bits/signal.h>
+#include "bits/signal.h"
 
 #endif  /* INCLUDE_METALC_SIGNAL_H_ */

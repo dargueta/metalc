@@ -1,7 +1,7 @@
 #ifndef INCLUDE_METALC_LIMITS_H_
 #define INCLUDE_METALC_LIMITS_H_
 
-#include <metalc/metalc.h>
+#include "metalc.h"
 
 #if METALC_HAVE_LIMITS_H
     #include <limits.h>

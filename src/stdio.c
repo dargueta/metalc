@@ -1,13 +1,14 @@
-#include <mcinternal/printf.h>
-#include <mcinternal/string.h>
-#include <metalc/crtinit.h>
-#include <metalc/ctype.h>
-#include <metalc/errno.h>
-#include <metalc/stdarg.h>
-#include <metalc/stdint.h>
-#include <metalc/stdio.h>
-#include <metalc/stdlib.h>
-#include <metalc/string.h>
+#include "metalc/crtinit.h"
+#include "metalc/ctype.h"
+#include "metalc/errno.h"
+#include "metalc/internal/printf.h"
+#include "metalc/internal/string.h"
+#include "metalc/limits.h"
+#include "metalc/stdarg.h"
+#include "metalc/stdint.h"
+#include "metalc/stdio.h"
+#include "metalc/stdlib.h"
+#include "metalc/string.h"
 
 
 extern MetalCRuntimeInfo *__mcint_runtime_info;
@@ -25,10 +26,124 @@ METALC_API_INTERNAL int stdio_teardown(void) {
 }
 
 
-int vsprintf(char *buffer, const char *format, va_list arg_list) {
-    struct MCFormatSpecifier format_info;
-    int format_error, n_chars_written, buffer_size, i;
+int __mcint_evaluate_format_specifier(
+    const char **format, va_list arg_list, char **output, int n_chars_written
+) {
     char temp[256];
+    int format_length;
+    size_t string_length;
+    struct MCFormatSpecifier info;
+    const char *string_pointer;
+
+    if (**format == '%') {
+        if (output) {
+            **output = '%';
+            ++*output;
+        }
+        ++*format;
+        return 1;
+    }
+
+    format_length = __mcint_parse_printf_format_specifier(*format, &info);
+    if (format_length < 0)
+        return -1;
+
+    *format += (size_t)format_length;
+
+    /* `**format` points to the first character in the format string *after* the
+     * introductory '%'. Look at that character and increment `*format` so we
+     * don't have to do that later. */
+    switch (info.argument_type) {
+        case MC_AT_CHAR:
+            /* n.b. `char` is promoted to `int` when passed as an argument */
+            temp[0] = (char)va_arg(arg_list, int);
+            if (output){
+                **output = temp[0];
+                ++*output;
+            }
+            return 1;
+
+        case MC_AT_BYTE:
+        case MC_AT_SHORT:
+        case MC_AT_INT:
+            /* This can be d, i, u, x, X, o, and their h or hh variants.
+             * We don't care if the argument is a short or byte, since they get
+             * promoted to integers when passed as arguments.
+             *
+             * FIXME: We need to output the radix first.
+             */
+            if (info.is_unsigned)
+                /* `x`, `X`, `u`, or `o` */
+                itoa(va_arg(arg_list, unsigned), temp, info.radix);
+            else
+                /* d or i */
+                itoa(va_arg(arg_list, int), temp, info.radix);
+
+            return strcpy_and_update_buffer(temp, (void **)output);
+
+        case MC_AT_LONG:
+            if (info.is_unsigned)
+                itoa(va_arg(arg_list, unsigned long), temp, info.radix);
+            else
+                itoa(va_arg(arg_list, long), temp, info.radix);
+
+            return strcpy_and_update_buffer(temp, (void **)output);
+
+        #if METALC_HAVE_LONG_LONG
+            case MC_AT_LONGLONG:
+                if (info.is_unsigned)
+                    itoa(va_arg(arg_list, unsigned long long), temp, info.radix);
+                else
+                    itoa(va_arg(arg_list, long long), temp, info.radix);
+
+                return strcpy_and_update_buffer(temp, (void **)output);
+        #endif
+
+        case MC_AT_N_WRITTEN_POINTER:
+            *va_arg(arg_list, int *) = n_chars_written;
+            return 0;
+
+        case MC_AT_STRING:
+            string_pointer = va_arg(arg_list, char *);
+
+            /* Determine the length of the string we need to copy, and fail if
+             * the number of bytes in the string exceeds the maximum value we
+             * can return.
+             *
+             * If the string is too long, it gets copied successfully but the
+             * number of bytes written will overflow our counter. This'll cause
+             * us to return a negative value. The caller think know an error
+             * occurred but wouldn't have the right errno value. With a carefully
+             * crafted string anything using the return value for pointer indexing
+             * could be made to write to an arbitrary location in memory. */
+            string_length = strlen(string_pointer);
+            if (string_length > (size_t)INT_MAX) {
+                __mcapi_errno = __mcapi_EOVERFLOW;
+                return -1;
+            }
+
+            if (!output)
+                return strlen(string_pointer);
+
+            /* Don't bother with padding crap, just output the string. */
+            strncpy(*output, string_pointer, string_length);
+            return (int)string_length;
+
+        case MC_AT_FLOAT:
+        case MC_AT_DOUBLE:
+        case MC_AT_LONGDOUBLE:
+            __mcapi_errno = __mcapi_ENOSYS;
+            return -1;
+
+        default:
+            __mcapi_errno = __mcapi_EINVAL;
+            return -1;
+    }
+}
+
+
+int vsprintf(char *buffer, const char *format, va_list arg_list) {
+    int n_chars_written, i;
 
     n_chars_written = 0;
 
@@ -37,186 +152,14 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
             if (buffer)
                 *buffer++ = *format;
             ++n_chars_written;
-            continue;
         }
-
-        /* Hit a % sign. We now must look at the format specifier in the next
-         * character. */
-        ++format;
-        switch (*format) {
-            case '%':
-                if (buffer)
-                    *buffer++ = '%';
-                ++n_chars_written;
-                break;
-            case 'c':
-                /* n.b. `char` is promoted to `int` when passed as an argument */
-                temp[0] = (char)va_arg(arg_list, int);
-                if (buffer)
-                    *buffer++ = temp[0];
-                ++n_chars_written;
-                break;
-            case 'd':
-            case 'i':
-                itoa(va_arg(arg_list, int), temp, 10);
-                n_chars_written += strcpy_and_update_buffer(temp, (void **)&buffer);
-                break;
-            case 'h':
-                /* Half size; this is either a `short int` or a `float`. We don't
-                 * support floating-point anything yet. Note that shorts are
-                 * promoted to ints when passed in so we use `int` not `short`. */
-                ++format;
-                switch (*format) {
-                    case 'd':
-                    case 'i':
-                        itoa(va_arg(arg_list, int), temp, 10);
-                        break;
-                    case 'u':
-                        utoa(va_arg(arg_list, unsigned), temp, 10);
-                        break;
-                    case 'x':
-                    case 'X':
-                        utoa(va_arg(arg_list, unsigned), temp, 16);
-                        buffer_size = (int)strlen(temp);
-                        if (*format == 'X') {
-                            for (i = 0; i < buffer_size; ++i)
-                                temp[i] = toupper(temp[i]);
-                        }
-                        break;
-                    case 'e':
-                    case 'f':
-                    case 'g':
-                        __mcapi_errno = __mcapi_ENOSYS;
-                        return -n_chars_written;
-                    default:
-                        __mcapi_errno = __mcapi_EINVAL;
-                        return -n_chars_written;
-                }
-                n_chars_written += strcpy_and_update_buffer(temp, (void **)&buffer);
-                ++format;
-                break;
-            case 'l':
-                #if METALC_HAVE_LONG_LONG
-                    /* If we have long long support we need two characters of lookahead
-                     * to see if the specifier is %ll_ or just %l_. */
-                    ++format;
-                    if (*format == 'l') {
-                        /* Format is %ll_ */
-                        ++format;
-                        switch (*format) {
-                            case 'd':
-                            case 'i':
-                                lltoa(va_arg(arg_list, long long), temp, 10);
-                                break;
-                            case 'u':
-                                ulltoa(
-                                    va_arg(arg_list, unsigned long long), temp, 10
-                                );
-                                break;
-                            case 'x':
-                            case 'X':
-                                ulltoa(
-                                    va_arg(arg_list, unsigned long long), temp, 16
-                                );
-                                buffer_size = (int)strlen(temp);
-                                if (*format == 'X') {
-                                    for (i = 0; i < buffer_size; ++i)
-                                        temp[i] = toupper(temp[i]);
-                                }
-                                break;
-                            default:
-                                __mcapi_errno = __mcapi_EINVAL;
-                                return -n_chars_written;
-                        }
-                    }
-                    else {
-                        /* Format is %l_ not %ll_ */
-                        switch (*format) {
-                            case 'd':
-                            case 'i':
-                                ltoa(va_arg(arg_list, long), temp, 10);
-                                break;
-                            case 'u':
-                                ultoa(
-                                    va_arg(arg_list, unsigned long), temp, 10
-                                );
-                                break;
-                            case 'x':
-                            case 'X':
-                            case 'e':
-                            case 'f':
-                            case 'g':
-                                /* TODO */
-                                __mcapi_errno = __mcapi_ENOSYS;
-                                return -n_chars_written;
-                            default:
-                                __mcapi_errno = __mcapi_EINVAL;
-                                return -n_chars_written;
-                        }
-                    }
-                #else
-                    /* No long long support */
-                    switch (*format) {
-                        case 'd':
-                        case 'i':
-                            ltoa(va_arg(arg_list, long), temp, 10);
-                            break;
-                        case 'u':
-                            ultoa(va_arg(arg_list, unsigned long), temp, 10);
-                            break;
-                        case 'x':
-                        case 'X':
-                            /* TODO */
-                            __mcapi_errno = __mcapi_ENOSYS;
-                            return -n_chars_written;
-                        default:
-                            __mcapi_errno = __mcapi_EINVAL;
-                            return -n_chars_written;
-                    }
-                #endif
-
-                n_chars_written += strcpy_and_update_buffer(temp, (void **)&buffer);
-                ++format;
-                break;
-            case 'n':
-                *va_arg(arg_list, int *) = n_chars_written;
-                break;
-            case 'u':
-                utoa(va_arg(arg_list, unsigned), temp, 10);
-                n_chars_written += strcpy_and_update_buffer(temp, (void **)&buffer);
-                break;
-            case 'x':
-            case 'X':
-                utoa(va_arg(arg_list, unsigned), temp, 16);
-                buffer_size = (int)strlen(temp);
-                if (*format == 'X') {
-                    for (i = 0; i < buffer_size; ++i)
-                        temp[i] = toupper(temp[i]);
-                }
-                if (buffer) {
-                    strcpy(temp, buffer);
-                    buffer += buffer_size;
-                }
-                n_chars_written += buffer_size;
-                break;
-            case 'e':
-            case 'f':
-            case 'g':
-                __mcapi_errno = __mcapi_ENOSYS;
+        else {
+            i = __mcint_evaluate_format_specifier(&format, arg_list, &buffer, n_chars_written);
+            if (i < 0)
                 return -n_chars_written;
-            default:
-                /* Else: This is a complex format specifier. */
-                format_error = _determine_format(format, &format_info);
-                if (format_error != 0) {
-                    __mcapi_errno = __mcapi_EINVAL;
-                    return -n_chars_written;
-                }
-                /* Else: Valid format specifier. */
-                break;
+            n_chars_written += i;
         }
     }
-
-    /* TODO (dargueta): Finish */
 
     return n_chars_written;
 }

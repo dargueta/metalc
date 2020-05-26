@@ -1,9 +1,9 @@
 #ifndef INCLUDE_METALC_STDLIB_H_
 #define INCLUDE_METALC_STDLIB_H_
 
-#include <metalc/metalc.h>
-#include <metalc/stddef.h>
-#include <metalc/wchar.h>
+#include "metalc.h"
+#include "stddef.h"
+#include "wchar.h"
 
 
 #define __mcapi_RAND_MAX    INT_MAX
@@ -87,7 +87,7 @@ cstdlib_export(free);
 
 
 #if METALC_HAVE_LONG_LONG
-    #include <metalc/bits/stdlib_longlong.h>
+    #include "bits/stdlib_longlong.h"
 #endif
 
 /* Nonstandard functions */

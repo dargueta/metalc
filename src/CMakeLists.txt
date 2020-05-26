@@ -60,9 +60,9 @@ set(HEADER_FILES
     "${INCLUDE_CLIB_DIR}/charsets/common.h"
     "${INCLUDE_CLIB_DIR}/charsets/utf8.h"
 
-    "${INCLUDE_ROOT_DIR}/mcinternal/efi.h"
-    "${INCLUDE_ROOT_DIR}/mcinternal/printf.h"
-    "${INCLUDE_ROOT_DIR}/mcinternal/string.h"
+    "${INCLUDE_ROOT_DIR}/metalc/internal/efi_shim.h"
+    "${INCLUDE_ROOT_DIR}/metalc/internal/printf.h"
+    "${INCLUDE_ROOT_DIR}/metalc/internal/string.h"
 )
 
 
@@ -82,6 +82,7 @@ set(LIBRARY_C_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/stdio.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/stdlib.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/string.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/wchar/utf8.c"
 )
 
 set(LIBRARY_X86_ASM_SOURCES

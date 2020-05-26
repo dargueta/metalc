@@ -1,10 +1,10 @@
 #ifndef INCLUDE_METALC_KERNEL_HOOKS_H_
 #define INCLUDE_METALC_KERNEL_HOOKS_H_
 
-#include <metalc/metalc.h>
-#include <metalc/stddef.h>
-#include <metalc/stdint.h>
-#include <metalc/stdio.h>
+#include "metalc.h"
+#include "stddef.h"
+#include "stdint.h"
+#include "stdio.h"
 
 
 /**
