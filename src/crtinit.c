@@ -82,26 +82,29 @@ int cstdlib_start(MetalCRuntimeInfo *rti, int argc, char **argv, char **env) {
     return 0;
 }
 
-#if METALC_PLATFORM_UEFI_FULL
-    /* This is a UEFI application. */
-    EFI_STATUS _start(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *system_table) {
-        MetalCRuntimeInfo rti;
 
-        rti.efi_image_handle = image_handle;
-        rti.efi_system_table = system_table;
+#if !METALC_COMPILE_FOR_TESTING
+    #if METALC_PLATFORM_UEFI_FULL
+        /* This is a UEFI application. */
+        EFI_STATUS _start(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *system_table) {
+            MetalCRuntimeInfo rti;
+
+            rti.efi_image_handle = image_handle;
+            rti.efi_system_table = system_table;
 
 
-        return (EFI_STATUS)cstdlib_start(&rti, 0, NULL, NULL);
-    }
-#elif METALC_PLATFORM_UEFI_RUNTIME_ONLY
-    /* UEFI runtime; this is the entry point for the kernel. */
-    int _start(MetalCRuntimeInfo *rti) {
+            return (EFI_STATUS)cstdlib_start(&rti, 0, NULL, NULL);
+        }
+    #elif METALC_PLATFORM_UEFI_RUNTIME_ONLY
+        /* UEFI runtime; this is the entry point for the kernel. */
+        int _start(MetalCRuntimeInfo *rti) {
 
-    }
-#else
-    /* Bare metal; does not assume any underlying system but it *does* need some
-     * information from the caller. */
-    int _start(MetalCRuntimeInfo *rti) {
-        return cstdlib_start(rti, 0, NULL, NULL);
-    }
+        }
+    #else
+        /* Bare metal; does not assume any underlying system but it *does* need some
+         * information from the caller. */
+        int _start(MetalCRuntimeInfo *rti) {
+            return cstdlib_start(rti, 0, NULL, NULL);
+        }
+    #endif
 #endif
