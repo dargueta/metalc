@@ -39,5 +39,3 @@ void __mcint_assert(
 
     abort();
 }
-
-cstdlib_implement(__mcint_assert);
