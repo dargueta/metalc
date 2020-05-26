@@ -188,4 +188,5 @@ if (METALC_COMPILE_FOR_TESTING)
         -DMETALC_COMPILE_FOR_TESTING=${METALC_COMPILE_FOR_TESTING}
         -DMETALC_DISABLE_STDLIB_DEFS=${METALC_DISABLE_STDLIB_DEFS}
     )
+    add_test(text_executable test_executable)
 endif()

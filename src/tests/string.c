@@ -15,7 +15,7 @@ BEGIN_TEST(test_memchr__basic)
 END_TEST()
 
 
-BEGIN_TEST(test_memchr__zero_length)
+BEGIN_TEST(test_memchr__not_found)
     CHECK_EQ(__mcapi_memchr("", '\n', 5), NULL);
 END_TEST()
 
@@ -25,7 +25,7 @@ BEGIN_TEST(test_memcmp__zero_length)
 END_TEST()
 
 
-BEGIN_TEST(test_memcmp__one_character_zero_equal)
+BEGIN_TEST(test_memcmp__no_character_zero_equal)
     CHECK_EQ(__mcapi_memcmp("", "", 1), 0);
 END_TEST()
 
@@ -37,9 +37,9 @@ END_TEST()
 
 const struct UnitTestEntry kStringUnitTests[] = {
     {test_memchr__basic, "memchr: basic"},
-    {test_memchr__zero_length, "memchr: zero-length string"},
-    {test_memcmp__zero_length, "memcmp: zero-length string"},
-    {test_memcmp__one_character_zero_equal, "memcmp: one character string, zero"},
-    {test_memcmp__one_character_nonzero_equal, "memcmp: one character string, non-zero"},
+    {test_memchr__not_found, "memchr: zero-length string, not found"},
+    {test_memcmp__zero_length, "memcmp: zero-length strings, zero length given"},
+    {test_memcmp__no_character_zero_equal, "memcmp: zero-length strings, nonzero length given"},
+    {test_memcmp__one_character_nonzero_equal, "memcmp: one character string, non-zero length given"},
     {NULL, NULL}
 };

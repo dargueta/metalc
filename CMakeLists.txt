@@ -27,4 +27,5 @@ add_compile_options(-Wall -Werror)
 include("settings.cmake")
 
 enable_testing()
+include("CTest")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src" "${CMAKE_CURRENT_BINARY_DIR}/lib")
