@@ -17,6 +17,7 @@
 
 
 #include "../metalc.h"
+#include "../stddef.h"
 
 
 #if METALC_HAVE_EFI_H
@@ -29,14 +30,26 @@
 
 
 /* The EFI headers don't exist so we must be compiling in bare metal mode. */
+
+
 #if !METALC_HAVE_EFI_H
-    typedef void *EFI_HANDLE;
-    typedef struct {
-        /**
-         * A useless pointer; ISO C requires structs to have at least one member.
-         */
-        void *dummy;
-    } EFI_SYSTEM_TABLE;
+    /** Dummy definition of the real EFI ``EFI_HANDLE`` type. */
+    typedef intptr_t EFI_HANDLE;
+
+    /**
+     * Dummy definition of the real EFI ``EFI_SYSTEM_TABLE`` type.
+     *
+     * In the real EFI headers this is defined as a struct, but if we're not using
+     * EFI support then it doesn't really matter what this is, does it?
+     */
+    typedef intptr_t EFI_SYSTEM_TABLE;
+
+    /**
+     * Dummy definition of the EFI ``EFI_STATUS`` type used for return values.
+     *
+     * This was taken from the real efi.h file on Ubuntu 20.04 so it's probably
+     * accurate. Not that it matters.
+     */
     typedef unsigned long EFI_STATUS;
 #endif
 
