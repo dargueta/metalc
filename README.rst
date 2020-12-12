@@ -1,10 +1,11 @@
-Metal Standard C Library
-========================
+Bare Metal/UEFI Standard C Library
+==================================
 
 This is an implementation of the C standard library designed for use by:
 
-* Programs that run with no underlying operating system, or
-* UEFI applications.
+* UEFI-aware OS kernels,
+* UEFI applications, or
+* Programs that run with absolutely no underlying system (not even EFI).
 
 This library requires your C compiler to provide a few headers of its own, namely:
 
@@ -15,7 +16,7 @@ This library requires your C compiler to provide a few headers of its own, namel
 * stdint.h (a partial shim is provided that'll work for some systems without it)
 
 GCC's freestanding mode provides all of these headers; MinGW probably does as
-well.
+well. I haven't tested clang yet.
 
 Caveat
 ------
