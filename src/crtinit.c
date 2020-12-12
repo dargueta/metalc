@@ -42,19 +42,9 @@ static int crt_teardown(void) {
 }
 
 
-int cstdlib_start(MetalCRuntimeInfo *rti, int argc, char **argv, char **env) {
+int cstdlib_run(int argc, char **argv, char **env) {
     int result;
-
-    __mcint_runtime_info = rti;
-
-    result = crt_init();
-    if (result != 0) {
-        /* Failed to initialize the standard library. The kernel is responsible
-         * for taking the appropriate action. */
-        rti->main_return_value = -1;
-        rti->signal_code = -1;
-        return result;
-    }
+    MetalCRuntimeInfo *rti = __mcint_runtime_info;
 
     result = setjmp(__mcint_abort_target);
     if (result == 0) {
@@ -79,6 +69,23 @@ int cstdlib_start(MetalCRuntimeInfo *rti, int argc, char **argv, char **env) {
     }
 
     crt_teardown();
+    return 0;
+}
+
+
+int cstdlib_init(MetalCRuntimeInfo *rti) {
+    __mcint_runtime_info = rti;
+    __mcapi_errno = 0;
+
+    setlocale(__mcapi_LC_ALL, "C");
+    malloc_init();
+    stdio_init();
+
+    /* TODO (dargueta): Initialize atexit here. */
+
+    rti->main_return_value = -1;
+    rti->signal_code = -1;
+
     return 0;
 }
 

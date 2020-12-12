@@ -93,7 +93,8 @@ int main(int argc, char **argv) {
             rti.page_size = FAKE_PAGE_SIZE;
             rti.udata = os_state;
 
-            result = cstdlib_start(&rti, 0, NULL, NULL);
+            cstdlib_init(&rti);
+            result = cstdlib_run(0, NULL, NULL);
             fflush(test_output_fd);
 
             if (result == 0) {

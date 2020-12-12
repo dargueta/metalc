@@ -93,8 +93,15 @@ typedef struct {
 } MetalCRuntimeInfo;
 
 
-METALC_API_EXPORT int cstdlib_start(
-    MetalCRuntimeInfo *rti, int argc, char **argv, char **env
-);
+/**
+ * Initialize the standard C library.
+ */
+METALC_API_EXPORT int cstdlib_init(MetalCRuntimeInfo *rti);
+
+
+/**
+ * Run the ``main`` function defined in
+ */
+METALC_API_EXPORT int cstdlib_run(int argc, char **argv, char **env);
 
 #endif  /* INCLUDE_METALC_CRTINIT_H_ */
