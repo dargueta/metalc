@@ -18,7 +18,6 @@
     %macro decl_mcint 1
         global %1:function hidden
         global __mcint_%1:function
-        __mcint_%1 EQU %1
     %endmacro
 
     %macro decl_mcapi 1
@@ -29,12 +28,10 @@
     ; Building for production
     %macro decl_mcint 1
         global %1:function
-        __mcint_%1 EQU %1
     %endmacro
 
     %macro decl_mcapi 1
         global %1:function
-        __mcapi_%1 EQU %1
     %endmacro
 %endif
 
