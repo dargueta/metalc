@@ -12,6 +12,8 @@ extern int malloc_init(void);
 extern int malloc_teardown(void);
 extern int stdio_init(void);
 extern int stdio_teardown(void);
+extern int locale_init(void);
+extern int locale_teardown(void);
 
 
 MetalCRuntimeInfo *__mcint_runtime_info __attribute__((visibility("hidden"))) = NULL;
@@ -19,25 +21,29 @@ MetalCRuntimeInfo *__mcint_runtime_info __attribute__((visibility("hidden"))) = 
 __mcapi_jmp_buf __mcint_abort_target;
 
 
-static int crt_init(void) {
-    /* Die if cstdlib_start hasn't been called yet. We need the kernel to give us the
-     * runtime info first. */
-    if (__mcint_runtime_info == NULL)
-        return __mcapi_EFAULT;
-
+int cstdlib_init(MetalCRuntimeInfo *rti) {
+    __mcint_runtime_info = rti;
     __mcapi_errno = 0;
-    setlocale(__mcapi_LC_ALL, "C");
+
+
     malloc_init();
     stdio_init();
+    locale_init();
+    setlocale(__mcapi_LC_ALL, "C");
+
     /* TODO (dargueta): Initialize atexit here. */
+
+    rti->main_return_value = -1;
+    rti->signal_code = -1;
 
     return 0;
 }
 
 
-static int crt_teardown(void) {
+static int cstdlib_teardown(void) {
     stdio_teardown();
     malloc_teardown();
+    locale_teardown();
     return 0;
 }
 
@@ -68,24 +74,7 @@ int cstdlib_run(int argc, char **argv, char **env) {
         rti->main_return_value = -1;
     }
 
-    crt_teardown();
-    return 0;
-}
-
-
-int cstdlib_init(MetalCRuntimeInfo *rti) {
-    __mcint_runtime_info = rti;
-    __mcapi_errno = 0;
-
-    setlocale(__mcapi_LC_ALL, "C");
-    malloc_init();
-    stdio_init();
-
-    /* TODO (dargueta): Initialize atexit here. */
-
-    rti->main_return_value = -1;
-    rti->signal_code = -1;
-
+    cstdlib_teardown();
     return 0;
 }
 
@@ -99,19 +88,23 @@ int cstdlib_init(MetalCRuntimeInfo *rti) {
             rti.efi_image_handle = image_handle;
             rti.efi_system_table = system_table;
 
-
-            return (EFI_STATUS)cstdlib_start(&rti, 0, NULL, NULL);
+            cstdlib_init(&rti);
+            return (EFI_STATUS)cstdlib_run(0, NULL, NULL);
         }
     #elif METALC_PLATFORM_UEFI_RUNTIME_ONLY
         /* UEFI runtime; this is the entry point for the kernel. */
         int _start(MetalCRuntimeInfo *rti) {
-
+            /* TODO */
         }
     #else
         /* Bare metal; does not assume any underlying system but it *does* need some
          * information from the caller. */
         int _start(MetalCRuntimeInfo *rti) {
-            return cstdlib_start(rti, 0, NULL, NULL);
+            rti.efi_image_handle = NULL;
+            rti.efi_system_table = NULL;
+
+            cstdlib_init(rti);
+            cstdlib_run(0, NULL, NULL);
         }
     #endif
 #endif
