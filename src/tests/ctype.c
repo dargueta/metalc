@@ -5,14 +5,14 @@
 
 
 BEGIN_TEST(isalnum__basic)
-    CHECK_EQ(isalnum('A'), 1);
-    CHECK_EQ(isalnum('F'), 1);
-    CHECK_EQ(isalnum('Z'), 1);
-    CHECK_EQ(isalnum('a'), 1);
-    CHECK_EQ(isalnum('j'), 1);
-    CHECK_EQ(isalnum('z'), 1);
-    CHECK_EQ(isalnum('0'), 1);
-    CHECK_EQ(isalnum('9'), 1);
+    CHECK_NE(isalnum('A'), 0);
+    CHECK_NE(isalnum('F'), 0);
+    CHECK_NE(isalnum('Z'), 0);
+    CHECK_NE(isalnum('a'), 0);
+    CHECK_NE(isalnum('j'), 0);
+    CHECK_NE(isalnum('z'), 0);
+    CHECK_NE(isalnum('0'), 0);
+    CHECK_NE(isalnum('9'), 0);
 END_TEST()
 
 
