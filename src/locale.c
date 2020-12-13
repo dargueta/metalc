@@ -40,6 +40,7 @@ struct LConvEntry {
 };
 
 
+/* TODO (dargueta) Adjust this if the lib is compiled to only support ASCII. */
 static struct __mcint_charset_info _supported_charsets[] = {
     {
         "utf8",
@@ -58,8 +59,8 @@ const struct LConvEntry _supported_locales[] = {
 };
 
 
-const struct __mcapi_lconv *_current_lconv = _supported_locales[0].lconv_info;
-const struct __mcint_charset_info *_current_charset = &_supported_charsets[0];
+struct __mcapi_lconv _current_lconv;
+const struct __mcint_charset_info *_ptr_current_charset = &_supported_charsets[0];
 
 
 static const struct __mcapi_lconv *_find_lconv(const char *name) {
@@ -84,29 +85,49 @@ static const struct __mcint_charset_info *_find_charset(const char *name) {
 }
 
 
+METALC_API_INTERNAL int locale_init(void) {
+    const struct __mcapi_lconv *default_locale = _find_lconv("C");
+    memcpy(&_current_lconv, default_locale, sizeof(_current_lconv));
+    return 0;
+}
+
+
+METALC_API_INTERNAL int locale_teardown(void) {
+    return 0;
+}
+
+
 int setlocale(int what, const char *name) {
     const struct __mcapi_lconv *locale;
     const struct __mcint_charset_info *charset;
 
     switch (what) {
         case __mcapi_LC_ALL:
+            /* Caller wants to change the entire locale. */
             locale = _find_lconv(name);
             if (locale == NULL)
                 return __mcapi_EINVAL;
-            _current_lconv = locale;
+
+            memcpy(&_current_lconv, locale, sizeof(_current_lconv));
             return 0;
+
         case __mcapi_LC_CTYPE:
+            /* Caller wants to change the default character set. */
             charset = _find_charset(name);
             if (charset == NULL)
                 return __mcapi_EINVAL;
-            _current_charset = charset;
+            _ptr_current_charset = charset;
             return 0;
+
         case __mcapi_LC_COLLATE:
         case __mcapi_LC_MONETARY:
         case __mcapi_LC_NUMERIC:
         case __mcapi_LC_TIME:
+            /* Caller wants to change specific portions of the current locale.
+             * We don't support this yet. */
             __mcapi_errno = __mcapi_ENOSYS;
             return __mcapi_ENOSYS;
+
         default:
             __mcapi_errno = __mcapi_EINVAL;
             return __mcapi_EINVAL;
@@ -115,9 +136,7 @@ int setlocale(int what, const char *name) {
 
 
 struct __mcapi_lconv *localeconv(void) {
-    /* Deliberately discard the const pointer because that's how the C standard
-     * library defines the function. */
-    return (struct __mcapi_lconv *)_current_lconv;
+    return &_current_lconv;
 }
 
 
