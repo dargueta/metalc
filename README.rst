@@ -48,6 +48,8 @@ Build Requirements
 
 To build this library you'll need:
 
+* Python 3.3 or higher. (Python 2 may work but I make no guarantees and you
+  really should reconsider the life choices that led you to still use it.)
 * CMake 3.8 or higher
 * A compiler supporting ANSI C99 or later, such as GCC or MinGW. Visual Studio
   cannot cross-compile and so is not supported.
