@@ -134,7 +134,15 @@ void clearerr(__mcapi_FILE *stream) {
 void fclose(__mcapi_FILE *stream) {
     krnlhook_fsync(stream->descriptor, __mcint_runtime_info->udata);
     krnlhook_close(stream->descriptor, __mcint_runtime_info->udata);
-    free(stream);
+
+    /* Don't free the standard I/O streams, as they were never allocated with
+     * malloc. */
+    if (
+        (stream != &_internal_stdin)
+        && (stream != &_internal_stdout)
+        && (stream != &_internal_stderr)
+    )
+        free(stream);
 }
 
 

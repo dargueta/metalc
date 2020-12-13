@@ -25,7 +25,6 @@ int cstdlib_init(MetalCRuntimeInfo *rti) {
     __mcint_runtime_info = rti;
     __mcapi_errno = 0;
 
-
     malloc_init();
     stdio_init();
     locale_init();
