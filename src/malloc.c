@@ -40,6 +40,7 @@ static struct PointerEntry *g_bookkeeping_pages = NULL;
     __mcint_assert(expr, __LINE__, __FILE__, #expr, "malloc(): " #msg, __VA_ARGS__)
 
 
+/* FIXME: THIS WAS BROKEN BY THE SBRK -> MMAP CHANGE -- FIX IT */
 static void *_allocate_pages(int count) {
     void *original_top = __mcint_sbrk(0);
 

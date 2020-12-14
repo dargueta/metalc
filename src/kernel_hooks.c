@@ -6,6 +6,8 @@
 #include "metalc/stdint.h"
 #include "metalc/stdio.h"
 
+#include "metalc/bits/sys/mman.h"
+
 
 extern __mcapi_jmp_buf __mcint_abort_target;
 
@@ -27,13 +29,24 @@ void krnlhook_core_dump(int sig, void *udata) {
 }
 
 
-void *krnlhook_brk(void *new_brk, void *udata) {
-    (void)new_brk, (void)udata;
-    raise(__mcapi_SIGSYS);
+void *krnlhook_mmap(
+    void *addr, size_t length, int prot, int flags, int fd, __mcapi_off_t offset
+) {
+    (void)addr, (void)length, (void)prot, (void)flags, (void)fd, (void)offset;
+    __mcapi_errno = __mcapi_ENOMEM;
+    return MAP_FAILED;
+}
 
-    /* We should never get here unless there's a bug in our implementation of raise().*/
-    __mcapi_errno = __mcapi_ENOSYS;
-    return (void *)-1;
+int krnlhook_munmap(void *addr, size_t length) {
+    (void)addr, (void)length;
+    /* Succeed unconditionally. This probably won't ever be called anyway. */
+    __mcapi_errno = 0;
+    return 0;
+}
+
+
+int krnlhook_getpagesize(void) {
+    return 4096;
 }
 
 

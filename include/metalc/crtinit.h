@@ -70,14 +70,6 @@ typedef struct {
     intptr_t stderr_handle;
 
     /**
-     * The original data break address when the library was first initialized.
-     *
-     * @warning Internal use only. Do not modify.
-     */
-    void *_original_brk;
-
-
-    /**
      * On UEFI-aware builds, the EFI image handle.
      *
      * Typedefed to a void pointer on bare metal builds.
