@@ -6,6 +6,7 @@
 #include "metalc/stdint.h"
 #include "metalc/stdio.h"
 
+#include "metalc/sys/mman.h"
 #include "metalc/bits/sys/mman.h"
 
 
@@ -34,7 +35,7 @@ void *krnlhook_mmap(
 ) {
     (void)addr, (void)length, (void)prot, (void)flags, (void)fd, (void)offset;
     __mcapi_errno = __mcapi_ENOMEM;
-    return MAP_FAILED;
+    return __mcapi_MAP_FAILED;
 }
 
 int krnlhook_munmap(void *addr, size_t length) {
