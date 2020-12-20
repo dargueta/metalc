@@ -112,7 +112,7 @@ int __mcint_evaluate_format_specifier(
              *
              * If the string is too long, it gets copied successfully but the
              * number of bytes written will overflow our counter. This'll cause
-             * us to return a negative value. The caller think know an error
+             * us to return a negative value. The caller will think an error
              * occurred but wouldn't have the right errno value. With a carefully
              * crafted string anything using the return value for pointer indexing
              * could be made to write to an arbitrary location in memory. */
