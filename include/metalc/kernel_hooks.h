@@ -68,12 +68,14 @@ void krnlhook_core_dump(int sig, void *udata) __attribute__((noreturn, weak));
  * @param flags     Flags controlling how the memory should be allocated.
  * @param fd        (Ignored, always -1)
  * @param offset    (Ignored, always 0)
+ * @param udata     The value of `udata` the C runtime was initialized with.
  *
  * @return The page-aligned address to the allocated memory block. On error,
  *         returns @ref MAP_FAILED and @ref errno is set to indicate the cause.
  */
 void *krnlhook_mmap(
-    void *addr, size_t length, int prot, int flags, int fd, __mcapi_off_t offset
+    void *addr, size_t length, int prot, int flags, int fd, __mcapi_off_t offset,
+    void *udata
 ) __attribute__((weak));
 
 
@@ -83,16 +85,16 @@ void *krnlhook_mmap(
  * For the time being, kernels need not implement this. The default stub will
  * always succeed, regardless of its arguments.
  */
-int krnlhook_munmap(void *addr, size_t length) __attribute__((weak));
+int krnlhook_munmap(void *addr, size_t length, void *udata) __attribute__((weak, nonnull(1)));
 
 
-int krnlhook_open(const char *file, int mode, int perms, void *udata) __attribute__((weak));
-int krnlhook_close(intptr_t fdesc, void *udata) __attribute__((weak));
-ssize_t krnlhook_write(intptr_t fdesc, const void *data, size_t size, void *udata) __attribute__((weak));
-ssize_t krnlhook_read(intptr_t fdesc, void *buffer, size_t size, void *udata) __attribute__((weak));
-__mcapi_off_t krnlhook_seek(intptr_t fdesc, __mcapi_off_t offset, int whence, void *udata) __attribute__((weak));
-__mcapi_off_t krnlhook_tell(intptr_t fdesc, void *udata) __attribute__((weak));
-int krnlhook_fsync(intptr_t fdesc, void *udata) __attribute__((weak));
+int krnlhook_open(const char *file, int mode, int perms, void *udata) __attribute__((weak, nonnull(1)));
+int krnlhook_close(int fdesc, void *udata) __attribute__((weak));
+ssize_t krnlhook_write(int fdesc, const void *data, size_t size, void *udata) __attribute__((weak, nonnull(2)));
+ssize_t krnlhook_read(int fdesc, void *buffer, size_t size, void *udata) __attribute__((weak, nonnull(2)));
+__mcapi_off_t krnlhook_seek(int fdesc, __mcapi_off_t offset, int whence, void *udata) __attribute__((weak));
+__mcapi_off_t krnlhook_tell(int fdesc, void *udata) __attribute__((weak));
+int krnlhook_fsync(int fdesc, void *udata) __attribute__((weak));
 
 
 #endif  /* INCLUDE_METALC_KERNEL_HOOKS_H_ */
