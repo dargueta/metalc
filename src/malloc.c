@@ -12,160 +12,73 @@
 #include "metalc/sys/mman.h"
 
 
-struct PointerEntry {
-    void *base;
-    uintptr_t size;
-} __attribute__((aligned(4)));
-
 extern MetalCRuntimeInfo *__mcint_runtime_info;
-
-static void **g_heap_pages = NULL;
-static struct PointerEntry *g_bookkeeping_pages = NULL;
 
 
 #if METALC_ARCH_BITS == 16
     #define MINIMUM_ALLOCATION_SIZE     8
+    #define MINIMUM_MMAP_REQUEST_SIZE   1024    /* 1 KiB */
 #elif METALC_ARCH_BITS == 32
     #define MINIMUM_ALLOCATION_SIZE     16
+    #define MINIMUM_MMAP_REQUEST_SIZE   4194304     /* 4 MiB */
 #else
     #define MINIMUM_ALLOCATION_SIZE     32
+    #define MINIMUM_MMAP_REQUEST_SIZE   4194304     /* 4 MiB */
 #endif
 
 
-#define _extract_pointer(p, t)  ((t *)((uintptr_t)(p) & (~(uintptr_t)1)))
-#define _is_allocated(p)        ((uintptr_t)(p) & (uintptr_t)1)
+struct _MemoryBlock {
+    void *p_previous;
+    uintptr_t block_size;
+};
 
 
-#define _malloc_assert(expr, msg, ...) \
-    __mcint_assert(expr, __LINE__, __FILE__, #expr, "malloc(): " #msg, __VA_ARGS__)
+static _MemoryBlock *g_ptr_first_page = NULL;
 
 
-/* FIXME: THIS WAS BROKEN BY THE SBRK -> MMAP CHANGE -- FIX IT */
-static void *_allocate_pages(int count) {
-    void *original_top = __mcint_sbrk(0);
-
-    if (__mcint_sbrk(count * __mcint_runtime_info->page_size) != (void *)-1)
-        return original_top;
-    return NULL;
-}
+/* Yes, yes, this is terrible, but we're only using it for one thing. */
+#define MAX(x, y)  ((x) < (y)) ? (y) : (x)
 
 
-static struct PointerEntry *_page_containing_index(size_t index) {
-    struct PointerEntry *current_page = g_bookkeeping_pages;
-
-    while (current_page != NULL) {
-        /* Page has no valid entries. This *must* be the last entry in the list.
-         * if not, it was supposed to have been freed as soon as the last valid
-         * entry was removed. */
-        if (current_page[0].size == 0) {
-            _malloc_assert(
-                current_page[0].base == NULL,
-                "Heap corruption detected -- Empty page should not point to a"
-                " subsequent page. Offending page %p points to %p.",
-                current_page, current_page[0].base
-            );
-
-            /* Hit the last page but the index wasn't found. This means the index
-             * was past the end of the list. */
-            return NULL;
-        }
-
-        if (index < (size_t)current_page[0].size)
-            return current_page;
-
-        /* If the index is beyond the end of this page's entries, skip to the
-         * next page. */
-        index -= current_page[0].size;
-        current_page = (struct PointerEntry *)current_page[0].base;
-    }
-
-    /* Hit the end of the list. `index` was invalid. */
-    return NULL;
-}
-
-
-static struct PointerEntry *_pointer_at_index(size_t index) {
-    struct PointerEntry *page = _page_containing_index(index);
-
-    if (page == NULL)
-        return NULL;
-    return &page[(index % (size_t)page->size) + 1];
-}
-
-
-static struct PointerEntry *_find_pointer(const void *pointer) {
-    struct PointerEntry *entry;
-    unsigned i;
-
-    i = 0;
-    do {
-        entry = _pointer_at_index(i);
-
-        /* Hit the end of the list without finding the pointer. */
-        if (entry == NULL)
-            return NULL;
-
-        i += 1;
-
-        /* If there's a bug and/or the heap got corrupted we could end up with a
-         * cycle in our bookkeeping list. If that happens, we'd be stuck in an
-         * infinite loop because `i` would overflow and we'd start searching at
-         * the beginning again. Avoid that situation. */
-        _malloc_assert(
-            i != 0,
-            "Heap corruption detected: Cycle found in the heap bookkeeping list at"
-            " entry %d", i
-        );
-    } while(_extract_pointer(entry, const void) != pointer);
-
-    return entry;
-}
-
-
-static uintptr_t _size_of_allocation(const void *pointer) {
-    const struct PointerEntry *entry = _find_pointer(pointer);
-    if (entry == NULL) {
-        __mcapi_errno = __mcapi_EINVAL;
-        return 0;
-    }
-    return entry->size;
+static void *allocate_pages(size_t n_pages, void *suggested_address) {
+    return krnlhook_mmap(
+        suggested_address,
+        n_pages * __mcint_runtime_info->page_size,
+        __mcapi_PROT_READ | __mcapi_PROT_WRITE,
+        __mcapi_MAP_ANONYMOUS,
+        -1,
+        0
+    );
 }
 
 
 METALC_API_INTERNAL int malloc_init(void) {
-    __mcint_runtime_info->_original_brk = krnlhook_brk(NULL, __mcint_runtime_info->udata);
+    size_t request_size;
 
-    if (__mcint_runtime_info->page_size == 0)
-        return __mcapi_ENOSYS;
+    /* The minimum allocation size depends on the architecture. For 16-bit builds,
+     * it's 1 KiB. Otherwise, 4 MiB. */
+    request_size = MAX(MINIMUM_MMAP_REQUEST_SIZE, __mcint_runtime_info->page_size);
+    g_ptr_first_page = (struct _MemoryBlock *)krnlhook_mmap(
+        NULL,
+        request_size,
+        __mcapi_PROT_READ | __mcapi_PROT_WRITE,
+        __mcapi_MAP_ANONYMOUS,
+        -1,
+        0
+    );
 
-    g_heap_pages = _allocate_pages(1);
-    if (g_heap_pages == NULL)
+    if (g_ptr_first_page == __mcapi_MAP_FAILED)
+        /* If mmap failed, then errno is already set for us. */
         return __mcapi_errno;
 
-    g_bookkeeping_pages = _allocate_pages(1);
-    if (g_bookkeeping_pages == NULL) {
-        _allocate_pages(-1);
-        return __mcapi_ENOMEM;
-    }
+    g_ptr_first_page->p_previous = NULL;
+    g_ptr_first_page->block_size = request_size;
 
-    memset(g_heap_pages, 0, __mcint_runtime_info->page_size);
-
-    g_heap_pages[1] = _allocate_pages(1);
-    if (g_heap_pages[1] == NULL) {
-        _allocate_pages(-2);
-        return __mcapi_ENOMEM;
-    }
-
-    g_bookkeeping_pages[0].base = NULL;
-    g_bookkeeping_pages[0].size = 1;
-    g_bookkeeping_pages[1].base = g_heap_pages[1];
-    g_bookkeeping_pages[1].size = __mcint_runtime_info->page_size;
     return 0;
 }
 
 
 METALC_API_INTERNAL int malloc_teardown(void) {
-    krnlhook_brk(__mcint_runtime_info->_original_brk, __mcint_runtime_info->udata);
     return 0;
 }
 
@@ -235,22 +148,9 @@ void *realloc(void *pointer, size_t new_size) {
 
 
 void free(void *pointer) {
-    struct PointerEntry *info;
-
-    /* Ignore attempt to free a null pointer. */
-    if (pointer == NULL)
-        return;
-
-    info = _find_pointer(pointer);
-    _malloc_assert(info != NULL, "Attempted to free invalid pointer: %p", pointer);
-    _malloc_assert(
-        _is_allocated(info->base),
-        "Attempted to free already free memory block at %p", pointer
-    );
-
-    /* Clear the low bit to indicate the block of memory is now free. */
-    info->base = _extract_pointer(info->base, void);
 }
 
 
 #undef MINIMUM_ALLOCATION_SIZE
+#undef MINIMUM_MMAP_REQUEST_SIZE
+#undef MAX
