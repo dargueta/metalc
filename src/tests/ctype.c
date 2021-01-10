@@ -13,10 +13,27 @@ BEGIN_TEST(isalnum__basic)
     CHECK_NE(isalnum('z'), 0);
     CHECK_NE(isalnum('0'), 0);
     CHECK_NE(isalnum('9'), 0);
+
+    CHECK_EQ(isalnum('\0'), 0);
+    CHECK_EQ(isalnum('~'), 0);
+    CHECK_EQ(isalnum(' '), 0);
+    CHECK_EQ(isalnum('\377'), 0);
+    CHECK_EQ(isalnum('{'), 0);
+    CHECK_EQ(isalnum('}'), 0);
 END_TEST()
 
 
 BEGIN_TEST(isalpha__basic)
+    CHECK_NE(isalnum('A'), 0);
+    CHECK_NE(isalnum('N'), 0);
+    CHECK_NE(isalnum('q'), 0);
+    CHECK_NE(isalnum('r'), 0);
+
+
+    CHECK_EQ(isalnum('\0'), 0);
+    CHECK_EQ(isalnum('~'), 0);
+    CHECK_EQ(isalnum(' '), 0);
+    CHECK_EQ(isalnum('\377'), 0);
 END_TEST()
 
 
