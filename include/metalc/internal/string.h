@@ -30,4 +30,11 @@
 METALC_API_INTERAL_WITH_ATTR(nonnull)
 size_t strcpy_and_update_buffer(const char *source, void **buffer);
 
+
+/**
+ * Same as @ref strcpy_and_update_buffer except copies at most @a n chars.
+ */
+METALC_API_INTERAL_WITH_ATTR(nonnull)
+size_t strncpy_and_update_buffer(const char *source, void **buffer, size_t n);
+
 #endif

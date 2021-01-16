@@ -27,16 +27,22 @@ METALC_API_INTERNAL int stdio_teardown(void) {
 
 
 int __mcint_evaluate_format_specifier(
-    const char **format, va_list arg_list, char **output, int n_chars_written
+    const char **format, va_list arg_list, char **output, int n_chars_written,
+    size_t limit
 ) {
     char temp[256];
     int format_length;
-    size_t string_length;
+    size_t string_length, remaining_chars;
     struct MCFormatSpecifier info;
     const char *string_pointer;
 
+    if ((limit == 0) || ((size_t)n_chars_written >= (limit - 1)))
+        remaining_chars = 0;
+    else
+        remaining_chars = limit - 1 - (size_t)n_chars_written;
+
     if (**format == '%') {
-        if (output) {
+        if (output && (remaining_chars > 0)) {
             **output = '%';
             ++*output;
         }
@@ -57,7 +63,7 @@ int __mcint_evaluate_format_specifier(
         case MC_AT_CHAR:
             /* n.b. `char` is promoted to `int` when passed as an argument */
             temp[0] = (char)va_arg(arg_list, int);
-            if (output){
+            if (output && (remaining_chars > 0)) {
                 **output = temp[0];
                 ++*output;
             }
@@ -79,7 +85,7 @@ int __mcint_evaluate_format_specifier(
                 /* d or i */
                 itoa(va_arg(arg_list, int), temp, info.radix);
 
-            return strcpy_and_update_buffer(temp, (void **)output);
+            return strncpy_and_update_buffer(temp, (void **)output, remaining_chars);
 
         case MC_AT_LONG:
             if (info.is_unsigned)
@@ -96,7 +102,7 @@ int __mcint_evaluate_format_specifier(
                 else
                     itoa(va_arg(arg_list, long long), temp, info.radix);
 
-                return strcpy_and_update_buffer(temp, (void **)output);
+                return strncpy_and_update_buffer(temp, (void **)output, remaining_chars);
         #endif
 
         case MC_AT_N_WRITTEN_POINTER:
@@ -117,16 +123,21 @@ int __mcint_evaluate_format_specifier(
              * crafted string anything using the return value for pointer indexing
              * could be made to write to an arbitrary location in memory. */
             string_length = strlen(string_pointer);
+
             if (string_length > (size_t)INT_MAX) {
                 __mcapi_errno = __mcapi_EOVERFLOW;
                 return -1;
             }
 
             if (!output)
-                return strlen(string_pointer);
+                return string_length;
 
             /* Don't bother with padding crap, just output the string. */
-            strncpy(*output, string_pointer, string_length);
+            strncpy(
+                *output,
+                string_pointer,
+                (string_length < remaining_chars) ? string_length : remaining_chars
+            );
             return (int)string_length;
 
         case MC_AT_FLOAT:
@@ -142,19 +153,21 @@ int __mcint_evaluate_format_specifier(
 }
 
 
-int vsprintf(char *buffer, const char *format, va_list arg_list) {
+int vsnprintf(char *buffer, size_t size, const char *format, va_list arg_list) {
     int n_chars_written, i;
 
     n_chars_written = 0;
 
     while (*format != '\0') {
         if (*format != '%') {
-            if (buffer)
+            if (buffer && ((size_t)n_chars_written < size))
                 *buffer++ = *format;
             ++n_chars_written;
         }
         else {
-            i = __mcint_evaluate_format_specifier(&format, arg_list, &buffer, n_chars_written);
+            i = __mcint_evaluate_format_specifier(
+                &format, arg_list, &buffer, n_chars_written, size
+            );
             if (i < 0)
                 return -n_chars_written;
             n_chars_written += i;
@@ -165,12 +178,28 @@ int vsprintf(char *buffer, const char *format, va_list arg_list) {
 }
 
 
+int vsprintf(char *buffer, const char *format, va_list arg_list) {
+    return vsnprintf(buffer, SIZE_MAX, format, arg_list);
+}
+
+
 int sprintf(char *buffer, const char *format, ...) {
     va_list arg_list;
     int result;
 
     va_start(arg_list, format);
     result = vsprintf(buffer, format, arg_list);
+    va_end(arg_list);
+    return result;
+}
+
+
+int snprintf(char *buffer, size_t n, const char *format, ...) {
+    va_list arg_list;
+    int result;
+
+    va_start(arg_list, format);
+    result = vsnprintf(buffer, format, arg_list);
     va_end(arg_list);
     return result;
 }
