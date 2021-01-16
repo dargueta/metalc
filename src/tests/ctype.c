@@ -1,3 +1,4 @@
+#include <metalc/assert.h>
 #include <metalc/ctype.h>
 #include <metalc/stddef.h>
 
@@ -5,35 +6,34 @@
 
 
 BEGIN_TEST(isalnum__basic)
-    CHECK_NE(isalnum('A'), 0);
-    CHECK_NE(isalnum('F'), 0);
-    CHECK_NE(isalnum('Z'), 0);
-    CHECK_NE(isalnum('a'), 0);
-    CHECK_NE(isalnum('j'), 0);
-    CHECK_NE(isalnum('z'), 0);
-    CHECK_NE(isalnum('0'), 0);
-    CHECK_NE(isalnum('9'), 0);
+    assert(isalnum('A') != 0);
+    assert(isalnum('F') != 0);
+    assert(isalnum('Z') != 0);
+    assert(isalnum('a') != 0);
+    assert(isalnum('j') != 0);
+    assert(isalnum('z') != 0);
+    assert(isalnum('0') != 0);
+    assert(isalnum('9') != 0);
 
-    CHECK_EQ(isalnum('\0'), 0);
-    CHECK_EQ(isalnum('~'), 0);
-    CHECK_EQ(isalnum(' '), 0);
-    CHECK_EQ(isalnum('\377'), 0);
-    CHECK_EQ(isalnum('{'), 0);
-    CHECK_EQ(isalnum('}'), 0);
+    assert(isalnum('\0') == 0);
+    assert(isalnum('~') == 0);
+    assert(isalnum(' ') == 0);
+    assert(isalnum('\377') == 0);
+    assert(isalnum('{') == 0);
+    assert(isalnum('}') == 0);
 END_TEST()
 
 
 BEGIN_TEST(isalpha__basic)
-    CHECK_NE(isalnum('A'), 0);
-    CHECK_NE(isalnum('N'), 0);
-    CHECK_NE(isalnum('q'), 0);
-    CHECK_NE(isalnum('r'), 0);
+    assert(isalnum('A') != 0);
+    assert(isalnum('N') != 0);
+    assert(isalnum('q') != 0);
+    assert(isalnum('r') != 0);
 
-
-    CHECK_EQ(isalnum('\0'), 0);
-    CHECK_EQ(isalnum('~'), 0);
-    CHECK_EQ(isalnum(' '), 0);
-    CHECK_EQ(isalnum('\377'), 0);
+    assert(isalnum('\0') == 0);
+    assert(isalnum('~') == 0);
+    assert(isalnum(' ') == 0);
+    assert(isalnum('\377') == 0);
 END_TEST()
 
 

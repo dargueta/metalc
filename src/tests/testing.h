@@ -2,6 +2,21 @@
 #define INCLUDE_METALC_TESTING_H_
 
 
+#define METALC_LOG_LEVEL_DEBUG      0
+#define METALC_LOG_LEVEL_INFO       10
+#define METALC_LOG_LEVEL_WARNING    20
+#define METALC_LOG_LEVEL_ERROR      30
+#define METALC_LOG_LEVEL_CRITICAL   40
+
+
+METALC_API_INTERNAL_WITH_ATTR(noreturn) extern void testhook_abort(int line, const char *file, const char *assert_text) __attribute__((noreturn));
+METALC_API_INTERNAL extern int testhook_report_test_name(int test_id, const char *test_name);
+METALC_API_INTERNAL extern int testhook_log(int level, const char *file, int line, const char *message);
+METALC_API_INTERNAL extern int testhook_report_result(int test_id, int result);
+METALC_API_INTERNAL_WITH_ATTR(noreturn) extern int testhook_terminate(int sig);
+METALC_API_INTERNAL extern void testhook_signal(int sig);
+
+
 typedef int (* metalc_unit_test_fn)(int, char **, char **);
 
 struct UnitTestEntry {
@@ -10,10 +25,8 @@ struct UnitTestEntry {
 };
 
 
-void initialize_test_log(void);
-
 void log_message(
-    const char *level,
+    int level,
     const char *test_name,
     unsigned line,
     const char *filename,
@@ -22,35 +35,10 @@ void log_message(
 );
 
 
-#define info_message(msg, ...)  log_message("INFO", _test_name, __LINE__, __FILE__, (msg), __VA_ARGS__)
+#define info_message(msg, ...)  log_message(METALC_LOG_LEVEL_INFO, _test_name, __LINE__, __FILE__, (msg), __VA_ARGS__)
 
 
-#define ASSERT_MSG(expr, msg, ...)                                      \
-    if (expr)                                                           \
-        log_message("OK", _test_name,  __LINE__, __FILE__, "");         \
-    else {                                                              \
-        log_message("FAILED", _test_name, __LINE__, __FILE__, (msg), __VA_ARGS__);   \
-        return 1;                                                       \
-    }
-
-
-#define ASSERT(expr)    ASSERT_MSG((expr), NULL)
-
-#define CHECK_EQ(x, y)  ASSERT_MSG(((x) == (y)), "Assertion failed: %s == %s -- left=%d, right=%d", #x, #y, x, y)
-#define CHECK_NE(x, y)  ASSERT_MSG(((x) != (y)), "Assertion failed: %s != %s -- left=%d, right=%d", #x, #y, x, y)
-#define CHECK_GT(x, y)  ASSERT_MSG(((x) > (y)), "Assertion failed: %s > %s -- left=%d, right=%d", #x, #y, x, y)
-#define CHECK_GE(x, y)  ASSERT_MSG(((x) >= (y)), "Assertion failed: %s >= %s -- left=%d, right=%d", #x, #y, x, y)
-#define CHECK_LT(x, y)  ASSERT_MSG(((x) < (y)), "Assertion failed: %s < %s -- left=%d, right=%d", #x, #y, x, y)
-#define CHECK_LE(x, y)  ASSERT_MSG(((x) <= (y)), "Assertion failed: %s <= %s -- left=%d, right=%d", #x, #y, x, y)
-
-#define CHECK_EQ_MSG(x, y, msg)  ASSERT_MSG(((x) == (y)), "%s", (msg))
-#define CHECK_NE_MSG(x, y, msg)  ASSERT_MSG(((x) != (y)), "%s", (msg))
-#define CHECK_GT_MSG(x, y, msg)  ASSERT_MSG(((x) > (y)), "%s", (msg))
-#define CHECK_GE_MSG(x, y, msg)  ASSERT_MSG(((x) >= (y)), "%s", (msg))
-#define CHECK_LT_MSG(x, y, msg)  ASSERT_MSG(((x) < (y)), "%s", (msg))
-#define CHECK_LE_MSG(x, y, msg)  ASSERT_MSG(((x) <= (y)), "%s", (msg))
-
-#define INFO(msg)   log_message("INFO", _test_name, __LINE__, __FILE__, (msg))
+#define INFO(msg)   log_message(METALC_LOG_LEVEL_INFO, _test_name, __LINE__, __FILE__, (msg))
 
 
 #define BEGIN_TEST(name)    \

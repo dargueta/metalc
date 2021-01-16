@@ -5,6 +5,10 @@
 #include <metalc/stdio.h>
 #include <metalc/stdlib.h>
 
+#if METALC_COMPILE_FOR_TESTING
+extern void testhook_abort(int line, const char *file, const char *assert_text) __attribute__((noreturn));
+#endif
+
 
 void __mcint_assert(
     int expression, int line, const char *file, const char* assert_text,
@@ -16,7 +20,9 @@ void __mcint_assert(
     if (expression)
         return;
 
-    #if METALC_COMPILE_OPTION_ENABLE_FILE_IO
+    #if METALC_COMPILE_FOR_TESTING
+        testhook_abort(line, file, assert_text);
+    #elif METALC_COMPILE_OPTION_ENABLE_FILE_IO
         out = (__mcapi_stderr != NULL) ? __mcapi_stderr : __mcapi_stdout;
         if (out) {
             fprintf(
