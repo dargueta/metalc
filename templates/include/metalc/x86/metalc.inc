@@ -7,6 +7,7 @@
 %define COMPILE_FOR_KERNEL      @METALC_COMPILE_FOR_KERNEL@
 %define USE_SHADOW_STACK        @METALC_COMPILE_OPTION_X86_USE_SHADOW_STACK@
 %define COMPILE_FOR_TESTING     @METALC_COMPILE_FOR_TESTING@
+%define ARCHITECTURE_SIZE       @METALC_ARCH_BITS@
 
 %if !(ABI_MICROSOFT || ABI_GNU)
     %error "No calling convention specified."
@@ -37,6 +38,11 @@
 
 
 %if __BITS__ == 64
+    %define REGISTER_AX     rax
+    %define REGISTER_BX     rbx
+    %define REGISTER_CX     rcx
+    %define REGISTER_DX     rdx
+
     %if ABI_MICROSOFT
         %define FN_ARG_1_B  cl
         %define FN_ARG_2_B  dl
@@ -65,6 +71,11 @@
         %define FN_ARG_4_Q  r9
         %define FN_ARG_5_Q  QWORD [rbp + 16]
         %define FN_ARG_6_Q  QWORD [rbp + 24]
+
+        %define FN_ARG_1_REGISTER   FN_ARG_1_Q
+        %define FN_ARG_2_REGISTER   FN_ARG_2_Q
+        %define FN_ARG_3_REGISTER   FN_ARG_3_Q
+        %define FN_ARG_4_REGISTER   FN_ARG_4_Q
 
         ; Arguments 5+ are passed on the stack, unlike the GNU calling convention
         ; which supports passing 6 arguments in registers.
@@ -96,8 +107,20 @@
         %define FN_ARG_4_Q  rcx
         %define FN_ARG_5_Q  r8
         %define FN_ARG_6_Q  r9
+
+        %define FN_ARG_1_REGISTER   FN_ARG_1_Q
+        %define FN_ARG_2_REGISTER   FN_ARG_2_Q
+        %define FN_ARG_3_REGISTER   FN_ARG_3_Q
+        %define FN_ARG_4_REGISTER   FN_ARG_4_Q
+        %define FN_ARG_5_REGISTER   FN_ARG_5_Q
+        %define FN_ARG_6_REGISTER   FN_ARG_6_Q
     %endif
 %elif __BITS__ == 32
+    %define REGISTER_AX     eax
+    %define REGISTER_BX     ebx
+    %define REGISTER_CX     ecx
+    %define REGISTER_DX     edx
+
     %if INTERNALS_USE_FASTCALL
         %define FN_ARG_1_B  cl
         %define FN_ARG_2_B  dl
@@ -142,6 +165,11 @@
         %define FN_ARG_6_D  DWORD [ebp + 28]
     %endif
 %else
+    %define REGISTER_AX     ax
+    %define REGISTER_BX     bx
+    %define REGISTER_CX     cx
+    %define REGISTER_DX     dx
+
     %define FN_ARG_1_B  BYTE [bp + 4]
     %define FN_ARG_2_B  BYTE [bp + 6]
     %define FN_ARG_3_B  BYTE [bp + 8]
