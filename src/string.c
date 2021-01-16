@@ -471,3 +471,15 @@ size_t strcpy_and_update_buffer(const char *source, void **buffer) {
     *(char **)buffer += buffer_size;
     return buffer_size;
 }
+
+
+size_t strncpy_and_update_buffer(const char *source, void **buffer, size_t n) {
+    size_t source_size, buffer_size;
+
+    source_size = strlen(source);
+    buffer_size = (source_size < n) ? source_size : n;
+
+    strncpy(*(char **)buffer, source, n);
+    *(char **)buffer += buffer_size;
+    return buffer_size;
+}
