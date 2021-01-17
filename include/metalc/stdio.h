@@ -16,7 +16,7 @@ extern __mcapi_FILE * const __mcapi_stderr;
 
 
 int vsprintf(char *buffer, const char *format, va_list arg_list);
-int vsnprintf(char *buffer, size_t size, const char *format, va_list arg_list);  /* Nonstandard */
+int vsnprintf(char *buffer, size_t size, const char *format, va_list arg_list);
 int snprintf(char *buffer, size_t length, const char *format, ...);
 int sprintf(char *buffer, const char *format, ...);
 int vprintf(const char *format, va_list arg_list);
@@ -36,7 +36,9 @@ int __mcint_mode_string_to_flags(const char *mode) __attribute__((nonnull));
 
 
 cstdlib_export_with_attr(vsprintf, nonnull(2));
+cstdlib_export_with_attr(vsnprintf, nonnull(3));
 cstdlib_export_with_attr(sprintf, nonnull(1, 2));
+cstdlib_export_with_attr(snprintf, nonnull(1, 3));
 cstdlib_export_with_attr(vprintf, nonnull(1));
 cstdlib_export_with_attr(printf, nonnull(1));
 cstdlib_export_with_attr(vfprintf, nonnull(1, 2));
