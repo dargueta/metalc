@@ -6,7 +6,7 @@
 #include <metalc/stdlib.h>
 
 #if METALC_COMPILE_FOR_TESTING
-extern void testhook_abort(int line, const char *file, const char *assert_text) __attribute__((noreturn));
+extern void testhook_abort(int line, const char *file, const char *assert_text);
 #endif
 
 

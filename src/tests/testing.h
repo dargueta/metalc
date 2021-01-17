@@ -9,9 +9,13 @@
 #define METALC_LOG_LEVEL_CRITICAL   40
 
 
-METALC_API_INTERNAL_WITH_ATTR(noreturn) extern void testhook_abort(int line, const char *file, const char *assert_text) __attribute__((noreturn));
+METALC_API_INTERNAL_WITH_ATTR(noreturn, nonnull(2, 3))
+extern void testhook_abort(int line, const char *file, const char *assert_text);
+METALC_API_INTERNAL_WITH_ATTR(nonnull(2))
 METALC_API_INTERNAL extern int testhook_report_test_name(int test_id, const char *test_name);
+METALC_API_INTERNAL_WITH_ATTR(nonnull(2, 4))
 METALC_API_INTERNAL extern int testhook_log(int level, const char *file, int line, const char *message);
+METALC_API_INTERNAL_WITH_ATTR(noreturn)
 METALC_API_INTERNAL extern int testhook_report_result(int test_id, int result);
 METALC_API_INTERNAL_WITH_ATTR(noreturn) extern int testhook_terminate(int sig);
 METALC_API_INTERNAL extern void testhook_signal(int sig);
