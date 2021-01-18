@@ -39,8 +39,8 @@ struct lconv {
 };
 
 
-METALC_API_EXPORT_WITH_ATTR(nonnull) int setlocale(int what, const char *name);
-METALC_API_EXPORT struct lconv* localeconv(void);
+METALC_EXPORT_WITH_ATTR(nonnull) int setlocale(int what, const char *name);
+METALC_EXPORT struct lconv* localeconv(void);
 
 
 #endif  /* INCLUDE_METALC_LOCALE_H_ */

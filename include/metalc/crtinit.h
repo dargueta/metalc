@@ -88,12 +88,12 @@ typedef struct {
 /**
  * Initialize the standard C library.
  */
-METALC_API_EXPORT int cstdlib_init(MetalCRuntimeInfo *rti);
+METALC_EXPORT int cstdlib_init(MetalCRuntimeInfo *rti);
 
 
 /**
  * Run the ``main`` function defined in
  */
-METALC_API_EXPORT int cstdlib_run(int argc, char **argv, char **env);
+METALC_EXPORT int cstdlib_run(int argc, char **argv, char **env);
 
 #endif  /* INCLUDE_METALC_CRTINIT_H_ */

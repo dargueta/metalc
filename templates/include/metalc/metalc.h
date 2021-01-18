@@ -149,25 +149,25 @@
 #if METALC_ARCH_BITS == 64
     /* Can't use cdecl here because GCC, MinGW, etc. will ignore it. GCC will
      * issue warnings and break the build. */
-    #define METALC_API_EXPORT
-    #define METALC_API_EXPORT_WITH_ATTR(...)         __attribute__((__VA_ARGS__))
-    #define METALC_API_EXPORT_FAST
-    #define METALC_API_EXPORT_FAST_WITH_ATTR(...)    __attribute__((__VA_ARGS__))
+    #define METALC_EXPORT
+    #define METALC_EXPORT_WITH_ATTR(...)         __attribute__((__VA_ARGS__))
+    #define METALC_EXPORT_FAST
+    #define METALC_EXPORT_FAST_WITH_ATTR(...)    __attribute__((__VA_ARGS__))
 #else
     /* 16- or 32-bit compile architecture. */
-    #define METALC_API_EXPORT
-    #define METALC_API_EXPORT_WITH_ATTR(...)        __attribute__((__VA_ARGS__))
-    #define METALC_API_EXPORT_FAST                  __attribute__((fastcall))
-    #define METALC_API_EXPORT_FAST_WITH_ATTR(...)   __attribute__((fastcall, __VA_ARGS__))
+    #define METALC_EXPORT
+    #define METALC_EXPORT_WITH_ATTR(...)        __attribute__((__VA_ARGS__))
+    #define METALC_EXPORT_FAST                  __attribute__((fastcall))
+    #define METALC_EXPORT_FAST_WITH_ATTR(...)   __attribute__((fastcall, __VA_ARGS__))
 #endif
 
 
 #if METALC_ENABLE_ASM_IMPLEMENTATIONS
-    #define METALC_API_EXPORT_ASM   METALC_API_EXPORT_WITH_ATTR(naked)
-    #define METALC_API_EXPORT_ASM_WITH_ATTR(...)    METALC_API_EXPORT_WITH_ATTR(naked, __VA_ARGS__)
+    #define METALC_EXPORT_ASM   METALC_EXPORT_WITH_ATTR(naked)
+    #define METALC_EXPORT_ASM_WITH_ATTR(...)    METALC_EXPORT_WITH_ATTR(naked, __VA_ARGS__)
 #else
-    #define METALC_API_EXPORT_ASM   METALC_API_EXPORT
-    #define METALC_API_EXPORT_ASM_WITH_ATTR(...)    METALC_API_EXPORT_WITH_ATTR(__VA_ARGS__)
+    #define METALC_EXPORT_ASM   METALC_EXPORT
+    #define METALC_EXPORT_ASM_WITH_ATTR(...)    METALC_EXPORT_WITH_ATTR(__VA_ARGS__)
 #endif
 
 
@@ -198,13 +198,13 @@
 
 
 #if !METALC_COMPILE_OPTION_ENABLE_FILE_IO
-    #define METALC_ATTRMARK_REQUIRES_FILEIO  METALC_API_EXPORT_WITH_ATTR(error ("Library not compiled with file I/O support."))
+    #define METALC_ATTRMARK_REQUIRES_FILEIO  METALC_EXPORT_WITH_ATTR(error ("Library not compiled with file I/O support."))
 #else
     #define METALC_ATTRMARK_REQUIRES_FILEIO
 #endif
 
 #if !METALC_COMPILE_OPTION_HAVE_TERMINAL
-    #define METALC_ATTRMARK_REQUIRES_TERM  METALC_API_EXPORT_WITH_ATTR(error ("Library not compiled with terminal I/O support."))
+    #define METALC_ATTRMARK_REQUIRES_TERM  METALC_EXPORT_WITH_ATTR(error ("Library not compiled with terminal I/O support."))
 #else
     #define METALC_ATTRMARK_REQUIRES_TERM
 #endif
@@ -217,16 +217,16 @@
      * able to test these directly. Make the `METALC_INTERNAL` markers a
      * no-op. */
     #define METALC_INTERNAL
-    #define METALC_API_INTERAL_WITH_ATTR(...)   __attribute__((__VA_ARGS__))
+    #define METALC_INTERNAL_WITH_ATTR(...)  __attribute__((__VA_ARGS__))
 #else
     /* Not in testing mode. We're either building the C library or a client
      * program is using the library. */
     #if METALC_INTERNALS_USE_FASTCALL && (METALC_ARCH_BITS != 64)
-        #define METALC_INTERNAL                     __attribute__((visibility("hidden"), fastcall))
-        #define METALC_API_INTERAL_WITH_ATTR(...)   __attribute__((visibility("hidden"), fastcall, __VA_ARGS__))
+        #define METALC_INTERNAL                 __attribute__((visibility("hidden"), fastcall))
+        #define METALC_INTERNAL_WITH_ATTR(...)  __attribute__((visibility("hidden"), fastcall, __VA_ARGS__))
     #else
-        #define METALC_INTERNAL                     __attribute__((visibility("hidden")))
-        #define METALC_API_INTERAL_WITH_ATTR(...)   __attribute__((visibility("hidden"), __VA_ARGS__))
+        #define METALC_INTERNAL                 __attribute__((visibility("hidden")))
+        #define METALC_INTERNAL_WITH_ATTR(...)  __attribute__((visibility("hidden"), __VA_ARGS__))
     #endif
 #endif  /* METALC_COMPILE_FOR_TESTING */
 

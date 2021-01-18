@@ -11,12 +11,12 @@ extern jmp_buf __mcint_abort_target;
 
 
 #if METALC_COMPILE_FOR_TESTING
-    METALC_API_INTERAL_WITH_ATTR(noreturn) extern void testhook_terminate(int sig);
-    METALC_API_INTERAL_WITH_ATTR(noreturn) extern void testhook_signal(int sig);
+    METALC_INTERNAL_WITH_ATTR(noreturn) extern void testhook_terminate(int sig);
+    METALC_INTERNAL_WITH_ATTR(noreturn) extern void testhook_signal(int sig);
 #endif
 
 
-METALC_API_INTERAL_WITH_ATTR(noreturn) static void _sighandler_term(int sig) {
+METALC_INTERNAL_WITH_ATTR(noreturn) static void _sighandler_term(int sig) {
     switch (sig) {
         case SIGQUIT:
         case SIGILL:

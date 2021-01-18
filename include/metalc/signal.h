@@ -10,8 +10,8 @@ typedef int32_t sig_atomic_t;
 typedef int64_t signal_mask_t;
 typedef void (*signal_handler_t)(int);
 
-METALC_API_EXPORT int raise(int sig);
-METALC_API_EXPORT signal_handler_t signal(int sig, signal_handler_t handler);
+METALC_EXPORT int raise(int sig);
+METALC_EXPORT signal_handler_t signal(int sig, signal_handler_t handler);
 
 
 #define SIGHUP       1

@@ -26,7 +26,7 @@ typedef char jmp_buf[BUFSIZE] __attribute__((aligned (16)));
 #undef BUFSIZE
 
 
-METALC_API_EXPORT_WITH_ATTR(returns_twice) int setjmp(jmp_buf buf);
-METALC_API_EXPORT_WITH_ATTR(noreturn) int longjmp(jmp_buf buf, int code);
+METALC_EXPORT_WITH_ATTR(returns_twice) int setjmp(jmp_buf buf);
+METALC_EXPORT_WITH_ATTR(noreturn) int longjmp(jmp_buf buf, int code);
 
 #endif  /* INCLUDE_METALC_SETJMP_H_ */

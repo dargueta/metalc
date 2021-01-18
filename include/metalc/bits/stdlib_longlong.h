@@ -15,14 +15,14 @@ typedef struct {
 } lldiv_t;
 
 
-METALC_API_EXPORT_WITH_ATTR(const) long long llabs(long long x);      /* done */
-METALC_API_EXPORT_WITH_ATTR(pure) long long atoll(const char *str);
-METALC_API_EXPORT_WITH_ATTR(pure) long long strtoll(const char *str, const char **endptr, int base);
-METALC_API_EXPORT_WITH_ATTR(pure) unsigned long long strtoull(const char *str, const char **endptr, int base);
-METALC_API_EXPORT_WITH_ATTR(const) lldiv_t lldiv(long long numer, long long denom);
+METALC_EXPORT_WITH_ATTR(const) long long llabs(long long x);      /* done */
+METALC_EXPORT_WITH_ATTR(pure) long long atoll(const char *str);
+METALC_EXPORT_WITH_ATTR(pure) long long strtoll(const char *str, const char **endptr, int base);
+METALC_EXPORT_WITH_ATTR(pure) unsigned long long strtoull(const char *str, const char **endptr, int base);
+METALC_EXPORT_WITH_ATTR(const) lldiv_t lldiv(long long numer, long long denom);
 
 /* Nonstandard */
-METALC_API_EXPORT char *lltoa(long long value, char *buf, int base);
-METALC_API_EXPORT char *ulltoa(unsigned long long value, char *str, int base);
+METALC_EXPORT char *lltoa(long long value, char *buf, int base);
+METALC_EXPORT char *ulltoa(unsigned long long value, char *str, int base);
 
 #endif  /* METALC_BITS_STDLIB_LONGLONG_H_ */
