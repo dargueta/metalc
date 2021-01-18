@@ -25,7 +25,7 @@ METALC_API_EXPORT_WITH_ATTR(nonnull) int strcmp(const char *str1, const char *st
 METALC_API_EXPORT_WITH_ATTR(nonnull) int strcoll(const char *str1, const char *str2);
 METALC_API_EXPORT_WITH_ATTR(nonnull) char *strcpy(char *destination, const char *source);
 METALC_API_EXPORT_WITH_ATTR(nonnull) size_t strcspn(const char *str1, const char *str2);
-METALC_API_EXPORT char *strerror(int errnum);
+METALC_API_EXPORT_WITH_ATTR(returns_nonnull) char *strerror(int errnum);
 METALC_API_EXPORT_WITH_ATTR(nonnull, pure) size_t strlen(const char *str);
 METALC_API_EXPORT_WITH_ATTR(nonnull) char *strncat(char *destination, const char *source, size_t num);
 METALC_API_EXPORT_WITH_ATTR(nonnull) int strncmp(const char *str1, const char *str2, size_t num);

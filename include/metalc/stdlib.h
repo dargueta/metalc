@@ -34,8 +34,8 @@ METALC_API_EXPORT_WITH_ATTR(nonnull) void atexit(void (*func)(void));
 METALC_API_EXPORT_WITH_ATTR(noreturn) void exit(int status);
 METALC_API_EXPORT_WITH_ATTR(nonnull, error("Function requires OS support.")) char *getenv(const char *name);
 METALC_API_EXPORT_WITH_ATTR(nonnull, error("Function requires OS support.")) int system(const char *string);
-METALC_API_EXPORT void *bsearch(const void *key, const void *base, size_t nitems, size_t size, int (*cmp)(const void *, const void *));
-METALC_API_EXPORT void qsort(void *base, size_t nitems, size_t size, int (*cmp)(const void *, const void *));
+METALC_API_EXPORT_WITH_ATTR(nonnull) void *bsearch(const void *key, const void *base, size_t nitems, size_t size, int (*cmp)(const void *, const void *));
+METALC_API_EXPORT_WITH_ATTR(nonnull) void qsort(void *base, size_t nitems, size_t size, int (*cmp)(const void *, const void *));
 METALC_API_EXPORT_WITH_ATTR(const) int abs(int x);                        /* done */
 METALC_API_EXPORT_WITH_ATTR(const) long labs(long x);                     /* done */
 METALC_API_EXPORT_WITH_ATTR(const) div_t div(int numer, int denom);       /* done */
