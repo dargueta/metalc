@@ -29,26 +29,39 @@ extern MetalCRuntimeInfo *__mcint_runtime_info;
 
 struct _MemoryBlock {
     void *p_previous;
+
+    /**
+     * The size of the allocation, in bytes. Allocations must always be aligned
+     * on at least a two-byte boundary so the low bit is used to indicate if the
+     * block is free.
+     */
     uintptr_t block_size;
 };
 
 
-static _MemoryBlock *g_ptr_first_page = NULL;
+static struct _MemoryBlock *g_ptr_first_page = NULL;
+static struct _MemoryBlock *g_next_allocation = NULL;
 
 
 /* Yes, yes, this is terrible, but we're only using it for one thing. */
 #define MAX(x, y)  ((x) < (y)) ? (y) : (x)
 
 
-static void *allocate_pages(size_t n_pages, void *suggested_address) {
+static struct _MemoryBlock *_allocate_pages(size_t n_pages, void *suggested_address) {
     return krnlhook_mmap(
         suggested_address,
         n_pages * __mcint_runtime_info->page_size,
         PROT_READ | PROT_WRITE,
         MAP_ANONYMOUS,
         -1,
-        0
+        0,
+        __mcint_runtime_info->udata
     );
+}
+
+
+static size_t _size_of_allocation(const void *pointer) {
+    return (((const struct _MemoryBlock *)pointer) - 1)->block_size;
 }
 
 
@@ -58,14 +71,7 @@ METALC_API_INTERNAL int malloc_init(void) {
     /* The minimum allocation size depends on the architecture. For 16-bit builds,
      * it's 1 KiB. Otherwise, 4 MiB. */
     request_size = MAX(MINIMUM_MMAP_REQUEST_SIZE, __mcint_runtime_info->page_size);
-    g_ptr_first_page = (struct _MemoryBlock *)krnlhook_mmap(
-        NULL,
-        request_size,
-        PROT_READ | PROT_WRITE,
-        MAP_ANONYMOUS,
-        -1,
-        0
-    );
+    g_ptr_first_page = _allocate_pages(request_size, NULL);
 
     if (g_ptr_first_page == MAP_FAILED)
         /* If mmap failed, then errno is already set for us. */
@@ -73,6 +79,7 @@ METALC_API_INTERNAL int malloc_init(void) {
 
     g_ptr_first_page->p_previous = NULL;
     g_ptr_first_page->block_size = request_size;
+    g_next_allocation = g_ptr_first_page;
 
     return 0;
 }
@@ -148,6 +155,7 @@ void *realloc(void *pointer, size_t new_size) {
 
 
 void free(void *pointer) {
+    (void)pointer;
 }
 
 
