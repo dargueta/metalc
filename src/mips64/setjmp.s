@@ -1,11 +1,11 @@
 .include "metalc/mips/metalc.s"
 
-.globl __mcapi_setjmp
-.globl __mcapi_longjmp
+.globl setjmp
+.globl longjmp
 
 .section .text
 
-__mcapi_setjmp:
+setjmp:
     # $a0 contains the jump buffer
     sd  $s0, 0($a0)
     sd  $s1, 8($a0)
@@ -30,7 +30,7 @@ __mcapi_setjmp:
     jr  $ra
 
 
-__mcapi_longjmp:
+longjmp:
     # $a0 contains the jump buffer, $a1 is the return value.
     ld  $s0, 0($a0)
     ld  $s1, 8($a0)

@@ -73,19 +73,3 @@ int tolower(int c) {
 int toupper(int c) {
     return islower(c) ? c - 32 : c;
 }
-
-
-cstdlib_implement(isalnum);
-cstdlib_implement(isalpha);
-cstdlib_implement(isblank);
-cstdlib_implement(iscntrl);
-cstdlib_implement(isdigit);
-cstdlib_implement(isgraph);
-cstdlib_implement(islower);
-cstdlib_implement(isprint);
-cstdlib_implement(ispunct);
-cstdlib_implement(isspace);
-cstdlib_implement(isupper);
-cstdlib_implement(isxdigit);
-cstdlib_implement(tolower);
-cstdlib_implement(toupper);

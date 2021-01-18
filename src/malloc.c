@@ -44,8 +44,8 @@ static void *allocate_pages(size_t n_pages, void *suggested_address) {
     return krnlhook_mmap(
         suggested_address,
         n_pages * __mcint_runtime_info->page_size,
-        __mcapi_PROT_READ | __mcapi_PROT_WRITE,
-        __mcapi_MAP_ANONYMOUS,
+        PROT_READ | PROT_WRITE,
+        MAP_ANONYMOUS,
         -1,
         0
     );
@@ -61,15 +61,15 @@ METALC_API_INTERNAL int malloc_init(void) {
     g_ptr_first_page = (struct _MemoryBlock *)krnlhook_mmap(
         NULL,
         request_size,
-        __mcapi_PROT_READ | __mcapi_PROT_WRITE,
-        __mcapi_MAP_ANONYMOUS,
+        PROT_READ | PROT_WRITE,
+        MAP_ANONYMOUS,
         -1,
         0
     );
 
-    if (g_ptr_first_page == __mcapi_MAP_FAILED)
+    if (g_ptr_first_page == MAP_FAILED)
         /* If mmap failed, then errno is already set for us. */
-        return __mcapi_errno;
+        return errno;
 
     g_ptr_first_page->p_previous = NULL;
     g_ptr_first_page->block_size = request_size;
@@ -87,7 +87,7 @@ void *malloc(size_t size) {
     if (size == 0)
         return NULL;
 
-    __mcapi_errno = __mcapi_ENOSYS;
+    errno = ENOSYS;
     return NULL;
 }
 
@@ -103,7 +103,7 @@ void *calloc(size_t n_elements, size_t element_size) {
 
     /* Bail out if n_elements * element_size overflows. */
     if (total_size / element_size != n_elements) {
-        __mcapi_errno = __mcapi_ERANGE;
+        errno = ERANGE;
         return NULL;
     }
 

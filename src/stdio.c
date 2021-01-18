@@ -125,7 +125,7 @@ int __mcint_evaluate_format_specifier(
             string_length = strlen(string_pointer);
 
             if (string_length > (size_t)INT_MAX) {
-                __mcapi_errno = __mcapi_EOVERFLOW;
+                errno = EOVERFLOW;
                 return -1;
             }
 
@@ -143,11 +143,11 @@ int __mcint_evaluate_format_specifier(
         case MC_AT_FLOAT:
         case MC_AT_DOUBLE:
         case MC_AT_LONGDOUBLE:
-            __mcapi_errno = __mcapi_ENOSYS;
+            errno = ENOSYS;
             return -1;
 
         default:
-            __mcapi_errno = __mcapi_EINVAL;
+            errno = EINVAL;
             return -1;
     }
 }
@@ -205,7 +205,7 @@ int snprintf(char *buffer, size_t n, const char *format, ...) {
 }
 
 
-int vfprintf(__mcapi_FILE *stream, const char *format, va_list arg_list) {
+int vfprintf(FILE *stream, const char *format, va_list arg_list) {
     char *buffer;
     int n_chars_written;
 
@@ -224,7 +224,7 @@ int vfprintf(__mcapi_FILE *stream, const char *format, va_list arg_list) {
 }
 
 
-int fprintf(__mcapi_FILE *stream, const char *format, ...) {
+int fprintf(FILE *stream, const char *format, ...) {
     va_list arg_list;
     int result;
 
@@ -236,7 +236,7 @@ int fprintf(__mcapi_FILE *stream, const char *format, ...) {
 
 
 int vprintf(const char *format, va_list arg_list) {
-    return vfprintf(__mcapi_stdout, format, arg_list);
+    return vfprintf(stdout, format, arg_list);
 }
 
 
@@ -249,11 +249,3 @@ int printf(const char *format, ...) {
     va_end(arg_list);
     return result;
 }
-
-
-cstdlib_implement(vsprintf);
-cstdlib_implement(sprintf);
-cstdlib_implement(vprintf);
-cstdlib_implement(printf);
-cstdlib_implement(vfprintf);
-cstdlib_implement(fprintf);

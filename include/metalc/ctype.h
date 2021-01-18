@@ -3,34 +3,19 @@
 
 #include "metalc.h"
 
-int isalnum(int c);
-int isalpha(int c);
-int isblank(int c);
-int iscntrl(int c);
-int isdigit(int c);
-int isgraph(int c);
-int islower(int c);
-int isprint(int c);
-int ispunct(int c);
-int isspace(int c);
-int isupper(int c);
-int isxdigit(int c);
-int tolower(int c);
-int toupper(int c);
-
-cstdlib_export_with_attr(isalnum, pure);
-cstdlib_export_with_attr(isalpha, pure);
-cstdlib_export_with_attr(isblank, pure);
-cstdlib_export_with_attr(iscntrl, pure);
-cstdlib_export_with_attr(isdigit, const);
-cstdlib_export_with_attr(isgraph, pure);
-cstdlib_export_with_attr(islower, pure);
-cstdlib_export_with_attr(isprint, pure);
-cstdlib_export_with_attr(ispunct, pure);
-cstdlib_export_with_attr(isspace, pure);
-cstdlib_export_with_attr(isupper, pure);
-cstdlib_export_with_attr(isxdigit, const);
-cstdlib_export_with_attr(tolower, pure);
-cstdlib_export_with_attr(toupper, pure);
+METALC_API_EXPORT_WITH_ATTR(pure) int isalnum(int c);
+METALC_API_EXPORT_WITH_ATTR(pure) int isalpha(int c);
+METALC_API_EXPORT_WITH_ATTR(pure) int isblank(int c);
+METALC_API_EXPORT_WITH_ATTR(pure) int iscntrl(int c);
+METALC_API_EXPORT_WITH_ATTR(const) int isdigit(int c);
+METALC_API_EXPORT_WITH_ATTR(pure) int isgraph(int c);
+METALC_API_EXPORT_WITH_ATTR(pure) int islower(int c);
+METALC_API_EXPORT_WITH_ATTR(pure) int isprint(int c);
+METALC_API_EXPORT_WITH_ATTR(pure) int ispunct(int c);
+METALC_API_EXPORT_WITH_ATTR(pure) int isspace(int c);
+METALC_API_EXPORT_WITH_ATTR(pure) int isupper(int c);
+METALC_API_EXPORT_WITH_ATTR(const) int isxdigit(int c);
+METALC_API_EXPORT_WITH_ATTR(pure) int tolower(int c);
+METALC_API_EXPORT_WITH_ATTR(pure) int toupper(int c);
 
 #endif  /* INCLUDE_METALC_CTYPE_H_ */

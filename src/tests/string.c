@@ -5,27 +5,27 @@
 
 BEGIN_TEST(test_memchr__basic)
     static const char *str = "Th\nisIsAString";
-    assert(__mcapi_memchr(str, '\n', 5) == 2);
+    assert(memchr(str, '\n', 5) == 2);
 END_TEST()
 
 
 BEGIN_TEST(test_memchr__not_found)
-    assert(__mcapi_memchr("", '\n', 5) == NULL);
+    assert(memchr("", '\n', 5) == NULL);
 END_TEST()
 
 
 BEGIN_TEST(test_memcmp__zero_length)
-    assert(__mcapi_memcmp("", "", 0) == 0);
+    assert(memcmp("", "", 0) == 0);
 END_TEST()
 
 
 BEGIN_TEST(test_memcmp__no_character_zero_equal)
-    assert(__mcapi_memcmp("", "", 1) == 0);
+    assert(memcmp("", "", 1) == 0);
 END_TEST()
 
 
 BEGIN_TEST(test_memcmp__one_character_nonzero_equal)
-    assert(__mcapi_memcmp("A", "A", 1) == 0);
+    assert(memcmp("A", "A", 1) == 0);
 END_TEST()
 
 

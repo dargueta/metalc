@@ -21,23 +21,12 @@
 /** @endcond */
 
 
-typedef char __mcapi_jmp_buf[BUFSIZE] __attribute__((aligned (16)));
+typedef char jmp_buf[BUFSIZE] __attribute__((aligned (16)));
 
 #undef BUFSIZE
 
 
-int setjmp(__mcapi_jmp_buf buf);
-int longjmp(__mcapi_jmp_buf buf, int code);
-
-
-#ifndef METALC_DISABLE_STDLIB_DEFS
-    typedef __mcapi_jmp_buf jmp_buf;
-#endif
-
-
-/** @cond DECL */
-cstdlib_export(setjmp);
-cstdlib_export_with_attr(longjmp, noreturn);
-/** @endcond */
+METALC_API_EXPORT int setjmp(jmp_buf buf);
+METALC_API_EXPORT_WITH_ATTR(noreturn) int longjmp(jmp_buf buf, int code);
 
 #endif  /* INCLUDE_METALC_SETJMP_H_ */

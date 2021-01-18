@@ -3,10 +3,11 @@
 #include "metalc/errno.h"
 #include "metalc/limits.h"
 #include "metalc/locale.h"
+#include "metalc/stdlib.h"
 #include "metalc/string.h"
 
 
-static const struct __mcapi_lconv _default_lconv_info = {
+static const struct lconv _default_lconv_info = {
     ".",        /* decimal_point */
     "",         /* thousands_sep */
     "",         /* grouping */
@@ -36,7 +37,7 @@ static const struct __mcapi_lconv _default_lconv_info = {
 
 struct LConvEntry {
     const char * const name;
-    const struct __mcapi_lconv * const lconv_info;
+    const struct lconv * const lconv_info;
 };
 
 
@@ -59,11 +60,11 @@ const struct LConvEntry _supported_locales[] = {
 };
 
 
-struct __mcapi_lconv _current_lconv;
+struct lconv _current_lconv;
 const struct __mcint_charset_info *_ptr_current_charset = &_supported_charsets[0];
 
 
-static const struct __mcapi_lconv *_find_lconv(const char *name) {
+static const struct lconv *_find_lconv(const char *name) {
     const struct LConvEntry *ptr;
 
     for (ptr = _supported_locales; ptr->name != NULL; ++ptr) {
@@ -86,7 +87,7 @@ static const struct __mcint_charset_info *_find_charset(const char *name) {
 
 
 METALC_API_INTERNAL int locale_init(void) {
-    const struct __mcapi_lconv *default_locale = _find_lconv("C");
+    const struct lconv *default_locale = _find_lconv("C");
     memcpy(&_current_lconv, default_locale, sizeof(_current_lconv));
     return 0;
 }
@@ -98,47 +99,43 @@ METALC_API_INTERNAL int locale_teardown(void) {
 
 
 int setlocale(int what, const char *name) {
-    const struct __mcapi_lconv *locale;
+    const struct lconv *locale;
     const struct __mcint_charset_info *charset;
 
     switch (what) {
-        case __mcapi_LC_ALL:
+        case LC_ALL:
             /* Caller wants to change the entire locale. */
             locale = _find_lconv(name);
             if (locale == NULL)
-                return __mcapi_EINVAL;
+                return EINVAL;
 
             memcpy(&_current_lconv, locale, sizeof(_current_lconv));
             return 0;
 
-        case __mcapi_LC_CTYPE:
+        case LC_CTYPE:
             /* Caller wants to change the default character set. */
             charset = _find_charset(name);
             if (charset == NULL)
-                return __mcapi_EINVAL;
+                return EINVAL;
             _ptr_current_charset = charset;
             return 0;
 
-        case __mcapi_LC_COLLATE:
-        case __mcapi_LC_MONETARY:
-        case __mcapi_LC_NUMERIC:
-        case __mcapi_LC_TIME:
+        case LC_COLLATE:
+        case LC_MONETARY:
+        case LC_NUMERIC:
+        case LC_TIME:
             /* Caller wants to change specific portions of the current locale.
              * We don't support this yet. */
-            __mcapi_errno = __mcapi_ENOSYS;
-            return __mcapi_ENOSYS;
+            errno = ENOSYS;
+            return ENOSYS;
 
         default:
-            __mcapi_errno = __mcapi_EINVAL;
-            return __mcapi_EINVAL;
+            errno = EINVAL;
+            return EINVAL;
     }
 }
 
 
-struct __mcapi_lconv *localeconv(void) {
+struct lconv *localeconv(void) {
     return &_current_lconv;
 }
-
-
-cstdlib_implement(setlocale);
-cstdlib_implement(localeconv);

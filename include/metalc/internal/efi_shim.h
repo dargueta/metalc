@@ -34,7 +34,7 @@
 
 #if !METALC_HAVE_EFI_H
     /** Dummy definition of the real EFI ``EFI_HANDLE`` type. */
-    typedef intptr_t EFI_HANDLE;
+    typedef void *EFI_HANDLE;
 
     /**
      * Dummy definition of the real EFI ``EFI_SYSTEM_TABLE`` type.

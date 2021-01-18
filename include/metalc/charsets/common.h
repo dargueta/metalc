@@ -11,8 +11,8 @@
 
 
 typedef int (*fptr_mblen)(const char *str, size_t n);
-typedef int (*fptr_wctomb)(char *str, __mcapi_wchar_t wchar);
-typedef int (*fptr_mbtowc)(__mcapi_wchar_t *pwc, const char *str, size_t n);
+typedef int (*fptr_wctomb)(char *str, wchar_t wchar);
+typedef int (*fptr_mbtowc)(wchar_t *pwc, const char *str, size_t n);
 
 
 struct __mcint_charset_info {

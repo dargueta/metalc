@@ -55,10 +55,10 @@ int parse_printf_format_width(const char *format, struct MCFormatSpecifier *info
     unsigned long width;
     const char *end;
 
-    __mcapi_errno = 0;
+    errno = 0;
     width = strtoul(format, &end, 10);
 
-    if (__mcapi_errno != 0)
+    if (errno != 0)
         return -1;
 
     info->minimum_field_width = (unsigned)width;
@@ -93,10 +93,10 @@ int parse_printf_format_precision(const char *format, struct MCFormatSpecifier *
     else
         n_read = 1;
 
-    __mcapi_errno = 0;
+    errno = 0;
     precision = strtoul(format + n_read, &end, 10);
 
-    if (__mcapi_errno != 0)
+    if (errno != 0)
         return -1;
 
     info->fraction_precision = precision;
@@ -118,7 +118,7 @@ enum MCArgumentType int_argtype_from_width(enum MCArgumentWidth width_kind) {
         case MCAW_LONGLONG:
             return MC_AT_LONGLONG;
         default:
-            __mcapi_errno = __mcapi_EINVAL;
+            errno = EINVAL;
             return -1;
     }
 }
@@ -131,7 +131,7 @@ enum MCArgumentType float_argtype_from_width(enum MCArgumentWidth width_kind) {
     if (width_kind == MCAW_LONG_DOUBLE)
         return MC_AT_LONGDOUBLE;
 
-    __mcapi_errno = __mcapi_EINVAL;
+    errno = EINVAL;
     return -1;
 }
 
@@ -147,7 +147,7 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
     switch(format[0]) {
         case '\0':
             /* Hit the end of the format string early -- fail. */
-            __mcapi_errno = __mcapi_EINVAL;
+            errno = EINVAL;
             return -1;
         case 'h':
             /* Check for `hh` */
@@ -240,10 +240,10 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
         case 'n':
         case 'p':
         case 's':
-            __mcapi_errno = __mcapi_ENOSYS;
+            errno = ENOSYS;
             return -1;
         default:
-            __mcapi_errno = __mcapi_EINVAL;
+            errno = EINVAL;
             return -1;
     }
 
@@ -279,5 +279,3 @@ int __mcint_parse_printf_format_specifier(
 
     return total_read;
 }
-
-

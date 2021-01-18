@@ -2,11 +2,11 @@ bits 16
 
 %include "metalc/setjmp.inc"
 
-global __mcapi_setjmp
-global __mcapi_longjmp
+global setjmp
+global longjmp
 
 
-__mcapi_setjmp:
+setjmp:
     mov     cx, bp
     mov     bp, sp
 
@@ -32,7 +32,7 @@ __mcapi_setjmp:
     ret     2
 
 
-__mcapi_longjmp:
+longjmp:
     mov     bp, sp
 
     ; Set the return value first before we overwrite BP. It's a 32-bit integer

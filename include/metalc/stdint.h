@@ -4,12 +4,8 @@
 #include "metalc.h"
 
 
-#if METALC_HAVE_STDINT_H
-    /* Always defer to the platform's header file if present. GCC-compatible
-     * compilers will provide this for us. In the past I've had trouble getting
-     * it to work with Visual Studio so I have a backup plan below. */
-    #include <stdint.h>
-#elif METALC_HAVE_LIMITS_H
+#if METALC_HAVE_LIMITS_H
+
     /* We don't have stdint.h so we gotta figure it out ourselves. */
     #include <limits.h>
 

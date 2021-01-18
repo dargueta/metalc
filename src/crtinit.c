@@ -5,6 +5,7 @@
 #include "metalc/locale.h"
 #include "metalc/metalc.h"
 #include "metalc/setjmp.h"
+#include "metalc/stdlib.h"
 #include "metalc/stddef.h"
 
 
@@ -18,17 +19,17 @@ extern int locale_teardown(void);
 
 MetalCRuntimeInfo *__mcint_runtime_info __attribute__((visibility("hidden"))) = NULL;
 
-__mcapi_jmp_buf __mcint_abort_target;
+jmp_buf __mcint_abort_target;
 
 
 int cstdlib_init(MetalCRuntimeInfo *rti) {
     __mcint_runtime_info = rti;
-    __mcapi_errno = 0;
+    errno = 0;
 
     malloc_init();
     stdio_init();
     locale_init();
-    setlocale(__mcapi_LC_ALL, "C");
+    setlocale(LC_ALL, "C");
 
     /* TODO (dargueta): Initialize atexit here. */
 
@@ -99,11 +100,11 @@ int cstdlib_run(int argc, char **argv, char **env) {
         /* Bare metal; does not assume any underlying system but it *does* need some
          * information from the caller. */
         int _start(MetalCRuntimeInfo *rti) {
-            rti.efi_image_handle = NULL;
-            rti.efi_system_table = NULL;
+            rti->efi_image_handle = NULL;
+            rti->efi_system_table = NULL;
 
             cstdlib_init(rti);
-            cstdlib_run(0, NULL, NULL);
+            return cstdlib_run(0, NULL, NULL);
         }
     #endif
 #endif

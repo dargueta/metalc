@@ -218,37 +218,6 @@
      * no-op. */
     #define METALC_API_INTERNAL
     #define METALC_API_INTERAL_WITH_ATTR(...)   __attribute__((__VA_ARGS__))
-
-    #if METALC_BUILDING_LIBC
-        /* We're building the C library but with the intent to run unit tests on
-         * it. Since our testbench requires use of the host OS's standard C
-         * library, we need to create aliases for all these exported functions
-         * to avoid naming collisions. */
-        #if defined METALC_BUILD_KIND_STATIC
-            #define cstdlib_export(name)   \
-                extern __typeof__(name) name __attribute__((visibility("hidden")))
-
-            #define cstdlib_export_with_attr(name, ...)   \
-                extern __typeof__(name) name __attribute__((visibility("hidden"), __VA_ARGS__))
-
-            #define cstdlib_implement(name)     extern __typeof__(name) __mcapi_##name __attribute__((alias(#name), copy(name)))
-        #elif defined METALC_BUILD_KIND_SHARED
-            #define cstdlib_export(name)   \
-                extern __typeof__(name) name __attribute__((visibility("hidden")))
-
-            #define cstdlib_export_with_attr(name, ...)   \
-                extern __typeof__(name) name __attribute__((visibility("hidden"), __VA_ARGS__))
-
-            #define cstdlib_implement(name)  extern __typeof__(name) __mcapi_##name __attribute__((alias(#name), copy(name)))
-        #else
-            #error "Need to define METALC_BUILD_KIND_STATIC or METALC_BUILD_KIND_SHARED when compiling the C library in testing mode."
-        #endif
-    #else
-        /* We're building the testbench code. */
-        #define cstdlib_export(name)                    extern __typeof__(name) __mcapi_##name __attribute__((copy(name)))
-        #define cstdlib_export_with_attr(name, ...)     extern __typeof__(name) __mcapi_##name __attribute__((copy(name), __VA_ARGS__))
-        #define cstdlib_implement(name)
-    #endif
 #else
     /* Not in testing mode. We're either building the C library or a client
      * program is using the library. */
@@ -258,19 +227,6 @@
     #else
         #define METALC_API_INTERNAL                 __attribute__((visibility("hidden")))
         #define METALC_API_INTERAL_WITH_ATTR(...)   __attribute__((visibility("hidden"), __VA_ARGS__))
-    #endif
-
-
-    #if METALC_BUILDING_LIBC
-        /* Building the C library in production mode. */
-        #define cstdlib_export(name)                    extern __typeof__(name) name
-        #define cstdlib_export_with_attr(name, ...)     extern __typeof__(name) name __attribute__((__VA_ARGS__))
-        #define cstdlib_implement(name)
-    #else
-        /* This file is being included by a client program. */
-        #define cstdlib_export(name)                    extern __typeof__(name) name
-        #define cstdlib_export_with_attr(name, ...)     extern __typeof__(name) name __attribute__((__VA_ARGS__))
-        #define cstdlib_implement(name)
     #endif
 #endif  /* METALC_COMPILE_FOR_TESTING */
 

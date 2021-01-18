@@ -4,14 +4,9 @@
 #include "metalc.h"
 
 #ifdef NDEBUG
-    #define __mcapi_assert(expression)
+    #define assert(expression)
 #else
-    #define __mcapi_assert(expression)  __mcint_assert((expression), __LINE__, __FILE__, #expression, NULL)
-#endif
-
-
-#ifndef METALC_DISABLE_STDLIB_DEFS
-    #define assert  __mcapi_assert
+    #define assert(expression)  __mcint_assert((expression), __LINE__, __FILE__, #expression, NULL)
 #endif
 
 

@@ -14,7 +14,7 @@ void __mcint_assert(
     int expression, int line, const char *file, const char* assert_text,
     const char *message, ...
 ) {
-    __mcapi_FILE *out;
+    FILE *out;
     va_list args;
 
     if (expression)
@@ -23,7 +23,7 @@ void __mcint_assert(
     #if METALC_COMPILE_FOR_TESTING
         testhook_abort(line, file, assert_text);
     #elif METALC_COMPILE_OPTION_ENABLE_FILE_IO
-        out = (__mcapi_stderr != NULL) ? __mcapi_stderr : __mcapi_stdout;
+        out = (stderr != NULL) ? stderr : stdout;
         if (out) {
             fprintf(
                 out,
