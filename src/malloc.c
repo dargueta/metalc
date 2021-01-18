@@ -65,7 +65,7 @@ static size_t _size_of_allocation(const void *pointer) {
 }
 
 
-METALC_API_INTERNAL int malloc_init(void) {
+METALC_INTERNAL int malloc_init(void) {
     size_t request_size;
 
     /* The minimum allocation size depends on the architecture. For 16-bit builds,
@@ -85,7 +85,7 @@ METALC_API_INTERNAL int malloc_init(void) {
 }
 
 
-METALC_API_INTERNAL int malloc_teardown(void) {
+METALC_INTERNAL int malloc_teardown(void) {
     return 0;
 }
 

@@ -103,7 +103,7 @@ struct MCFormatSpecifier {
  *          processing the format specifier. If an error occurred, the return
  *          value will be negative and @ref errno will be set accordingly.
  */
-METALC_API_INTERNAL
+METALC_INTERNAL
 int __mcint_parse_printf_format_specifier(const char *format, struct MCFormatSpecifier *info);
 
 /**
@@ -114,7 +114,7 @@ int __mcint_parse_printf_format_specifier(const char *format, struct MCFormatSpe
  * @todo Add support for floating-point numbers.
  * @todo Add support for left- and right-justifying values.
  */
-METALC_API_INTERNAL
+METALC_INTERNAL
 int __mcint_evaluate_format_specifier(
     const char **format, va_list arg_list, char **output, int n_chars_written
 );

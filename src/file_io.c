@@ -28,7 +28,7 @@ FILE * const stdout = &_internal_stdout;
 FILE * const stderr = &_internal_stderr;
 
 
-METALC_API_INTERNAL int fileio_init(void) {
+METALC_INTERNAL int fileio_init(void) {
     memset(&_internal_stdin, 0, sizeof(_internal_stdin));
     memset(&_internal_stdout, 0, sizeof(_internal_stdout));
     memset(&_internal_stderr, 0, sizeof(_internal_stderr));
@@ -45,7 +45,7 @@ METALC_API_INTERNAL int fileio_init(void) {
 }
 
 
-METALC_API_INTERNAL int fileio_teardown(void) {
+METALC_INTERNAL int fileio_teardown(void) {
     fclose(stdin);
     fclose(stdout);
     fclose(stderr);

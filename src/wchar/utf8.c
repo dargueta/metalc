@@ -4,7 +4,7 @@
 #include <metalc/wchar.h>
 
 
-METALC_API_INTERNAL int __mcint_utf8_mblen(const char *str, size_t n) {
+METALC_INTERNAL int __mcint_utf8_mblen(const char *str, size_t n) {
     unsigned uchr;
 
     /* A NULL pointer means the caller is asking if the character set is state-dependent.
@@ -35,7 +35,7 @@ METALC_API_INTERNAL int __mcint_utf8_mblen(const char *str, size_t n) {
 }
 
 
-METALC_API_INTERNAL int __mcint_utf8_mbtowc(wchar_t *pwc, const char *str, size_t n) {
+METALC_INTERNAL int __mcint_utf8_mbtowc(wchar_t *pwc, const char *str, size_t n) {
     wchar_t result;
     int current_char_len;
 
@@ -85,7 +85,7 @@ METALC_API_INTERNAL int __mcint_utf8_mbtowc(wchar_t *pwc, const char *str, size_
 }
 
 
-METALC_API_INTERNAL int __mcint_utf8_wctomb(char *str, wchar_t wchar) {
+METALC_INTERNAL int __mcint_utf8_wctomb(char *str, wchar_t wchar) {
     /* Caller is asking if this encoding is state-dependent. It isn't. */
     if (str == NULL)
         return 0;

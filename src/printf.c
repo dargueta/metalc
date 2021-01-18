@@ -12,7 +12,7 @@
  * the number will be negative and errno will be set. The absolute value of the
  * return value is still the number of characters read.
  */
-METALC_API_INTERNAL
+METALC_INTERNAL
 int parse_printf_format_flags(const char *format, struct MCFormatSpecifier *info) {
     int i;
 
@@ -50,7 +50,7 @@ int parse_printf_format_flags(const char *format, struct MCFormatSpecifier *info
  * The function returns the number of characters read. If the width isn't present,
  * the return value will be 0 and `info->width` will also be 0.
  */
-METALC_API_INTERNAL
+METALC_INTERNAL
 int parse_printf_format_width(const char *format, struct MCFormatSpecifier *info) {
     unsigned long width;
     const char *end;
@@ -73,7 +73,7 @@ int parse_printf_format_width(const char *format, struct MCFormatSpecifier *info
  * the first character. If not, it assumes there is no precision specifier and
  * returns immediately.
  */
-METALC_API_INTERNAL
+METALC_INTERNAL
 int parse_printf_format_precision(const char *format, struct MCFormatSpecifier *info) {
     unsigned long precision;
     const char *end;
@@ -104,7 +104,7 @@ int parse_printf_format_precision(const char *format, struct MCFormatSpecifier *
 }
 
 
-METALC_API_INTERNAL
+METALC_INTERNAL
 enum MCArgumentType int_argtype_from_width(enum MCArgumentWidth width_kind) {
     switch (width_kind) {
         case MCAW_BYTE:
@@ -124,7 +124,7 @@ enum MCArgumentType int_argtype_from_width(enum MCArgumentWidth width_kind) {
 }
 
 
-METALC_API_INTERNAL
+METALC_INTERNAL
 enum MCArgumentType float_argtype_from_width(enum MCArgumentWidth width_kind) {
     if (width_kind == MCAW_DEFAULT)
         return MC_AT_DOUBLE;
@@ -136,7 +136,7 @@ enum MCArgumentType float_argtype_from_width(enum MCArgumentWidth width_kind) {
 }
 
 
-METALC_API_INTERNAL
+METALC_INTERNAL
 int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info) {
     enum MCArgumentWidth width;
     int n_read = 0;
@@ -252,7 +252,7 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
 
 
 
-METALC_API_INTERNAL
+METALC_INTERNAL
 int __mcint_parse_printf_format_specifier(
     const char *format, struct MCFormatSpecifier *info
 ) {

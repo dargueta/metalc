@@ -86,14 +86,14 @@ static const struct __mcint_charset_info *_find_charset(const char *name) {
 }
 
 
-METALC_API_INTERNAL int locale_init(void) {
+METALC_INTERNAL int locale_init(void) {
     const struct lconv *default_locale = _find_lconv("C");
     memcpy(&_current_lconv, default_locale, sizeof(_current_lconv));
     return 0;
 }
 
 
-METALC_API_INTERNAL int locale_teardown(void) {
+METALC_INTERNAL int locale_teardown(void) {
     return 0;
 }
 

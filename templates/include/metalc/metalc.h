@@ -214,18 +214,18 @@
     /* Building the C library for testing... */
 
     /* No functions are internal to the C library anymore since we need to be
-     * able to test these directly. Make the `METALC_API_INTERNAL` markers a
+     * able to test these directly. Make the `METALC_INTERNAL` markers a
      * no-op. */
-    #define METALC_API_INTERNAL
+    #define METALC_INTERNAL
     #define METALC_API_INTERAL_WITH_ATTR(...)   __attribute__((__VA_ARGS__))
 #else
     /* Not in testing mode. We're either building the C library or a client
      * program is using the library. */
     #if METALC_INTERNALS_USE_FASTCALL && (METALC_ARCH_BITS != 64)
-        #define METALC_API_INTERNAL                 __attribute__((visibility("hidden"), fastcall))
+        #define METALC_INTERNAL                     __attribute__((visibility("hidden"), fastcall))
         #define METALC_API_INTERAL_WITH_ATTR(...)   __attribute__((visibility("hidden"), fastcall, __VA_ARGS__))
     #else
-        #define METALC_API_INTERNAL                 __attribute__((visibility("hidden")))
+        #define METALC_INTERNAL                     __attribute__((visibility("hidden")))
         #define METALC_API_INTERAL_WITH_ATTR(...)   __attribute__((visibility("hidden"), __VA_ARGS__))
     #endif
 #endif  /* METALC_COMPILE_FOR_TESTING */
