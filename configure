@@ -228,7 +228,7 @@ def parse_arguments():
         "--platform",
         choices=("none", "uefi-full", "uefi-runtime"),
         help="",
-        default="uefi-full"
+        default="none"
     )
     parser.add_argument(
         "-t",
