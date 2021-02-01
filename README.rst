@@ -35,13 +35,14 @@ Compilation Modes
 This library can be compiled in one of several modes, depending on the needs of
 the program linking to it.
 
-* **Bare:** Assumes no underlying system system support. Many features such as I/O
-  require hooks to be implemented by the code using the library.
+* **Bare:** Assumes no underlying system system support. Use this for OS kernels
+  that don't need UEFI support or will implement it on their own. Many features
+  such as I/O require hooks to be implemented by the code using the library.
 * **UEFI Application:** Uses the UEFI boot services to provide I/O, memory
   allocation, etc. Useful for writing OS bootloaders and UEFI applications, but
   not OS kernels.
-* **Kernel:** Uses the UEFI runtime API. Useful for OS kernels that rely on UEFI
-  for certain hardware access.
+* **UEFI Kernel:** Uses the UEFI runtime API. Useful for OS kernels that rely on
+  UEFI for certain hardware access.
 
 Build Requirements
 ------------------
@@ -51,7 +52,7 @@ To build this library you'll need:
 * Python 3.3 or higher. (Python 2 may work but I make no guarantees and you
   really should reconsider the life choices that led you to still use it.)
 * CMake 3.8 or higher
-* A compiler supporting ANSI C99 or later, such as GCC or MinGW. Visual Studio
+* A compiler supporting ANSI C90 or later, such as GCC or MinGW. Visual Studio
   cannot cross-compile and so is not supported.
 * (UEFI modes only) A UEFI cross-compiler, such as `GNU_EFI`_ or `TianoCore`_.
   Clang/LLVM has this built in.
