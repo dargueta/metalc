@@ -28,5 +28,9 @@ typedef uint_least32_t wchar_t;
 #define WCHAR_MIN   0
 #define WCHAR_MAX   UINT_LEAST32_MAX
 
+#ifndef NULL
+    #define NULL    ((void *)0)
+#endif
+
 
 #endif  /* INCLUDE_METALC_STDDEF_H_ */
