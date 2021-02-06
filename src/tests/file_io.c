@@ -48,19 +48,11 @@ BEGIN_TEST(test_mode_string_to_flags__all)
     struct ModeStringTestCase *testcase;
 
     for (testcase = mode_string_to_flags_cases; testcase->mode_string != NULL; ++testcase) {
-        info_message(
-            "Testing mode string `%s`, expecting output %d and errno %d.",
-            testcase->mode_string,
-            testcase->expected_flags,
-            testcase->errno_value
-        );
-
         errno = 0;
-        CHECK_EQ(
-            __mcint_mode_string_to_flags(testcase->mode_string),
-            testcase->expected_flags
+        assert(
+            __mcint_mode_string_to_flags(testcase->mode_string) == testcase->expected_flags
         );
-        CHECK_EQ(errno, testcase->errno_value);
+        assert(errno == testcase->errno_value);
     }
 END_TEST()
 

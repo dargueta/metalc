@@ -1,4 +1,3 @@
-#include <metalc/assert.h>
 #include <metalc/ctype.h>
 #include <metalc/stddef.h>
 

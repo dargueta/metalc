@@ -1,11 +1,10 @@
-#include <metalc/assert.h>
 #include <metalc/string.h>
 #include "testing.h"
 
 
 BEGIN_TEST(test_memchr__basic)
     static const char *str = "Th\nisIsAString";
-    assert(memchr(str, '\n', 5) == 2);
+    assert(memchr(str, '\n', 5) == str + 2);
 END_TEST()
 
 

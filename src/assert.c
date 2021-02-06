@@ -1,13 +1,7 @@
 #include <metalc/assert.h>
 #include <metalc/metalc.h>
-#include <metalc/signal.h>
-#include <metalc/stdbool.h>
 #include <metalc/stdio.h>
 #include <metalc/stdlib.h>
-
-#if METALC_COMPILE_FOR_TESTING
-extern void testhook_abort(int line, const char *file, const char *assert_text);
-#endif
 
 
 void __mcint_assert(
@@ -20,9 +14,7 @@ void __mcint_assert(
     if (expression)
         return;
 
-    #if METALC_COMPILE_FOR_TESTING
-        testhook_abort(line, file, assert_text);
-    #elif METALC_COMPILE_OPTION_ENABLE_FILE_IO
+    #if METALC_COMPILE_OPTION_ENABLE_FILE_IO
         out = (stderr != NULL) ? stderr : stdout;
         if (out) {
             fprintf(
