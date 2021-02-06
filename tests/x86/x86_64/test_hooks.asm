@@ -1,5 +1,6 @@
 %include "metalc/x86/metalc.inc"
 
+
 %if ARCHITECTURE_SIZE == 16
     bits 16
 %elif ARCHITECTURE_SIZE == 32
@@ -9,7 +10,7 @@
 %endif
 
 
-decl_mint testhook_log_message
+decl_mcint testhook_log_message
 
 testhook_log_message:
     xor     REGISTER_AX, REGISTER_AX
