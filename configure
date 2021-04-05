@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 
 import argparse
+import configparser
 import datetime
 import collections
+import logging
 import os
 import platform
 import string
 import sys
+
+
+LOG = logging.getLogger()
 
 
 class ErrorExit(Exception):
@@ -14,239 +19,94 @@ class ErrorExit(Exception):
 
 
 _EPILOG = """\
-FEATURES
---------
+OVERRIDING DEFAULT SETTINGS
+---------------------------
 
-You can use the -f<feature_name> and -fno-<feature_name> flags to turn features
-on and off, respectively. For example, to enable use of the x86 processors' shadow
-stack, pass -fshadow-stack. To disable it, pass -fno-shadow-stack. A full list of
-supported features is below.
+You can override default build settings using the `-s` command line option, in
+the form `-s <setting-name>=<value>`, e.g. `-s target__build_mode=debug`. Each
+setting name consists of two parts: the section name, two underscores, and the
+key within that section. Letter case doesn't matter for the keys or values
+except where noted.
 
-
--ffastcall-internals [default] / -fno-fastcall-internals
-    (x86_32 only) Internal functions not exposed as part of the C library will
-    use the fastcall calling convention instead of the normal cdecl.
-
-
--fshadow-stack / -fno-shadow-stack [default]
-    Enable or disable use of the shadow stack. Supported on 32/64-bit x86 targets
-    only, and disabled by default.
-
-
--fexcl-fopen / -fno-excl-fopen [default]
-    Enable or disable the C2011 "x" flag for fopen. This is off by default since
-    it requires kernel support to implement.
+For a full depiction of what settings are available, descriptions, allowed
+values, and their defaults, see `default-build-config.ini` in the `config`
+directory. You can also run the configure command with the `--show-settings`
+flag, though this will only show the default values and not the documentation. 
 """
 
 HERE = os.path.dirname(__file__)
 
 
-MACHINE_TO_ARCH_ID = {
-    "i386": 1,  # x86_32
-    "i486": 1,  # x86_32
-    "i586": 2,  # x86_64
-    "x86_64": 2,  # x86_64
-    # TODO: Add support here for other processors if possible
-}
-
-
-MACHINE_TO_TARGET_NAME = {
-    "i386": "x86_32",
-    "i486": "x86_32",
-    "i586": "x86_64",
-    "x86_64": "x86_64",
-}
-
-ARCH_ID_TO_BITS = {
-    0: 16,  # x86-16
-    1: 32,  # x86-32
-    2: 64,  # x86-64
-    3: 32,  # MIPS32
-    4: 64,  # MIPS64
-}
-
-
-TOOLCHAIN_NAMES = {
-    "host": {
-        "ASSEMBLER": "as",
-        "COMPILER": "gcc",
-        "LINKER": "ld",
-        "ARCHITECTURE_ID": MACHINE_TO_ARCH_ID[platform.machine()],
-        "ARCHITECTURE_BITS": ARCH_ID_TO_BITS[MACHINE_TO_ARCH_ID[platform.machine()]],
-        "COMPILER_DEFINES": ["-march=native", "-mtune=native"],
-        "ASSEMBLER_DEFINES": ["-march=native"],
-    },
-    "x86_16": {
-        "ASSEMBLER": "nasm",
-        "COMPILER": "gcc",
-        "LINKER": "ld",
-        "ARCHITECTURE_ID": 0,
-        "ARCHITECTURE_BITS": 16,
-        "COMPILER_DEFINES": ["-m16"],
-        "ASSEMBLER_DEFINES": [],
-    },
-    "x86_32": {
-        "ASSEMBLER": "nasm",
-        "COMPILER": "gcc",
-        "LINKER": "ld",
-        "ARCHITECTURE_ID": 1,
-        "ARCHITECTURE_BITS": 32,
-        "COMPILER_DEFINES": ["-march=i386"],
-        "ASSEMBLER_DEFINES": [],
-    },
-    "x86_64": {
-        "ASSEMBLER": "nasm",
-        "COMPILER": "x86_64-linux-gnu-gcc",
-        "LINKER": "x86_64-linux-gnu-ld",
-        "ARCHITECTURE_ID": 2,
-        "ARCHITECTURE_BITS": 64,
-        "COMPILER_DEFINES": ["-march=x86-64"],
-        "ASSEMBLER_DEFINES": [],
-    },
-    "mips32": {
-        "ASSEMBLER": "mips-linux-gnu-as",
-        "COMPILER": "mips-linux-gnu-gcc",
-        "LINKER": "mips-linux-gnu-ld",
-        "ARCHITECTURE_ID": 3,
-        "ARCHITECTURE_BITS": 32,
-        "COMPILER_DEFINES": ["-march=mips32"],
-        "ASSEMBLER_DEFINES": ["-march=mips32"],
-    },
-    "mips64": {
-        "ASSEMBLER": "mips-linux-gnu-as",
-        "COMPILER": "mips-linux-gnu-gcc",
-        "LINKER": "mips-linux-gnu-ld",
-        "ARCHITECTURE_ID": 4,
-        "ARCHITECTURE_BITS": 64,
-        "COMPILER_DEFINES": ["-march=mips64"],
-        "ASSEMBLER_DEFINES": ["-march=mips64"],
-    },
-}
-
-
-def build_toolchain_params(args):
-    """Build a list of key-value pairs to write to the CMake toolchain file."""
-    if "efi" in args.feature_flags and args.arch not in ("x86_32", "x86_64"):
-        raise ErrorExit(
-            "Cannot use architecture `%s` with UEFI. You can only use x86_32 or x86_64"
-            " with it."
-        )
-
-    variables = collections.OrderedDict()
-    variables["REPOSITORY_ROOT"] = HERE
-
-    defines = " ".join(args.defines or ())
-
-    if "check-args" in args.feature_flags:
-        defines += " -DMETALC_CHECK_ARGS"
-
-    variables["C_DEFINES"] = defines
-    variables["TOOLCHAIN_ID"] = args.toolchain or ""
-    variables["COMPILE_FOR_KERNEL"] = 1 if args.kernel_mode else 0
-    variables["PLATFORM_NONE"] = 1 if args.platform == "none" else 0
-    variables["PLATFORM_UEFI_FULL"] = 1 if args.platform == "uefi-full" else 0
-    variables["PLATFORM_UEFI_RUNTIME_ONLY"] = 1 if args.platform == "uefi-runtime" else 0
-    variables["X86_USE_SHADOW_STACK"] = 1 if "shadow-stack" in args.feature_flags else 0
-    variables["FASTCALL_INTERNALS"] = 0 if "no-fastcall-internals" in args.feature_flags else 1
-    variables["COMPILE_FOR_KERNEL"] = 1 if args.kernel_mode else 0
-    variables["COMPILE_FOR_TESTING"] = 1 if args.build == "test" else 0
-
-    if args.arch == "host":
-        variables["TARGET_PROCESSOR"] = MACHINE_TO_TARGET_NAME[platform.machine()]
-    else:
-        variables["TARGET_PROCESSOR"] = args.arch
-
-    # TODO (dargueta): Modify this to be independent of EFI use.
-    # We can do this once support is implemented for giving the kernel callbacks
-    # to catch I/O events with.
-    variables["ENABLE_ALL_IO"] = 1 if "uefi" in args.platform else 0
-
-    variables.update(TOOLCHAIN_NAMES[args.arch])
-    return variables
-
-
-def templatize_cmake_file(params, basename):
-    with open(os.path.join("templates/", basename + ".cmake"), "r") as fd:
-        text = fd.read()
-
-    template = string.Template(text)
-    with open(basename + ".cmake", "w") as fd:
-        fd.write(template.substitute(params))
-
-
-def parse_arguments():
+def parse_arguments(toolchains):
     parser = argparse.ArgumentParser(
         description="Configure the MetalC library for building.",
         epilog=_EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         fromfile_prefix_chars="@",
     )
-    parser.add_argument(
-        "-a",
-        "--arch",
-        choices=("x86_16", "x86_32", "x86_64", "mips32", "mips64", "host"),
-        help="Choose the target architecture to build the library for. `host` (the"
-        " default) chooses the current hardware as the target architecture.",
-        default="host",
+    verbosity_group = parser.add_mutually_exclusive_group()
+    verbosity_group.add_argument(
+        "-v",
+        "--verbose",
+        dest="log_level",
+        action="store_const",
+        const=logging.INFO,
+        default=logging.WARNING,
+    )
+    verbosity_group.add_argument(
+        "-d", "--debug", dest="log_level", action="store_const", const=logging.DEBUG
     )
     parser.add_argument(
-        "-b",
-        "--build",
-        choices=("debug", "release", "test"),
-        help="The mode to compile the library in. Debug mode includes debug symbols in"
-        " the output binary and disables all optimizations. Test mode disables aliasing"
-        " so that MetalC can be used alongside the standard library to test it. Release"
-        " mode enables aliasing and optimizations, and strips out debug info.",
-        default="test",
+        "--show-settings", action="store_true", help="Show all default settings."
     )
     parser.add_argument(
-        "-D",
+        "-s",
+        dest="setting_overrides",
         action="append",
-        dest="defines",
-        metavar="KEY=VALUE",
-        help="Define macros at compile time.",
-        default=[],
+        help="Override a setting value, in the form of <setting-name>=<value>.",
     )
-    parser.add_argument(
-        "-f",
-        action="append",
-        dest="feature_flags",
-        metavar="FLAG",
-        help="Enable or disable a feature. See `FEATURES` below for more information.",
-        default=[],
-    )
-    parser.add_argument(
-        "-k",
-        "--kernel-mode",
-        action="store_true",
-        help="Compile the library for static linkage to an OS kernel. This enables the"
-        " library to make some assumptions about privileges, and disables some features"
-        " inappropriate for use in a kernel, like red zones.",
-    )
-    parser.add_argument(
-        "-p",
-        "--platform",
-        choices=("none", "uefi-full", "uefi-runtime"),
-        help="",
-        default="uefi-full"
-    )
-    parser.add_argument(
-        "-t",
-        "--toolchain",
-        metavar="NAME",
-        help="The name of the compiler toolchain to use when cross-compiling. This is"
-        " a three-part string of the form <cpu>-<host>-<abi>. This is normally deduced"
-        " from --arch and whether -fefi is enabled, but you can manually override it"
-        " here.",
-    )
+
     return parser.parse_args()
 
 
 def main():
-    args = parse_arguments()
-    params = build_toolchain_params(args)
-    templatize_cmake_file(params, "toolchain")
-    templatize_cmake_file(params, "settings")
+    logging.debug("Reading default build settings.")
+    build_defaults = configparser.ConfigParser()
+    build_defaults.read(os.path.join(HERE, "config", "default-build-config.ini"))
+
+    logging.debug("Loading toolchain information.")
+    toolchains = configparser.ConfigParser()
+    toolchains.read(os.path.join(HERE, "config", "toolchains.ini"))
+
+    args = parse_arguments(toolchains)
+    logging.basicConfig(format="[%(levelname)-7s] %(message)s", level=args.log_level)
+
+    if args.show_settings:
+        for section, contents in sorted(build_defaults.items()):
+            for key, value in sorted(contents.items()):
+                print("%s__%s=%s" % (section.upper(), key.upper(), value))
+        return
+
+
+def define_variables():
+    if sys.platform == "win32":
+        os_ish = "windows"
+        abi = "microsoft"
+    elif sys.platform == "cygwin":
+        os_ish = "linux"
+        abi = "microsoft"
+    elif sys.platform == "darwin":
+        os_ish = "macos"
+        abi = "gnu"
+    else:
+        os_ish = "linux"
+        abi = "gnu"
+
+    return {
+        "REPO_ROOT": HERE,
+        "HOST_PLATFORM": os_ish,
+        "ABI": abi,
+    }
 
 
 if __name__ == "__main__":

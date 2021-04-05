@@ -17,3 +17,4 @@ settings.cmake
 include/metalc/metalc.h
 include/metalc/x86/metalc.inc
 docs/html
+.python-version
