@@ -12,6 +12,9 @@
 decl_mint testhook_log_message
 
 testhook_log_message:
+    ; Set RAX/EAX/AX to all bits on and call interrupt 0x80. The testbench will
+    ; detect this call and intercept it but otherwise let other calls through
+    ; to the original handler.
     xor     REGISTER_AX, REGISTER_AX
     not     REGISTER_AX
     int     0x80

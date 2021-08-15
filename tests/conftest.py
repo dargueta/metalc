@@ -1,25 +1,42 @@
+import contextlib
+import typing
+
 import more_itertools
 import pytest
 import unicorn
 from unicorn import x86_const
 
 
+if typing.TYPE_CHECKING:
+    from typing import Callable
+    from typing import Iterator
+    from typing import Tuple
+    from typing import Union
+
+    InterruptCallback = Callable[["Machine", int, int, Tuple[bytes, ...]], None]
+
+
 class RegisterAccessor:
     def __init__(self, machine):
+        # type: (Machine) -> None
         self.machine = machine
 
     def __getitem__(self, register_id):
+        # type: (int) -> int
         return self.machine.engine.reg_read(register_id)
 
     def __setitem__(self, register_id, value):
+        # type: (int, int) -> None
         self.machine.engine.reg_write(register_id, value)
 
 
 class MemoryAccessor:
     def __init__(self, machine):
+        # type: (Machine) -> None
         self.machine = machine
 
     def indexer_to_bounds(self, slice_or_int):
+        # type: (Union[int, slice]) -> Tuple[int, int]
         if isinstance(slice_or_int, int):
             return slice_or_int, slice_or_int
 
@@ -41,15 +58,17 @@ class MemoryAccessor:
         if slice_or_int.stop is None:
             last_address = self.machine.memory_size - 1
         else:
-            last_address = where.stop - 1
+            last_address = slice_or_int.stop - 1
 
         return base_address, last_address
 
     def __getitem__(self, where):
+        # type: (Union[int, slice]) -> bytes
         base_address, last_address = self.indexer_to_bounds(where)
         return self.machine.engine.mem_read(base_address, last_address)
 
     def __setitem__(self, where, data):
+        # type: (int, bytes) -> None
         # Blow up if they try to write using a slice
         if not isinstance(where, int):
             raise TypeError(
@@ -68,6 +87,7 @@ class MemoryAccessor:
 
     # Syntactic sugar for clearing RAM
     def __delitem__(self, where):
+        # type: (Union[int, slice]) -> None
         base_address, last_address = self.indexer_to_bounds(where)
         data = b"\x00" * (last_address - base_address + 1)
         self[base_address] = data
@@ -75,7 +95,7 @@ class MemoryAccessor:
 
 class Machine:
     def __init__(self, architecture, address_width, interrupt_callback):
-        # type: (int, int, Callable[[Machine, int, int, Tuple[bytes, ...]], None])
+        # type: (int, int, InterruptCallback) -> None
         # Map in 1 MiB of RAM for 16-bit architectures, otherwise 512 MiB
         if address_width == unicorn.UC_MODE_16:
             self.memory_size = 2 ** 20
@@ -92,7 +112,7 @@ class Machine:
 
     def load_image(self, contents):
         # type: (bytes) -> None
-        self.engine.memory[0x8000] = contents
+        self.memory[0x8000] = contents
 
     def load_image_file(self, file_path):
         # type: (str) -> None
@@ -100,16 +120,16 @@ class Machine:
             return self.load_image(fd.read())
 
     def start(self):
-        # () -> None
+        # type: () -> None
         self.engine.emu_start(0x8000, self.memory_size - 0x8000)
 
     def stop(self):
-        # () -> None
+        # type: () -> None
         self.engine.emu_stop()
 
     def close(self):
-        # () -> None
-        self.engine.uc_close()
+        # type: () -> None
+        pass
 
     def _interrupt_hook(self, _engine, interrupt_number):
         # type: (unicorn.Uc, int) -> None
@@ -152,12 +172,22 @@ class Machine:
         )
 
 
-@pytest.fixture
-def virtual_machine__x86_64():
-    uc = Machine(unicorn.UC_ARCH_X86, unicorn.UC_MODE_64)
-    uc.engine.memory[0x8000] = contents
+@contextlib.contextmanager
+def virtual_machine__x86_64(contents, interrupt_callback, base_address=0x100000):
+    # type: (bytes, InterruptCallback, int) -> Iterator[Machine]
+    """Create a virtual machine with the given contents in RAM and interrupt callback.
+
+    Arguments:
+        contents (bytes):
+            The contents of RAM beginning at absolute address 0x8000.
+
+    """
+    uc = Machine(unicorn.UC_ARCH_X86, unicorn.UC_MODE_64, interrupt_callback)
+    uc.memory[base_address] = contents
     # TODO: Set instruction pointer and segment registers?
     uc.start()
-    yield uc
-    uc.stop()
-    uc.close()
+    try:
+        yield uc
+    finally:
+        uc.stop()
+        uc.close()
