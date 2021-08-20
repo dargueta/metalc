@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import argparse
-import datetime
 import collections
 import os
 import platform
@@ -145,9 +144,13 @@ def build_toolchain_params(args):
     variables["COMPILE_FOR_KERNEL"] = 1 if args.kernel_mode else 0
     variables["PLATFORM_NONE"] = 1 if args.platform == "none" else 0
     variables["PLATFORM_UEFI_FULL"] = 1 if args.platform == "uefi-full" else 0
-    variables["PLATFORM_UEFI_RUNTIME_ONLY"] = 1 if args.platform == "uefi-runtime" else 0
+    variables["PLATFORM_UEFI_RUNTIME_ONLY"] = (
+        1 if args.platform == "uefi-runtime" else 0
+    )
     variables["X86_USE_SHADOW_STACK"] = 1 if "shadow-stack" in args.feature_flags else 0
-    variables["FASTCALL_INTERNALS"] = 0 if "no-fastcall-internals" in args.feature_flags else 1
+    variables["FASTCALL_INTERNALS"] = (
+        0 if "no-fastcall-internals" in args.feature_flags else 1
+    )
     variables["COMPILE_FOR_KERNEL"] = 1 if args.kernel_mode else 0
     variables["COMPILE_FOR_TESTING"] = 1 if args.build == "test" else 0
 
@@ -228,7 +231,7 @@ def parse_arguments():
         "--platform",
         choices=("none", "uefi-full", "uefi-runtime"),
         help="",
-        default="uefi-full"
+        default="none",
     )
     parser.add_argument(
         "-t",
