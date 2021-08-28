@@ -5,16 +5,12 @@
 #include "stdint.h"
 
 
-#if defined(INT_LEAST64_MAX)
-    typedef uint_least64_t size_t;
-    typedef int_least64_t ssize_t;
-#elif defined(INT_LEAST32_MAX)
-    typedef uint_least32_t size_t;
-    typedef int_least32_t ssize_t;
-#else
-    typedef uint_least16_t size_t;
-    typedef int_least16_t ssize_t;
-#endif
+typedef uintptr_t size_t;
+typedef intptr_t ssize_t;
+
+#define SIZE_MAX UINTPTR_MAX
+#define SSIZE_MIN INTPTR_MIN
+#define SSIZE_MAX INTPTR_MAX
 
 /* TODO (dargueta): Is this correct? */
 typedef intmax_t max_align_t;
@@ -31,6 +27,5 @@ typedef uint_least32_t wchar_t;
 #ifndef NULL
     #define NULL    ((void *)0)
 #endif
-
 
 #endif  /* INCLUDE_METALC_STDDEF_H_ */

@@ -40,6 +40,7 @@ void *krnlhook_mmap(
     return MAP_FAILED;
 }
 
+
 int krnlhook_munmap(void *addr, size_t length, void *udata) {
     (void)addr, (void)length, (void)udata;
     /* Succeed unconditionally. This probably won't ever be called anyway. */
