@@ -5,6 +5,7 @@
 #include "metalc/internal/string.h"
 #include "metalc/limits.h"
 #include "metalc/stdarg.h"
+#include "metalc/stddef.h"
 #include "metalc/stdint.h"
 #include "metalc/stdio.h"
 #include "metalc/stdlib.h"
@@ -199,7 +200,7 @@ int snprintf(char *buffer, size_t n, const char *format, ...) {
     int result;
 
     va_start(arg_list, format);
-    result = vsnprintf(buffer, format, arg_list);
+    result = vsnprintf(buffer, n, format, arg_list);
     va_end(arg_list);
     return result;
 }

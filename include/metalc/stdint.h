@@ -50,9 +50,9 @@ typedef unsigned short uint_least16_t;
 
 
 #if INT_MAX > 0x7FFFFFFF
-    /* An int is greater than 32 bits. Rare, but again, it does happen. It
-     * is VERY unlikely nowadays that this will be anything but 64 bits, so
-     * we're going to take a gamble. */
+    /* An int is greater than 32 bits. Rare, but again, it does happen. It is
+     * VERY unlikely nowadays that this will be anything but 64 bits, so we're
+     * going to take a gamble. */
     typedef signed int int_least64_t;
     typedef unsigned int uint_least64_t;
 
@@ -140,7 +140,7 @@ typedef unsigned short uint_least16_t;
     typedef unsigned char uint8_t;
     typedef signed char int8_t;
     #define UINT8_MAX   255
-    #define INT8_MIN    -127
+    #define INT8_MIN    (-127)
     #define INT8_MAX    127
 #endif
 
@@ -149,7 +149,7 @@ typedef unsigned short uint_least16_t;
     typedef unsigned short uint16_t;
     typedef signed short int16_t;
     #define UINT16_MAX  65535
-    #define INT16_MIN   -32767
+    #define INT16_MIN   (-32767)
     #define INT16_MAX   32767
 #endif
 
@@ -158,7 +158,7 @@ typedef unsigned short uint_least16_t;
     typedef uint_least32_t uint32_t;
     typedef int_least32_t int32_t;
     #define UINT32_MAX  0xFFFFFFFF
-    #define INT32_MIN   -0x7FFFFFFF
+    #define INT32_MIN   (-0x7FFFFFFF)
     #define INT32_MAX   0x7FFFFFFF
 #endif
 
@@ -167,7 +167,7 @@ typedef unsigned short uint_least16_t;
     typedef uint_least64_t uint64_t;
     typedef int_least64_t int64_t;
     #define UINT64_MAX  0xFFFFFFFFFFFFFFFF
-    #define INT64_MIN   -0x7FFFFFFFFFFFFFFF
+    #define INT64_MIN   (-0x7FFFFFFFFFFFFFFF)
     #define INT64_MAX   0x7FFFFFFFFFFFFFFF
 #endif
 

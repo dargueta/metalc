@@ -34,11 +34,12 @@ void *krnlhook_mmap(
     void *addr, size_t length, int prot, int flags, int fd, __mcapi_off_t offset,
     void *udata
 ) {
-    (void)addr, (void)length, (void)prot, (void)flags, (void)fd, (void)offset,,
+    (void)addr, (void)length, (void)prot, (void)flags, (void)fd, (void)offset,
     (void)udata;
     __mcapi_errno = __mcapi_ENOMEM;
     return __mcapi_MAP_FAILED;
 }
+
 
 int krnlhook_munmap(void *addr, size_t length, void *udata) {
     (void)addr, (void)length, (void)udata;

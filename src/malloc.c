@@ -33,7 +33,7 @@ struct _MemoryBlock {
 };
 
 
-static _MemoryBlock *g_ptr_first_page = NULL;
+static struct _MemoryBlock *g_ptr_first_page = NULL;
 
 
 /* Yes, yes, this is terrible, but we're only using it for one thing. */
@@ -47,33 +47,27 @@ static void *allocate_pages(size_t n_pages, void *suggested_address) {
         __mcapi_PROT_READ | __mcapi_PROT_WRITE,
         __mcapi_MAP_ANONYMOUS,
         -1,
-        0
+        0,
+        __mcint_runtime_info->udata
     );
 }
 
 
 METALC_API_INTERNAL int malloc_init(void) {
-    size_t request_size;
+    size_t n_pages = MINIMUM_MMAP_REQUEST_SIZE / __mcint_runtime_info->page_size;
 
-    /* The minimum allocation size depends on the architecture. For 16-bit builds,
-     * it's 1 KiB. Otherwise, 4 MiB. */
-    request_size = MAX(MINIMUM_MMAP_REQUEST_SIZE, __mcint_runtime_info->page_size);
-    g_ptr_first_page = (struct _MemoryBlock *)krnlhook_mmap(
-        NULL,
-        request_size,
-        __mcapi_PROT_READ | __mcapi_PROT_WRITE,
-        __mcapi_MAP_ANONYMOUS,
-        -1,
-        0
-    );
+    /* On the off chance that the minimum mmap size is smaller than a page size,
+     * allocate one page. */
+    if (n_pages == 0)
+        n_pages = 1;
 
+    g_ptr_first_page = (struct _MemoryBlock *)allocate_pages(n_pages, NULL);
     if (g_ptr_first_page == __mcapi_MAP_FAILED)
         /* If mmap failed, then errno is already set for us. */
         return __mcapi_errno;
 
     g_ptr_first_page->p_previous = NULL;
-    g_ptr_first_page->block_size = request_size;
-
+    g_ptr_first_page->block_size = MINIMUM_MMAP_REQUEST_SIZE;
     return 0;
 }
 
@@ -81,6 +75,9 @@ METALC_API_INTERNAL int malloc_init(void) {
 METALC_API_INTERNAL int malloc_teardown(void) {
     return 0;
 }
+
+
+#define _size_of_allocation(ptr)    (((const struct _MemoryBlock *)(((const char *)(ptr)) - sizeof(struct _MemoryBlock)))->block_size)
 
 
 void *malloc(size_t size) {
@@ -148,6 +145,7 @@ void *realloc(void *pointer, size_t new_size) {
 
 
 void free(void *pointer) {
+    (void)pointer;
 }
 
 

@@ -8,17 +8,13 @@
 #if !defined METALC_DISABLE_STDLIB_DEFS || defined __STRICT_ANSI__
     #include "../stdint.h"
 
-    /* FIXME (dargueta): These predefined constants are pretty specific to GCC and may
-     * not work on MinGW or clang. */
-    #if __SIZEOF_SIZE_T__ == 8
-        typedef int64_t ssize_t;
-    #elif __SIZEOF_SIZE_T__ == 4
-        typedef int32_t ssize_t;
-    #elif __SIZEOF_SIZE_T__ == 2
-        typedef int16_t ssize_t;
-    #else
-        #error "Cannot define ssize_t: size_t width makes no sense: " ## __SIZEOF_SIZE_T__
-    #endif
+    typedef uintptr_t size_t;
+    typedef intptr_t ssize_t;
+
+    #define SIZE_MAX UINTPTR_MAX
+    #define SSIZE_MIN INTPTR_MIN
+    #define SSIZE_MAX INTPTR_MAX
+
 #endif  /* !METALC_DISABLE_STDLIB_DEFS */
 
 #endif  /* INCLUDE_METALC_BITS_STDDEF_H_ */

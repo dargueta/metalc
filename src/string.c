@@ -5,7 +5,6 @@
 #include "metalc/string.h"
 
 
-
 /* These are copied and pasted from the Linux headers on Ubuntu 19.10. */
 static const char *ERROR_STRINGS[__mcapi__MAX_ERRNO] = {
     "Success",
