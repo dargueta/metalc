@@ -5,34 +5,34 @@
 
 
 BEGIN_TEST(isalnum__basic)
-    assert(isalnum('A') != 0);
-    assert(isalnum('F') != 0);
-    assert(isalnum('Z') != 0);
-    assert(isalnum('a') != 0);
-    assert(isalnum('j') != 0);
-    assert(isalnum('z') != 0);
-    assert(isalnum('0') != 0);
-    assert(isalnum('9') != 0);
+    check(isalnum('A') != 0);
+    check(isalnum('F') != 0);
+    check(isalnum('Z') != 0);
+    check(isalnum('a') != 0);
+    check(isalnum('j') != 0);
+    check(isalnum('z') != 0);
+    check(isalnum('0') != 0);
+    check(isalnum('9') != 0);
 
-    assert(isalnum('\0') == 0);
-    assert(isalnum('~') == 0);
-    assert(isalnum(' ') == 0);
-    assert(isalnum('\377') == 0);
-    assert(isalnum('{') == 0);
-    assert(isalnum('}') == 0);
+    check(isalnum('\0') == 0);
+    check(isalnum('~') == 0);
+    check(isalnum(' ') == 0);
+    check(isalnum('\377') == 0);
+    check(isalnum('{') == 0);
+    check(isalnum('}') == 0);
 END_TEST()
 
 
 BEGIN_TEST(isalpha__basic)
-    assert(isalnum('A') != 0);
-    assert(isalnum('N') != 0);
-    assert(isalnum('q') != 0);
-    assert(isalnum('r') != 0);
+    check(isalnum('A') != 0);
+    check(isalnum('N') != 0);
+    check(isalnum('q') != 0);
+    check(isalnum('r') != 0);
 
-    assert(isalnum('\0') == 0);
-    assert(isalnum('~') == 0);
-    assert(isalnum(' ') == 0);
-    assert(isalnum('\377') == 0);
+    check(isalnum('\0') == 0);
+    check(isalnum('~') == 0);
+    check(isalnum(' ') == 0);
+    check(isalnum('\377') == 0);
 END_TEST()
 
 

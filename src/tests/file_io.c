@@ -49,10 +49,10 @@ BEGIN_TEST(test_mode_string_to_flags__all)
 
     for (testcase = mode_string_to_flags_cases; testcase->mode_string != NULL; ++testcase) {
         errno = 0;
-        assert(
+        check(
             __mcint_mode_string_to_flags(testcase->mode_string) == testcase->expected_flags
         );
-        assert(errno == testcase->errno_value);
+        check(errno == testcase->errno_value);
     }
 END_TEST()
 

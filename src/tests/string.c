@@ -4,27 +4,27 @@
 
 BEGIN_TEST(test_memchr__basic)
     static const char *str = "Th\nisIsAString";
-    assert(memchr(str, '\n', 5) == str + 2);
+    check(memchr(str, '\n', 5) == str + 2);
 END_TEST()
 
 
 BEGIN_TEST(test_memchr__not_found)
-    assert(memchr("", '\n', 5) == NULL);
+    check(memchr("", '\n', 5) == NULL);
 END_TEST()
 
 
 BEGIN_TEST(test_memcmp__zero_length)
-    assert(memcmp("", "", 0) == 0);
+    check(memcmp("", "", 0) == 0);
 END_TEST()
 
 
 BEGIN_TEST(test_memcmp__no_character_zero_equal)
-    assert(memcmp("", "", 1) == 0);
+    check(memcmp("", "", 1) == 0);
 END_TEST()
 
 
 BEGIN_TEST(test_memcmp__one_character_nonzero_equal)
-    assert(memcmp("A", "A", 1) == 0);
+    check(memcmp("A", "A", 1) == 0);
 END_TEST()
 
 
