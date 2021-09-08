@@ -94,7 +94,7 @@ class MemoryAccessor:
 
 
 class Machine:
-    def __init__(self, architecture, address_width, interrupt_callback):
+    def __init__(self, architecture, address_width, callback):
         # type: (int, int, InterruptCallback) -> None
         # Map in 1 MiB of RAM for 16-bit architectures, otherwise 512 MiB
         if address_width == unicorn.UC_MODE_16:
@@ -108,7 +108,11 @@ class Machine:
         self.engine.mem_map(0, self.memory_size)
         self.registers = RegisterAccessor(self)
         self.memory = MemoryAccessor(self)
-        self.interrupt_callback = interrupt_callback
+        self.callback = callback
+        self._hook_handle = self.engine.hook_add(
+            unicorn.UC_HOOK_INSN, self._hook, self, 0, 0, x86_const.UC_X86_INS_HLT
+        )
+
 
     def load_image(self, contents):
         # type: (bytes) -> None
@@ -131,14 +135,11 @@ class Machine:
         # type: () -> None
         pass
 
-    def _interrupt_hook(self, _engine, interrupt_number):
-        # type: (unicorn.Uc, int) -> None
+    def _hook(self, _engine, address, instruction_size, userdata):
+        # type: (unicorn.Uc, int, int, object) -> None
+
         if self.architecture == unicorn.UC_ARCH_X86:
-            # AL contains the number of arguments. The stack pointer points to the base
-            # of the memory we need to read to separate out the individual arguments.
-            # The first argument is always a signed int giving the test ID; subsequent
-            # arguments are passed to the handler as a tuple of each argument's raw
-            # bytes. This way, it can interpret them as needed.
+            # All bits in RAX/EAX/AX should be set.
             n_args = self.registers[x86_const.UC_X86_REG_AL]
 
             if self.address_width == unicorn.UC_MODE_64:
