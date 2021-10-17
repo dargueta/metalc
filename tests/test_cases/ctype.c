@@ -1,10 +1,10 @@
 #include <metalc/ctype.h>
 #include <metalc/stddef.h>
 
-#include "testing.h"
+#include "../include/testing.h"
 
 
-BEGIN_TEST(isalnum__basic)
+BEGIN_TEST()
     check(isalnum('A') != 0);
     check(isalnum('F') != 0);
     check(isalnum('Z') != 0);
@@ -23,7 +23,7 @@ BEGIN_TEST(isalnum__basic)
 END_TEST()
 
 
-BEGIN_TEST(isalpha__basic)
+BEGIN_TEST()
     check(isalnum('A') != 0);
     check(isalnum('N') != 0);
     check(isalnum('q') != 0);
@@ -36,51 +36,51 @@ BEGIN_TEST(isalpha__basic)
 END_TEST()
 
 
-BEGIN_TEST(isblank__basic)
+BEGIN_TEST()
 END_TEST()
 
 
-BEGIN_TEST(iscntrl__basic)
+BEGIN_TEST()
 END_TEST()
 
 
-BEGIN_TEST(isdigit__basic)
+BEGIN_TEST()
 END_TEST()
 
 
-BEGIN_TEST(isgraph__basic)
+BEGIN_TEST()
 END_TEST()
 
 
-BEGIN_TEST(islower__basic)
+BEGIN_TEST()
 END_TEST()
 
 
-BEGIN_TEST(isprint__basic)
+BEGIN_TEST()
 END_TEST()
 
 
-BEGIN_TEST(ispunct__basic)
+BEGIN_TEST()
 END_TEST()
 
 
-BEGIN_TEST(isspace__basic)
+BEGIN_TEST()
 END_TEST()
 
 
-BEGIN_TEST(isupper__basic)
+BEGIN_TEST()
 END_TEST()
 
 
-BEGIN_TEST(isxdigit__basic)
+BEGIN_TEST()
 END_TEST()
 
 
-BEGIN_TEST(tolower__basic)
+BEGIN_TEST()
 END_TEST()
 
 
-BEGIN_TEST(toupper__basic)
+BEGIN_TEST()
 END_TEST()
 
 

@@ -44,7 +44,7 @@ struct ModeStringTestCase mode_string_to_flags_cases[] = {
 
 
 
-BEGIN_TEST(test_mode_string_to_flags__all)
+BEGIN_TEST()
     struct ModeStringTestCase *testcase;
 
     for (testcase = mode_string_to_flags_cases; testcase->mode_string != NULL; ++testcase) {
@@ -55,9 +55,3 @@ BEGIN_TEST(test_mode_string_to_flags__all)
         check(errno == testcase->errno_value);
     }
 END_TEST()
-
-
-const struct UnitTestEntry kFileIOUnitTests[] = {
-    {test_mode_string_to_flags__all, "mode_string_to_flags: all"},
-    {NULL, NULL}
-};

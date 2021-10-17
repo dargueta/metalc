@@ -1,4 +1,3 @@
-pytest >= 4.0
-more-itertools >= 5.0
+pytest ~= 6.0
+pytest-randomly
 unicorn ~= 1.0.1
-typing  ; python_version<"3.5"
