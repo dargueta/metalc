@@ -6,32 +6,32 @@
 #include "metalc/stddef.h"
 
 
-extern MetalCRuntimeInfo *__mcint_runtime_info;
-extern __mcapi_jmp_buf __mcint_abort_target;
+extern MetalCRuntimeInfo *mcinternal_runtime_info;
+extern mclib_jmp_buf mcinternal_abort_target;
 
 
 __attribute__((noreturn)) static void _sighandler_term(int sig) {
     switch (sig) {
-        case __mcapi_SIGQUIT:
-        case __mcapi_SIGILL:
-        case __mcapi_SIGTRAP:
-        case __mcapi_SIGABRT:
-        case __mcapi_SIGBUS:
-        case __mcapi_SIGFPE:
-        case __mcapi_SIGSEGV:
-        case __mcapi_SIGSTKFLT:
-        case __mcapi_SIGXCPU:
-        case __mcapi_SIGXFSZ:
-        case __mcapi_SIGSYS:
+        case mclib_SIGQUIT:
+        case mclib_SIGILL:
+        case mclib_SIGTRAP:
+        case mclib_SIGABRT:
+        case mclib_SIGBUS:
+        case mclib_SIGFPE:
+        case mclib_SIGSEGV:
+        case mclib_SIGSTKFLT:
+        case mclib_SIGXCPU:
+        case mclib_SIGXFSZ:
+        case mclib_SIGSYS:
             /* All of these signals require a core dump and immediate termination.
              * crt_teardown() will *not* be called and no resources are released.
              * It's up to the operating system to release memory, file handles,
              * etc. */
-            krnlhook_core_dump(sig, __mcint_runtime_info->udata);
+            krnlhook_core_dump(sig, mcinternal_runtime_info->udata);
             break;
 
         default:
-            longjmp(__mcint_abort_target, sig);
+            longjmp(mcinternal_abort_target, sig);
             break;
     };
 }
@@ -45,13 +45,13 @@ static void _sighandler_ignore(int sig) {
 
 /* Signal handler pauses the current process. */
 static void _sighandler_stop(int sig) {
-    krnlhook_suspend(sig, __mcint_runtime_info->udata);
+    krnlhook_suspend(sig, mcinternal_runtime_info->udata);
 }
 
 
 /* Signal handler resumes the current process. */
 static void _sighandler_resume(int sig) {
-    krnlhook_resume(sig, __mcint_runtime_info->udata);
+    krnlhook_resume(sig, mcinternal_runtime_info->udata);
 }
 
 
@@ -68,7 +68,7 @@ static signal_handler_t kHandlersByMaskValue[] = {
 */
 
 
-static const __mcapi_signal_handler_t _default_signal_handlers[] = {
+static const mclib_signal_handler_t _default_signal_handlers[] = {
     /* Signal numbers begin at 1. Don't bother storing a handler for signal 0. */
     _sighandler_term,       /* SIGHUP */
     _sighandler_ignore,     /* SIGINT */
@@ -110,7 +110,7 @@ static void _sighandler_default(int sig) {
 }
 
 
-static __mcapi_signal_handler_t _current_signal_handlers[] = {
+static mclib_signal_handler_t _current_signal_handlers[] = {
     /* Signal numbers begin at 1. Don't bother storing a handler for signal 0. */
     _sighandler_default,
     _sighandler_default,
@@ -149,7 +149,7 @@ static __mcapi_signal_handler_t _current_signal_handlers[] = {
 
 int raise(int sig) {
     if ((sig < 1) || (sig > 32))
-        return __mcapi_EINVAL;
+        return mclib_EINVAL;
 
     _current_signal_handlers[sig - 1](sig);
     return 0;
@@ -157,27 +157,27 @@ int raise(int sig) {
 cstdlib_implement(raise);
 
 
-__mcapi_signal_handler_t signal(int sig, __mcapi_signal_handler_t handler) {
-    __mcapi_signal_handler_t original_handler;
+mclib_signal_handler_t signal(int sig, mclib_signal_handler_t handler) {
+    mclib_signal_handler_t original_handler;
 
     /* Ignore attempts to set signal handlers for signals that can't be overridden. */
-    if ((sig == __mcapi_SIGTSTP) || (sig == __mcapi_SIGKILL)) {
-        __mcapi_errno = __mcapi_EPERM;
+    if ((sig == mclib_SIGTSTP) || (sig == mclib_SIGKILL)) {
+        mclib_errno = mclib_EPERM;
         return _sighandler_default;
     }
     /* Barf if the caller tries overriding a signal we don't support */
     else if ((sig < 1) || (sig > 32)) {
-        __mcapi_errno = __mcapi_EINVAL;
+        mclib_errno = mclib_EINVAL;
         return _sighandler_term;
     }
 
     original_handler = _current_signal_handlers[sig - 1];
 
-    if (handler == (__mcapi_signal_handler_t)__mcapi_SIG_DFL)
+    if (handler == (mclib_signal_handler_t)mclib_SIG_DFL)
         _current_signal_handlers[sig - 1] = _sighandler_default;
-    else if (handler == (__mcapi_signal_handler_t)__mcapi_SIG_IGN)
+    else if (handler == (mclib_signal_handler_t)mclib_SIG_IGN)
         _current_signal_handlers[sig - 1] = _sighandler_ignore;
-    else if (handler == (__mcapi_signal_handler_t)__mcapi_SIG_ERR)
+    else if (handler == (mclib_signal_handler_t)mclib_SIG_ERR)
         _current_signal_handlers[sig - 1] = _sighandler_term;
     else
         _current_signal_handlers[sig - 1] = handler;

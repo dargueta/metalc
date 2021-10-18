@@ -18,12 +18,12 @@
     ; Building the C library for use by the testbench code
     %macro decl_mcint 1
         global %1:function hidden
-        global __mcint_%1:function
+        global mcinternal_%1:function
     %endmacro
 
     %macro decl_mcapi 1
         global %1:function hidden
-        global __mcapi_%1:function
+        global mclib_%1:function
     %endmacro
 %else
     ; Building for production

@@ -57,7 +57,7 @@ static metalc_big_float _factorial(unsigned int n) {
 }
 
 
-double __mcapi_fabs(double x) {
+double mclib_fabs(double x) {
     #if 0  /* #if METALC_ENABLE_ASM_IMPLEMENTATIONS */
         #if METALC_COMPILER_GCC_COMPATIBLE
             __asm__ ("fabs" : "st0");
@@ -72,7 +72,7 @@ double __mcapi_fabs(double x) {
 }
 
 
-float __mcapi_fabsf(float x) {
+float mclib_fabsf(float x) {
     #if 0  /* #if METALC_ENABLE_ASM_IMPLEMENTATIONS */
         #if METALC_COMPILER_GCC_COMPATIBLE
             __asm__ ("fabs" : "st0");
@@ -87,7 +87,7 @@ float __mcapi_fabsf(float x) {
 }
 
 
-double __mcapi_cos(double x) {
+double mclib_cos(double x) {
     #if 0  /* #if METALC_ENABLE_ASM_IMPLEMENTATIONS */
         #if METALC_COMPILER_GCC_COMPATIBLE
             __asm__ ("fcos" : "st0");
@@ -100,9 +100,9 @@ double __mcapi_cos(double x) {
 
         for (i = 0; i < LOOP_PRECISION; ++i) {
             if (i % 2 == 1)
-                cosine -= __mcapi_pow(x, 2 * i) / _factorial(2 * i);
+                cosine -= mclib_pow(x, 2 * i) / _factorial(2 * i);
             else
-                cosine += __mcapi_pow(x, 2 * i) / _factorial(2 * i);
+                cosine += mclib_pow(x, 2 * i) / _factorial(2 * i);
         }
 
         return cosine;
@@ -110,7 +110,7 @@ double __mcapi_cos(double x) {
 }
 
 
-float __mcapi_cosf(float x) {
+float mclib_cosf(float x) {
     #if 0  /* #if METALC_ENABLE_ASM_IMPLEMENTATIONS */
         #if METALC_COMPILER_GCC_COMPATIBLE
             __asm__ ("fcos" : "st0");
@@ -119,12 +119,12 @@ float __mcapi_cosf(float x) {
         #endif
     #else
         /* This is a cheap copout. :/ */
-        return (float)__mcapi_cos((double)x);
+        return (float)mclib_cos((double)x);
     #endif
 }
 
 
-double __mcapi_sin(double x) {
+double mclib_sin(double x) {
     #if 0  /* #if METALC_ENABLE_ASM_IMPLEMENTATIONS */
         #if METALC_COMPILER_GCC_COMPATIBLE
             __asm__ ("fsin" : "st0");
@@ -137,9 +137,9 @@ double __mcapi_sin(double x) {
 
         for (i = 0; i < LOOP_PRECISION; ++i) {
             if (i % 2 == 1)
-                sine -= __mcapi_pow(x, (2 * i) + 1) / _factorial((2 * i) + 1);
+                sine -= mclib_pow(x, (2 * i) + 1) / _factorial((2 * i) + 1);
             else
-                sine += __mcapi_pow(x, (2 * i) + 1) / _factorial((2 * i) + 1);
+                sine += mclib_pow(x, (2 * i) + 1) / _factorial((2 * i) + 1);
         }
 
         return sine;
@@ -147,7 +147,7 @@ double __mcapi_sin(double x) {
 }
 
 
-float __mcapi_sinf(float x) {
+float mclib_sinf(float x) {
     #if 0  /* #if METALC_ENABLE_ASM_IMPLEMENTATIONS */
         #if METALC_COMPILER_GCC_COMPATIBLE
             __asm__ ("fsin" : "st0");
@@ -155,12 +155,12 @@ float __mcapi_sinf(float x) {
             __asm fsin;
         #endif
     #else
-        return (float)__mcapi_sin((double)x);
+        return (float)mclib_sin((double)x);
     #endif
 }
 
 
-double __mcapi_tan(double x) {
+double mclib_tan(double x) {
     #if 0  /* #if METALC_ENABLE_ASM_IMPLEMENTATIONS */
         #if METALC_COMPILER_GCC_COMPATIBLE
             __asm__ ("fptan\nfincstp" : "st0");
@@ -169,16 +169,16 @@ double __mcapi_tan(double x) {
             __asm fincstp;
         #endif
     #else
-        if (__mcapi_fabs(x) > _PI_OVER_2) {
-            __mcapi_errno = __mcapi_EDOM;
+        if (mclib_fabs(x) > _PI_OVER_2) {
+            mclib_errno = mclib_EDOM;
             return 0;
         }
-        return __mcapi_sin(x) / __mcapi_cos(x);
+        return mclib_sin(x) / mclib_cos(x);
     #endif
 }
 
 
-float __mcapi_tanf(float x) {
+float mclib_tanf(float x) {
     #if 0  /* #if METALC_ENABLE_ASM_IMPLEMENTATIONS */
         #if METALC_COMPILER_GCC_COMPATIBLE
             __asm__ ("fptan\nfincstp" : "st0");
@@ -187,64 +187,64 @@ float __mcapi_tanf(float x) {
             __asm fincstp;
         #endif
     #else
-        if (__mcapi_fabsf(x) > _PI_OVER_2) {
-            __mcapi_errno = __mcapi_EDOM;
+        if (mclib_fabsf(x) > _PI_OVER_2) {
+            mclib_errno = mclib_EDOM;
             return 0;
         }
-        return __mcapi_sinf(x) / __mcapi_cosf(x);
+        return mclib_sinf(x) / mclib_cosf(x);
     #endif
 }
 
 
-double __mcapi_asin(double x) {
+double mclib_asin(double x) {
     unsigned i;
     double result = 0;
 
-    if (__mcapi_fabs(x) > 1) {
-        __mcapi_errno = __mcapi_EDOM;
+    if (mclib_fabs(x) > 1) {
+        mclib_errno = mclib_EDOM;
         return 0;
     }
 
     /* From https://en.wikipedia.org/wiki/Inverse_trigonometric_functions#Infinite_series */
     for (i = 0; i < LOOP_PRECISION; ++i) {
         result += \
-            _factorial(2 * i) * __mcapi_pow(x, (2 * i) + 1)
-            / __mcapi_pow(__mcapi_pow(2, i) * _factorial(i), 2) / ((2 * i) + 1);
+            _factorial(2 * i) * mclib_pow(x, (2 * i) + 1)
+            / mclib_pow(mclib_pow(2, i) * _factorial(i), 2) / ((2 * i) + 1);
     }
     return result;
 }
 
 
-float __mcapi_asinf(float x) {
-    return (float)__mcapi_asin((double)x);
+float mclib_asinf(float x) {
+    return (float)mclib_asin((double)x);
 }
 
 
-double __mcapi_acos(double x) {
-    return _PI_OVER_2 - __mcapi_asin(x);
+double mclib_acos(double x) {
+    return _PI_OVER_2 - mclib_asin(x);
 }
 
 
-float __mcapi_acosf(float x) {
-    return _PI_OVER_2 - __mcapi_asin((double)x);
+float mclib_acosf(float x) {
+    return _PI_OVER_2 - mclib_asin((double)x);
 }
 
 
-double __mcapi_pow(double base, double exponent) {
+double mclib_pow(double base, double exponent) {
     if (exponent == 0)
         return 1.0;
     else if (exponent == 1)
         return base;
     else if (exponent > 1) {
         /* Multiply */
-        __mcapi_errno = __mcapi_ENOSYS;
+        mclib_errno = mclib_ENOSYS;
         return 0;
     }
     else if (exponent < 0)
-        return 1 / __mcapi_pow(base, -exponent);
+        return 1 / mclib_pow(base, -exponent);
     else {
         /* Exponent is between 0 and 1, exclusive */
-        __mcapi_errno = __mcapi_ENOSYS;
+        mclib_errno = mclib_ENOSYS;
         return 0;
     }
 }
@@ -259,87 +259,87 @@ double __mcapi_pow(double base, double exponent) {
  * returns 10 bytes by default on a 64-bit architecture.
  */
 #if METALC_HAVE_LONG_DOUBLE
-    long double __mcapi_fabsl(long double x) {
+    long double mclib_fabsl(long double x) {
         if (x < 0)
             return -x;
         return x;
     }
 
-    long double __mcapi_cosl(long double x) {
+    long double mclib_cosl(long double x) {
         unsigned i;
         long double cosine = 1.0;
 
         for (i = 0; i < LOOP_PRECISION; ++i) {
             if (i % 2 == 1)
-                cosine -= __mcapi_powl(x, 2 * i) / _factorial(2 * i);
+                cosine -= mclib_powl(x, 2 * i) / _factorial(2 * i);
             else
-                cosine += __mcapi_powl(x, 2 * i) / _factorial(2 * i);
+                cosine += mclib_powl(x, 2 * i) / _factorial(2 * i);
         }
         return cosine;
     }
 
 
-    long double __mcapi_sinl(long double x) {
+    long double mclib_sinl(long double x) {
         unsigned i;
         long double sine = x;
 
         for (i = 0; i < LOOP_PRECISION; ++i) {
             if (i % 2 == 1)
-                sine -= __mcapi_powl(x, (2 * i) + 1) / _factorial((2 * i) + 1);
+                sine -= mclib_powl(x, (2 * i) + 1) / _factorial((2 * i) + 1);
             else
-                sine += __mcapi_powl(x, (2 * i) + 1) / _factorial((2 * i) + 1);
+                sine += mclib_powl(x, (2 * i) + 1) / _factorial((2 * i) + 1);
         }
 
         return sine;
     }
 
 
-    long double __mcapi_tanl(long double x) {
-        if (__mcapi_fabsl(x) > _PI_OVER_2) {
-            __mcapi_errno = __mcapi_EDOM;
+    long double mclib_tanl(long double x) {
+        if (mclib_fabsl(x) > _PI_OVER_2) {
+            mclib_errno = mclib_EDOM;
             return 0;
         }
-        return __mcapi_sinl(x) / __mcapi_cosl(x);
+        return mclib_sinl(x) / mclib_cosl(x);
     }
 
-    long double __mcapi_asinl(long double x) {
+    long double mclib_asinl(long double x) {
         unsigned i;
         long double result = 0;
 
-        if (__mcapi_fabsl(x) > 1) {
-            __mcapi_errno = __mcapi_EDOM;
+        if (mclib_fabsl(x) > 1) {
+            mclib_errno = mclib_EDOM;
             return 0;
         }
 
         /* From https://en.wikipedia.org/wiki/Inverse_trigonometric_functions#Infinite_series */
         for (i = 0; i < LOOP_PRECISION; ++i) {
             result += \
-                _factorial(2 * i) * __mcapi_powl(x, (2 * i) + 1)
-                / __mcapi_powl(__mcapi_powl(2, i) * _factorial(i), 2) / ((2 * i) + 1);
+                _factorial(2 * i) * mclib_powl(x, (2 * i) + 1)
+                / mclib_powl(mclib_powl(2, i) * _factorial(i), 2) / ((2 * i) + 1);
         }
         return result;
     }
 
-    long double __mcapi_acosl(long double x) {
-        return _PI_OVER_2 - __mcapi_asinl(x);
+    long double mclib_acosl(long double x) {
+        return _PI_OVER_2 - mclib_asinl(x);
     }
 
 
-    long double __mcapi_powl(long double base, long double exponent) {
+    long double mclib_powl(long double base, long double exponent) {
         if (exponent == 0)
             return 1.0;
         else if (exponent == 1)
             return base;
         else if (exponent > 1) {
             /* Multiply */
-            __mcapi_errno = __mcapi_ENOSYS;
+            mclib_errno = mclib_ENOSYS;
             return 0;
         }
         else if (exponent < 0)
-            return 1 / __mcapi_powl(base, -exponent);
+            return 1 / mclib_powl(base, -exponent);
         else {
             /* Exponent is between 0 and 1, exclusive */
-            __mcapi_errno = __mcapi_ENOSYS;
+            mclib_errno = mclib_ENOSYS;
             return 0;
         }
     }

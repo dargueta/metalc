@@ -5,19 +5,19 @@
 #include "stdint.h"
 
 
-typedef uint32_t __mcapi_wchar_t;
+typedef uint32_t mclib_wchar_t;
 
 
 #ifndef METALC_COMPILE_FOR_TESTING
-    typedef __mcapi_wchar_t wchar_t;
+    typedef mclib_wchar_t wchar_t;
 #endif
 
-#define __mcapi_WCHAR_MIN   0UL
-#define __mcapi_WCHAR_MAX   0x10ffffUL
+#define mclib_WCHAR_MIN   0UL
+#define mclib_WCHAR_MAX   0x10ffffUL
 
 #ifndef METALC_DISABLE_STDLIB_DEFS
-    #define WCHAR_MIN __mcapi_WCHAR_MIN
-    #define WCHAR_MAX __mcapi_WCHAR_MAX
+    #define WCHAR_MIN mclib_WCHAR_MIN
+    #define WCHAR_MAX mclib_WCHAR_MAX
 #endif
 
 #endif  /* INCLUDE_METALC_WCHAR_H_ */

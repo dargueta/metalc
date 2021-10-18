@@ -16,19 +16,19 @@ extern int locale_init(void);
 extern int locale_teardown(void);
 
 
-MetalCRuntimeInfo *__mcint_runtime_info __attribute__((visibility("hidden"))) = NULL;
+MetalCRuntimeInfo *mcinternal_runtime_info __attribute__((visibility("hidden"))) = NULL;
 
-__mcapi_jmp_buf __mcint_abort_target;
+mclib_jmp_buf mcinternal_abort_target;
 
 
 int cstdlib_init(MetalCRuntimeInfo *rti) {
-    __mcint_runtime_info = rti;
-    __mcapi_errno = 0;
+    mcinternal_runtime_info = rti;
+    mclib_errno = 0;
 
     malloc_init();
     stdio_init();
     locale_init();
-    setlocale(__mcapi_LC_ALL, "C");
+    setlocale(mclib_LC_ALL, "C");
 
     /* TODO (dargueta): Initialize atexit here. */
 
@@ -49,9 +49,9 @@ static int cstdlib_teardown(void) {
 
 int cstdlib_run(int argc, char **argv, char **env) {
     int result;
-    MetalCRuntimeInfo *rti = __mcint_runtime_info;
+    MetalCRuntimeInfo *rti = mcinternal_runtime_info;
 
-    result = setjmp(__mcint_abort_target);
+    result = setjmp(mcinternal_abort_target);
     if (result == 0) {
         /* Call main() using the three-argument form. It's up to the kernel to
          * provide a shim for main() implementations that take zero or two

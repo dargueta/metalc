@@ -6,7 +6,7 @@
 
 
 /* These are copied and pasted from the Linux headers on Ubuntu 19.10. */
-static const char *ERROR_STRINGS[__mcapi__MAX_ERRNO] = {
+static const char *ERROR_STRINGS[mclib__MAX_ERRNO] = {
     "Success",
     "Operation not permitted",
     "No such file or directory",
@@ -296,7 +296,7 @@ cstdlib_implement(strcspn);
 char *strerror(int errnum) {
     static char buffer[128];
 
-    if ((errnum >= 0) && (errnum < __mcapi__MAX_ERRNO))
+    if ((errnum >= 0) && (errnum < mclib__MAX_ERRNO))
         return strcpy(buffer, ERROR_STRINGS[errnum]);
 
     sprintf(buffer, "Unknown error %d", errnum);
@@ -348,7 +348,7 @@ int strncmp(const char *str1, const char *str2, size_t num) {
     }
 
     /* When we get out here either 1) num is 0 and all characters matched so far,
-     * or 2) num > 0 and we hit the end of one or both strings. In case 1 we
+     * or 2) num > 0, and we hit the end of one or both strings. In case 1 we
      * want to return 0, otherwise compare the last characters. */
 
     if (num == 0)

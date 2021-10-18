@@ -6,18 +6,18 @@
 #include <metalc/stdlib.h>
 
 
-void __mcint_assert(
+void mcinternal_assert(
     int expression, int line, const char *file, const char* assert_text,
     const char *message, ...
 ) {
-    __mcapi_FILE *out;
+    mclib_FILE *out;
     va_list args;
 
     if (expression)
         return;
 
     #if METALC_COMPILE_OPTION_ENABLE_FILE_IO
-        out = (__mcapi_stderr != NULL) ? __mcapi_stderr : __mcapi_stdout;
+        out = (mclib_stderr != NULL) ? mclib_stderr : mclib_stdout;
         if (out) {
             fprintf(
                 out,

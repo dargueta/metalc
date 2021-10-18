@@ -7,12 +7,12 @@
 #include "stddef.h"
 
 
-struct __mcint_FILE;
-typedef struct __mcint_FILE __mcapi_FILE;
+struct mcinternal_FILE;
+typedef struct mcinternal_FILE mclib_FILE;
 
-extern __mcapi_FILE * const __mcapi_stdin;
-extern __mcapi_FILE * const __mcapi_stdout;
-extern __mcapi_FILE * const __mcapi_stderr;
+extern mclib_FILE * const mclib_stdin;
+extern mclib_FILE * const mclib_stdout;
+extern mclib_FILE * const mclib_stderr;
 
 
 int vsprintf(char *buffer, const char *format, va_list arg_list);
@@ -21,18 +21,18 @@ int snprintf(char *buffer, size_t length, const char *format, ...);
 int sprintf(char *buffer, const char *format, ...);
 int vprintf(const char *format, va_list arg_list);
 int printf(const char *format, ...);
-int vfprintf(__mcapi_FILE *stream, const char *format, va_list arg_list);
-int fprintf(__mcapi_FILE *stream, const char *format, ...);
-void clearerr(__mcapi_FILE *stream);
-void fclose(__mcapi_FILE *stream);
-int feof(__mcapi_FILE *stream);
-int ferror(__mcapi_FILE *stream);
-__mcapi_FILE *fopen(const char *path, const char *mode);
-size_t fwrite(const void *ptr, size_t size, size_t count, __mcapi_FILE *stream);
-size_t fread(void *ptr, size_t size, size_t count, __mcapi_FILE *stream);
-__mcapi_fpos_t fseek(__mcapi_FILE *stream, long offset, int whence);
+int vfprintf(mclib_FILE *stream, const char *format, va_list arg_list);
+int fprintf(mclib_FILE *stream, const char *format, ...);
+void clearerr(mclib_FILE *stream);
+void fclose(mclib_FILE *stream);
+int feof(mclib_FILE *stream);
+int ferror(mclib_FILE *stream);
+mclib_FILE *fopen(const char *path, const char *mode);
+size_t fwrite(const void *ptr, size_t size, size_t count, mclib_FILE *stream);
+size_t fread(void *ptr, size_t size, size_t count, mclib_FILE *stream);
+mclib_fpos_t fseek(mclib_FILE *stream, long offset, int whence);
 
-int __mcint_mode_string_to_flags(const char *mode) __attribute__((nonnull));
+int mcinternal_mode_string_to_flags(const char *mode) __attribute__((nonnull));
 
 
 cstdlib_export_with_attr(vsprintf, nonnull(2));

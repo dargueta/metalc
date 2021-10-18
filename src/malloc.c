@@ -12,7 +12,7 @@
 #include "metalc/sys/mman.h"
 
 
-extern MetalCRuntimeInfo *__mcint_runtime_info;
+extern MetalCRuntimeInfo *mcinternal_runtime_info;
 
 
 #if METALC_ARCH_BITS == 16
@@ -43,18 +43,18 @@ static struct _MemoryBlock *g_ptr_first_page = NULL;
 static void *allocate_pages(size_t n_pages, void *suggested_address) {
     return krnlhook_mmap(
         suggested_address,
-        n_pages * __mcint_runtime_info->page_size,
-        __mcapi_PROT_READ | __mcapi_PROT_WRITE,
-        __mcapi_MAP_ANONYMOUS,
+        n_pages * mcinternal_runtime_info->page_size,
+        mclib_PROT_READ | mclib_PROT_WRITE,
+        mclib_MAP_ANONYMOUS,
         -1,
         0,
-        __mcint_runtime_info->udata
+        mcinternal_runtime_info->udata
     );
 }
 
 
 METALC_API_INTERNAL int malloc_init(void) {
-    size_t n_pages = MINIMUM_MMAP_REQUEST_SIZE / __mcint_runtime_info->page_size;
+    size_t n_pages = MINIMUM_MMAP_REQUEST_SIZE / mcinternal_runtime_info->page_size;
 
     /* On the off chance that the minimum mmap size is smaller than a page size,
      * allocate one page. */
@@ -62,9 +62,9 @@ METALC_API_INTERNAL int malloc_init(void) {
         n_pages = 1;
 
     g_ptr_first_page = (struct _MemoryBlock *)allocate_pages(n_pages, NULL);
-    if (g_ptr_first_page == __mcapi_MAP_FAILED)
+    if (g_ptr_first_page == mclib_MAP_FAILED)
         /* If mmap failed, then errno is already set for us. */
-        return __mcapi_errno;
+        return mclib_errno;
 
     g_ptr_first_page->p_previous = NULL;
     g_ptr_first_page->block_size = MINIMUM_MMAP_REQUEST_SIZE;
@@ -84,7 +84,7 @@ void *malloc(size_t size) {
     if (size == 0)
         return NULL;
 
-    __mcapi_errno = __mcapi_ENOSYS;
+    mclib_errno = mclib_ENOSYS;
     return NULL;
 }
 
@@ -100,7 +100,7 @@ void *calloc(size_t n_elements, size_t element_size) {
 
     /* Bail out if n_elements * element_size overflows. */
     if (total_size / element_size != n_elements) {
-        __mcapi_errno = __mcapi_ERANGE;
+        mclib_errno = mclib_ERANGE;
         return NULL;
     }
 

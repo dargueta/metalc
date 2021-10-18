@@ -1,1 +1,1 @@
-int __mcapi_errno __attribute__((used));
+int mclib_errno __attribute__((used));

@@ -10,89 +10,89 @@
 #include "metalc/bits/sys/mman.h"
 
 
-extern __mcapi_jmp_buf __mcint_abort_target;
+extern mclib_jmp_buf mcinternal_abort_target;
 
 
 void krnlhook_suspend(int sig, void *udata) {
     (void)sig, (void)udata;
-    raise(__mcapi_SIGSYS);
+    raise(mclib_SIGSYS);
 }
 
 void krnlhook_resume(int sig, void *udata) {
     (void)sig, (void)udata;
-    raise(__mcapi_SIGSYS);
+    raise(mclib_SIGSYS);
 }
 
 
 void krnlhook_core_dump(int sig, void *udata) {
     (void)udata;
-    longjmp(__mcint_abort_target, sig);
+    longjmp(mcinternal_abort_target, sig);
 }
 
 
 void *krnlhook_mmap(
-    void *addr, size_t length, int prot, int flags, int fd, __mcapi_off_t offset,
+    void *addr, size_t length, int prot, int flags, int fd, mclib_off_t offset,
     void *udata
 ) {
     (void)addr, (void)length, (void)prot, (void)flags, (void)fd, (void)offset,
     (void)udata;
-    __mcapi_errno = __mcapi_ENOMEM;
-    return __mcapi_MAP_FAILED;
+    mclib_errno = mclib_ENOMEM;
+    return mclib_MAP_FAILED;
 }
 
 
 int krnlhook_munmap(void *addr, size_t length, void *udata) {
     (void)addr, (void)length, (void)udata;
     /* Succeed unconditionally. This probably won't ever be called anyway. */
-    __mcapi_errno = 0;
+    mclib_errno = 0;
     return 0;
 }
 
 
 int krnlhook_open(const char *file, int mode, int perms, void *udata) {
     (void)file, (void)mode, (void)perms, (void)udata;
-    __mcapi_errno = __mcapi_ENOSYS;
+    mclib_errno = mclib_ENOSYS;
     return -1;
 }
 
 
 int krnlhook_close(int fdesc, void *udata) {
     (void)fdesc, (void)udata;
-    __mcapi_errno = __mcapi_ENOSYS;
+    mclib_errno = mclib_ENOSYS;
     return -1;
 }
 
 
 ssize_t krnlhook_write(int fdesc, const void *data, size_t size, void *udata) {
     (void)fdesc, (void)data, (void)size, (void)udata;
-    __mcapi_errno = __mcapi_ENOSYS;
+    mclib_errno = mclib_ENOSYS;
     return -1;
 }
 
 
 ssize_t krnlhook_read(int fdesc, void *buffer, size_t size, void *udata) {
     (void)fdesc, (void)buffer, (void)size, (void)udata;
-    __mcapi_errno = __mcapi_ENOSYS;
+    mclib_errno = mclib_ENOSYS;
     return -1;
 }
 
 
-__mcapi_off_t krnlhook_seek(int fdesc, __mcapi_off_t offset, int whence, void *udata) {
+mclib_off_t krnlhook_seek(int fdesc, mclib_off_t offset, int whence, void *udata) {
     (void)fdesc, (void)offset, (void)whence, (void)udata;
-    __mcapi_errno = __mcapi_ENOSYS;
+    mclib_errno = mclib_ENOSYS;
     return 0;
 }
 
 
-__mcapi_off_t krnlhook_tell(int fdesc, void *udata) {
+mclib_off_t krnlhook_tell(int fdesc, void *udata) {
     (void)fdesc, (void)udata;
-    __mcapi_errno = __mcapi_ENOSYS;
+    mclib_errno = mclib_ENOSYS;
     return -1;
 }
 
 
 int krnlhook_fsync(int fdesc, void *udata) {
     (void)fdesc, (void)udata;
-    __mcapi_errno = __mcapi_ENOSYS;
+    mclib_errno = mclib_ENOSYS;
     return -1;
 }

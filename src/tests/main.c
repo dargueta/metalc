@@ -52,7 +52,7 @@ void *krnlhook_brk(void *new_brk, void *udata) {
             "\nERROR: new_brk out of bounds: %p not in [%p, %p)\n\n",
             new_brk, state->data_area, state->data_area + DATA_AREA_SIZE
         );
-        __mcapi_errno = __mcapi_EINVAL;
+        mclib_errno = mclib_EINVAL;
         return NULL;
     }
 

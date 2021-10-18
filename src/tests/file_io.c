@@ -34,11 +34,11 @@ struct ModeStringTestCase mode_string_to_flags_cases[] = {
     {"ab", O_WRONLY | O_CREAT | O_APPEND | O_BINARY, 0},
     {"a+b", O_RDWR | O_CREAT | O_APPEND | O_BINARY, 0},
     {"ab+", O_RDWR | O_CREAT | O_APPEND | O_BINARY, 0},
-    {"R", -1, __mcapi_EINVAL},
-    {"", -1, __mcapi_EINVAL},
-    {"r+x", -1, __mcapi_EINVAL},
-    {"ax", -1, __mcapi_EINVAL},
-    {"a+x", -1, __mcapi_EINVAL},
+    {"R", -1, mclib_EINVAL},
+    {"", -1, mclib_EINVAL},
+    {"r+x", -1, mclib_EINVAL},
+    {"ax", -1, mclib_EINVAL},
+    {"a+x", -1, mclib_EINVAL},
     {NULL, 0, 0}
 };
 
@@ -55,12 +55,12 @@ BEGIN_TEST(test_mode_string_to_flags__all)
             testcase->errno_value
         );
 
-        __mcapi_errno = 0;
+        mclib_errno = 0;
         CHECK_EQ(
-            __mcint_mode_string_to_flags(testcase->mode_string),
+            mcinternal_mode_string_to_flags(testcase->mode_string),
             testcase->expected_flags
         );
-        CHECK_EQ(__mcapi_errno, testcase->errno_value);
+        CHECK_EQ(mclib_errno, testcase->errno_value);
     }
 END_TEST()
 

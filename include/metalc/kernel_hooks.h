@@ -74,7 +74,7 @@ void krnlhook_core_dump(int sig, void *udata) __attribute__((noreturn, weak));
  *         returns @ref MAP_FAILED and @ref errno is set to indicate the cause.
  */
 void *krnlhook_mmap(
-    void *addr, size_t length, int prot, int flags, int fd, __mcapi_off_t offset,
+    void *addr, size_t length, int prot, int flags, int fd, mclib_off_t offset,
     void *udata
 ) __attribute__((weak));
 
@@ -92,8 +92,8 @@ int krnlhook_open(const char *file, int mode, int perms, void *udata) __attribut
 int krnlhook_close(int fdesc, void *udata) __attribute__((weak));
 ssize_t krnlhook_write(int fdesc, const void *data, size_t size, void *udata) __attribute__((weak, nonnull(2)));
 ssize_t krnlhook_read(int fdesc, void *buffer, size_t size, void *udata) __attribute__((weak, nonnull(2)));
-__mcapi_off_t krnlhook_seek(int fdesc, __mcapi_off_t offset, int whence, void *udata) __attribute__((weak));
-__mcapi_off_t krnlhook_tell(int fdesc, void *udata) __attribute__((weak));
+mclib_off_t krnlhook_seek(int fdesc, mclib_off_t offset, int whence, void *udata) __attribute__((weak));
+mclib_off_t krnlhook_tell(int fdesc, void *udata) __attribute__((weak));
 int krnlhook_fsync(int fdesc, void *udata) __attribute__((weak));
 
 

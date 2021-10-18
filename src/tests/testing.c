@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern int __mcapi_errno;
+extern int mclib_errno;
 
 extern FILE *test_output_fd;
 
@@ -52,7 +52,7 @@ void log_message(
         write_csv_string(filename);
     fputc('\t', test_output_fd);
 
-    fprintf(test_output_fd, "%u\t%d\t", line, __mcapi_errno);
+    fprintf(test_output_fd, "%u\t%d\t", line, mclib_errno);
 
     if (message != NULL) {
         va_start(args, message);

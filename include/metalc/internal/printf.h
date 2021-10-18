@@ -105,7 +105,7 @@ struct MCFormatSpecifier {
  *          value will be negative and @ref errno will be set accordingly.
  */
 METALC_API_INTERNAL
-int __mcint_parse_printf_format_specifier(const char *format, struct MCFormatSpecifier *info);
+int mcinternal_parse_printf_format_specifier(const char *format, struct MCFormatSpecifier *info);
 
 /**
  * Given a format string, write a single value to the buffer.
@@ -116,7 +116,7 @@ int __mcint_parse_printf_format_specifier(const char *format, struct MCFormatSpe
  * @todo Add support for left- and right-justifying values.
  */
 METALC_API_INTERNAL
-int __mcint_evaluate_format_specifier(
+int mcinternal_evaluate_format_specifier(
     const char **format, va_list arg_list, char **output, int n_chars_written,
     size_t limit
 );

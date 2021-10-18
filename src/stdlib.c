@@ -14,15 +14,15 @@
 static unsigned g_rand_seed = 0;
 static const char *kIntAlphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-extern MetalCRuntimeInfo *__mcint_runtime_info;
-extern __mcapi_jmp_buf __mcint_abort_target;
+extern MetalCRuntimeInfo *mcinternal_runtime_info;
+extern mclib_jmp_buf mcinternal_abort_target;
 
-extern const struct __mcapi_lconv _current_lconv;
-extern const struct __mcint_charset_info *_ptr_current_charset;
+extern const struct mclib_lconv _current_lconv;
+extern const struct mcinternal_charset_info *_ptr_current_charset;
 
 
 void abort(void) {
-    raise(__mcapi_SIGABRT);
+    raise(mclib_SIGABRT);
 
     /* Theoretically we should never get here; the program should exit once the
      * abort signal has been raised. On the off chance that doesn't happen... */
@@ -37,8 +37,8 @@ void srand(unsigned seed) {
 
 void exit(int code) {
     /* TODO: execute atexit handlers here */
-    __mcint_runtime_info->main_return_value = code;
-    longjmp(__mcint_abort_target, INT_MIN);
+    mcinternal_runtime_info->main_return_value = code;
+    longjmp(mcinternal_abort_target, INT_MIN);
 }
 
 
@@ -53,7 +53,7 @@ double atof(const char *str) {
 
     /* If we hit the end of the string, bail. */
     if (*str == '\0') {
-        __mcapi_errno = __mcapi_EINVAL;
+        mclib_errno = mclib_EINVAL;
         return 0.0;
     }
 
@@ -105,7 +105,7 @@ char *utoa(unsigned value, char *str, int base) {
 
 char *ltoa(long value, char *str, int base) {
     if ((base < 2) || (base > 36)) {
-        __mcapi_errno = __mcapi_EINVAL;
+        mclib_errno = mclib_EINVAL;
         return NULL;
     }
 
@@ -125,7 +125,7 @@ char *ultoa(unsigned long value, char *str, int base) {
     char *write_pointer = str;
 
     if ((base < 2) || (base > 36)) {
-        __mcapi_errno = __mcapi_EINVAL;
+        mclib_errno = mclib_EINVAL;
         return NULL;
     }
 
@@ -191,7 +191,7 @@ unsigned long strtoul(const char *str, const char **endptr, int base) {
     }
     else if ((base < 2) || (base > 36)) {
         /* If a radix is passed in, it must be between 2 and 36, inclusive. */
-        __mcapi_errno = __mcapi_EINVAL;
+        mclib_errno = mclib_EINVAL;
         if (endptr)
             *endptr = str;
         return 0;
@@ -212,11 +212,11 @@ unsigned long strtoul(const char *str, const char **endptr, int base) {
     if (n_digits_processed == 0) {
         /* If we haven't processed any digits then this isn't a valid string.
          * Indicate this in @ref errno and return 0. */
-        __mcapi_errno = __mcapi_EINVAL;
+        mclib_errno = mclib_EINVAL;
         value = 0;
     }
     else
-        __mcapi_errno = 0;
+        mclib_errno = 0;
 
     if (endptr)
         *endptr = str;
@@ -243,10 +243,10 @@ long strtol(const char *str, const char **endptr, int base) {
         sign = 1;
 
     magnitude = strtoul(str, endptr, base);
-    if (__mcapi_errno != 0)
+    if (mclib_errno != 0)
         return 0;
     if (magnitude > LONG_MAX) {
-        __mcapi_errno = __mcapi_EOVERFLOW;
+        mclib_errno = mclib_EOVERFLOW;
         return 0;
     }
 
@@ -254,8 +254,8 @@ long strtol(const char *str, const char **endptr, int base) {
 }
 
 
-__mcapi_div_t div(int numer, int denom) {
-    __mcapi_div_t result;
+mclib_div_t div(int numer, int denom) {
+    mclib_div_t result;
 
     result.quot = numer / denom;
     result.rem = numer % denom;
@@ -263,8 +263,8 @@ __mcapi_div_t div(int numer, int denom) {
 }
 
 
-__mcapi_ldiv_t ldiv(long numer, long denom) {
-    __mcapi_ldiv_t result;
+mclib_ldiv_t ldiv(long numer, long denom) {
+    mclib_ldiv_t result;
 
     result.quot = numer / denom;
     result.rem = numer % denom;
@@ -277,17 +277,17 @@ int mblen(const char *str, size_t n) {
 }
 
 
-int wctomb(char *str, __mcapi_wchar_t wchar) {
+int wctomb(char *str, mclib_wchar_t wchar) {
     return _ptr_current_charset->f_wctomb(str, wchar);
 }
 
 
-int mbtowc(__mcapi_wchar_t *pwc, const char *str, size_t n) {
+int mbtowc(mclib_wchar_t *pwc, const char *str, size_t n) {
     return _ptr_current_charset->f_mbtowc(pwc, str, n);
 }
 
 
-size_t mbstowcs(__mcapi_wchar_t *pwcs, const char *str, size_t n) {
+size_t mbstowcs(mclib_wchar_t *pwcs, const char *str, size_t n) {
     size_t out_position;
     ptrdiff_t current_char_len;
 
@@ -295,7 +295,7 @@ size_t mbstowcs(__mcapi_wchar_t *pwcs, const char *str, size_t n) {
         current_char_len = mbtowc(pwcs + out_position, str, current_char_len);
 
         if (current_char_len < 0) {
-            __mcapi_errno = __mcapi_EILSEQ;
+            mclib_errno = mclib_EILSEQ;
             return out_position;
         }
         else if (current_char_len == 0)
@@ -310,7 +310,7 @@ size_t mbstowcs(__mcapi_wchar_t *pwcs, const char *str, size_t n) {
 }
 
 
-size_t wcstombs(char *str, const __mcapi_wchar_t *pwcs, size_t n) {
+size_t wcstombs(char *str, const mclib_wchar_t *pwcs, size_t n) {
     size_t out_position;
     char buffer[4];
     int wchar_length;
@@ -324,7 +324,7 @@ size_t wcstombs(char *str, const __mcapi_wchar_t *pwcs, size_t n) {
 
         wchar_length = wctomb(buffer, *pwcs);
         if (wchar_length < 0) {
-            __mcapi_errno = __mcapi_EILSEQ;
+            mclib_errno = mclib_EILSEQ;
             return (size_t)-1;
         }
 
@@ -345,8 +345,8 @@ size_t wcstombs(char *str, const __mcapi_wchar_t *pwcs, size_t n) {
 
 
 #if METALC_HAVE_LONG_LONG
-    __mcapi_lldiv_t lldiv(long long numer, long long denom) {
-        __mcapi_lldiv_t result;
+    mclib_lldiv_t lldiv(long long numer, long long denom) {
+        mclib_lldiv_t result;
 
         result.quot = numer / denom;
         result.rem = numer % denom;
@@ -363,7 +363,7 @@ size_t wcstombs(char *str, const __mcapi_wchar_t *pwcs, size_t n) {
 
     char *lltoa(long long value, char *str, int base) {
         if ((base < 2) || (base > 36)) {
-            __mcapi_errno = __mcapi_EINVAL;
+            mclib_errno = mclib_EINVAL;
             return NULL;
         }
 
@@ -383,7 +383,7 @@ size_t wcstombs(char *str, const __mcapi_wchar_t *pwcs, size_t n) {
         char *write_pointer = str;
 
         if ((base < 2) || (base > 36)) {
-            __mcapi_errno = __mcapi_EINVAL;
+            mclib_errno = mclib_EINVAL;
             return NULL;
         }
 

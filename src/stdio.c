@@ -12,7 +12,7 @@
 #include "metalc/string.h"
 
 
-extern MetalCRuntimeInfo *__mcint_runtime_info;
+extern MetalCRuntimeInfo *mcinternal_runtime_info;
 extern int fileio_init(void);
 extern int fileio_teardown(void);
 
@@ -27,7 +27,7 @@ METALC_API_INTERNAL int stdio_teardown(void) {
 }
 
 
-int __mcint_evaluate_format_specifier(
+int mcinternal_evaluate_format_specifier(
     const char **format, va_list arg_list, char **output, int n_chars_written,
     size_t limit
 ) {
@@ -51,7 +51,7 @@ int __mcint_evaluate_format_specifier(
         return 1;
     }
 
-    format_length = __mcint_parse_printf_format_specifier(*format, &info);
+    format_length = mcinternal_parse_printf_format_specifier(*format, &info);
     if (format_length < 0)
         return -1;
 
@@ -126,7 +126,7 @@ int __mcint_evaluate_format_specifier(
             string_length = strlen(string_pointer);
 
             if (string_length > (size_t)INT_MAX) {
-                __mcapi_errno = __mcapi_EOVERFLOW;
+                mclib_errno = mclib_EOVERFLOW;
                 return -1;
             }
 
@@ -144,11 +144,11 @@ int __mcint_evaluate_format_specifier(
         case MC_AT_FLOAT:
         case MC_AT_DOUBLE:
         case MC_AT_LONGDOUBLE:
-            __mcapi_errno = __mcapi_ENOSYS;
+            mclib_errno = mclib_ENOSYS;
             return -1;
 
         default:
-            __mcapi_errno = __mcapi_EINVAL;
+            mclib_errno = mclib_EINVAL;
             return -1;
     }
 }
@@ -166,7 +166,7 @@ int vsnprintf(char *buffer, size_t size, const char *format, va_list arg_list) {
             ++n_chars_written;
         }
         else {
-            i = __mcint_evaluate_format_specifier(
+            i = mcinternal_evaluate_format_specifier(
                 &format, arg_list, &buffer, n_chars_written, size
             );
             if (i < 0)
@@ -206,7 +206,7 @@ int snprintf(char *buffer, size_t n, const char *format, ...) {
 }
 
 
-int vfprintf(__mcapi_FILE *stream, const char *format, va_list arg_list) {
+int vfprintf(mclib_FILE *stream, const char *format, va_list arg_list) {
     char *buffer;
     int n_chars_written;
 
@@ -225,7 +225,7 @@ int vfprintf(__mcapi_FILE *stream, const char *format, va_list arg_list) {
 }
 
 
-int fprintf(__mcapi_FILE *stream, const char *format, ...) {
+int fprintf(mclib_FILE *stream, const char *format, ...) {
     va_list arg_list;
     int result;
 
@@ -237,7 +237,7 @@ int fprintf(__mcapi_FILE *stream, const char *format, ...) {
 
 
 int vprintf(const char *format, va_list arg_list) {
-    return vfprintf(__mcapi_stdout, format, arg_list);
+    return vfprintf(mclib_stdout, format, arg_list);
 }
 
 

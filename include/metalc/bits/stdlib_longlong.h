@@ -12,21 +12,21 @@
 
 typedef struct {
     long long quot, rem;
-} __mcapi_lldiv_t;
+} mclib_lldiv_t;
 
 
 long long llabs(long long x);      /* done */
 long long atoll(const char *str);
 long long strtoll(const char *str, const char **endptr, int base);
 unsigned long long strtoull(const char *str, const char **endptr, int base);
-__mcapi_lldiv_t lldiv(long long numer, long long denom);
+mclib_lldiv_t lldiv(long long numer, long long denom);
 
 /* Nonstandard */
 char *lltoa(long long value, char *buf, int base);
 char *ulltoa(unsigned long long value, char *str, int base);
 
 #ifndef METALC_DISABLE_STDLIB_DEFS
-    #define lldiv_t __mcapi_lldiv_t
+    #define lldiv_t mclib_lldiv_t
 #endif
 
 cstdlib_export_with_attr(llabs, const);

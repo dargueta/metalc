@@ -231,7 +231,7 @@
             #define cstdlib_export_with_attr(name, ...)   \
                 extern __typeof__(name) name __attribute__((visibility("hidden"), __VA_ARGS__))
 
-            #define cstdlib_implement(name)     extern __typeof__(name) __mcapi_##name __attribute__((alias(#name), copy(name)))
+            #define cstdlib_implement(name)     extern __typeof__(name) mclib_##name __attribute__((alias(#name), copy(name)))
         #elif defined METALC_BUILD_KIND_SHARED
             #define cstdlib_export(name)   \
                 extern __typeof__(name) name __attribute__((visibility("hidden")))
@@ -239,14 +239,14 @@
             #define cstdlib_export_with_attr(name, ...)   \
                 extern __typeof__(name) name __attribute__((visibility("hidden"), __VA_ARGS__))
 
-            #define cstdlib_implement(name)  extern __typeof__(name) __mcapi_##name __attribute__((alias(#name), copy(name)))
+            #define cstdlib_implement(name)  extern __typeof__(name) mclib_##name __attribute__((alias(#name), copy(name)))
         #else
             #error "Need to define METALC_BUILD_KIND_STATIC or METALC_BUILD_KIND_SHARED when compiling the C library in testing mode."
         #endif
     #else
         /* We're building the testbench code. */
-        #define cstdlib_export(name)                    extern __typeof__(name) __mcapi_##name __attribute__((copy(name)))
-        #define cstdlib_export_with_attr(name, ...)     extern __typeof__(name) __mcapi_##name __attribute__((copy(name), __VA_ARGS__))
+        #define cstdlib_export(name)                    extern __typeof__(name) mclib_##name __attribute__((copy(name)))
+        #define cstdlib_export_with_attr(name, ...)     extern __typeof__(name) mclib_##name __attribute__((copy(name), __VA_ARGS__))
         #define cstdlib_implement(name)
     #endif
 #else

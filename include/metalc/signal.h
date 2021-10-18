@@ -6,63 +6,63 @@
 #include "stdint.h"
 
 
-typedef int32_t __mcapi_sig_atomic_t;
-typedef int64_t __mcapi_signal_mask_t;
-typedef void (*__mcapi_signal_handler_t)(int);
+typedef int32_t mclib_sig_atomic_t;
+typedef int64_t mclib_signal_mask_t;
+typedef void (*mclib_signal_handler_t)(int);
 
 int raise(int sig);
-__mcapi_signal_handler_t signal(int sig, __mcapi_signal_handler_t handler);
+mclib_signal_handler_t signal(int sig, mclib_signal_handler_t handler);
 
 cstdlib_export(raise);
 cstdlib_export(signal);
 
 
-#define __mcapi_SIGHUP       1
-#define __mcapi_SIGINT       2
-#define __mcapi_SIGQUIT      3
-#define __mcapi_SIGILL       4
-#define __mcapi_SIGTRAP      5
-#define __mcapi_SIGABRT      6
-#define __mcapi_SIGIOT       __mcapi_SIGABRT
-#define __mcapi_SIGBUS       7
-#define __mcapi_SIGFPE       8
-#define __mcapi_SIGKILL      9
-#define __mcapi_SIGUSR1     10
-#define __mcapi_SIGSEGV     11
-#define __mcapi_SIGUSR2     12
-#define __mcapi_SIGPIPE     13
-#define __mcapi_SIGALRM     14
-#define __mcapi_SIGTERM     15
-#define __mcapi_SIGSTKFLT   16
-#define __mcapi_SIGCHLD     17
-#define __mcapi_SIGCONT     18
-#define __mcapi_SIGSTOP     19
-#define __mcapi_SIGTSTP     20
-#define __mcapi_SIGTTIN     21
-#define __mcapi_SIGTTOU     22
-#define __mcapi_SIGURG      23
-#define __mcapi_SIGXCPU     24
-#define __mcapi_SIGXFSZ     25
-#define __mcapi_SIGVTALRM   26
-#define __mcapi_SIGPROF     27
-#define __mcapi_SIGWINCH    28
-#define __mcapi_SIGIO       29
-#define __mcapi_SIGPOLL     __mcapi_SIGIO
+#define mclib_SIGHUP       1
+#define mclib_SIGINT       2
+#define mclib_SIGQUIT      3
+#define mclib_SIGILL       4
+#define mclib_SIGTRAP      5
+#define mclib_SIGABRT      6
+#define mclib_SIGIOT       mclib_SIGABRT
+#define mclib_SIGBUS       7
+#define mclib_SIGFPE       8
+#define mclib_SIGKILL      9
+#define mclib_SIGUSR1     10
+#define mclib_SIGSEGV     11
+#define mclib_SIGUSR2     12
+#define mclib_SIGPIPE     13
+#define mclib_SIGALRM     14
+#define mclib_SIGTERM     15
+#define mclib_SIGSTKFLT   16
+#define mclib_SIGCHLD     17
+#define mclib_SIGCONT     18
+#define mclib_SIGSTOP     19
+#define mclib_SIGTSTP     20
+#define mclib_SIGTTIN     21
+#define mclib_SIGTTOU     22
+#define mclib_SIGURG      23
+#define mclib_SIGXCPU     24
+#define mclib_SIGXFSZ     25
+#define mclib_SIGVTALRM   26
+#define mclib_SIGPROF     27
+#define mclib_SIGWINCH    28
+#define mclib_SIGIO       29
+#define mclib_SIGPOLL     mclib_SIGIO
 /*
 #define SIGLOST     29
 */
-#define __mcapi_SIGPWR      30
-#define __mcapi_SIGSYS      31
-#define __mcapi_SIGUNUSED   31
+#define mclib_SIGPWR      30
+#define mclib_SIGSYS      31
+#define mclib_SIGUNUSED   31
 
 /**
  * Default signal handling
  *
  * The signal is handled by the default action for that particular signal.
  */
-#define __mcapi_SIG_DFL     0
-#define __mcapi_SIG_IGN     1   /**< Ignore signal: The signal is ignored. */
-#define __mcapi_SIG_ERR     2   /**< The signal triggers an error. */
+#define mclib_SIG_DFL     0
+#define mclib_SIG_IGN     1   /**< Ignore signal: The signal is ignored. */
+#define mclib_SIG_ERR     2   /**< The signal triggers an error. */
 
 #include "bits/signal.h"
 
