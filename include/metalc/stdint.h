@@ -18,7 +18,7 @@ typedef unsigned char uint_least8_t;
 
     #define INT_LEAST16_MIN     SCHAR_MIN
     #define INT_LEAST16_MAX     SCHAR_MAX
-    #define UINT_LEAST16_MAX    SCHAR_MAX
+    #define UINT_LEAST16_MAX    UCHAR_MAX
 #else
     /* A short is defined by the standard to be at least 16 bits. */
     typedef signed short int_least16_t;
@@ -57,8 +57,16 @@ typedef unsigned char uint_least8_t;
     #define UINT_LEAST32_MAX    ULONG_MAX
 #endif
 
+#if SHRT_MAX >= 0x7FFFFFFFFFFFFFFFLL
+    /* According to Wikipedia some systems actually do have 64-bit shorts. I'm
+     * not doing this for fun. */
+    typedef signed short int_least64_t;
+    typedef unsigned short uint_least64_t;
 
-#if INT_MAX >= 0x7FFFFFFFFFFFFFFFLL
+    #define INT_LEAST64_MIN     SHRT_MIN
+    #define INT_LEAST64_MAX     SHRT_MAX
+    #define UINT_LEAST64_MAX    USHRT_MAX
+#elif INT_MAX >= 0x7FFFFFFFFFFFFFFFLL
     /* An int is at least 64 bits. Rare, but again, it does happen. */
     typedef signed int int_least64_t;
     typedef unsigned int uint_least64_t;
@@ -83,44 +91,103 @@ typedef unsigned char uint_least8_t;
     #define INT_LEAST64_MIN     LLONG_MIN
     #define INT_LEAST64_MAX     LLONG_MAX
     #define UINT_LEAST64_MAX    ULLONG_MAX
-/* else: No way to define a 64-bit integer. We're probably compiling for a
- * 16-bit system. */
+/* else: No way to define a 64-bit integer. Weird nowadays, but possible. */
 #endif
 
 
 #if INT_LEAST8_MAX == 127
     typedef uint_least8_t uint8_t;
     typedef int_least8_t int8_t;
+    #define HAVE_INT8
+#elif defined(_MSC_VER)
+    /* Microsoft */
+    typedef unsigned __int8 uint8_t;
+    typedef signed __int8 int8_t;
+    #define HAVE_INT8
+#elif defined(__INT8_TYPE__)
+    /* GCC */
+    typedef __UINT8_TYPE__  uint8_t;
+    typedef __INT8_TYPE__ int8_t;
+    #define HAVE_INT8
+#endif
+
+#ifdef HAVE_INT8
     #define UINT8_MAX   255
     #define INT8_MIN    (-127)
     #define INT8_MAX    127
+    #undef HAVE_INT8
 #endif
 
 
 #if INT_LEAST16_MAX == 32767
     typedef uint_least16_t uint16_t;
     typedef int_least16_t int16_t;
+    #define HAVE_INT16
+#elif defined(_MSC_VER)
+    /* Microsoft */
+    typedef unsigned __int16 uint16_t;
+    typedef signed __int16 int16_t;
+    #define HAVE_INT16
+#elif defined(__INT16_TYPE__)
+    /* GCC */
+    typedef __UINT16_TYPE__  uint16_t;
+    typedef __INT16_TYPE__ int16_t;
+    #define HAVE_INT16
+#endif
+
+#ifdef HAVE_INT16
     #define UINT16_MAX  65535
     #define INT16_MIN   (-32767)
     #define INT16_MAX   32767
+    #undef HAVE_INT16
 #endif
 
 
 #if defined(INT_LEAST32_MAX) && (INT_LEAST32_MAX == 0x7FFFFFFFL)
     typedef uint_least32_t uint32_t;
     typedef int_least32_t int32_t;
+    #define HAVE_INT32
+#elif defined(_MSC_VER)
+    /* Microsoft */
+    typedef unsigned __int32 uint32_t;
+    typedef signed __int32 int32_t;
+    #define HAVE_INT32
+#elif defined(__INT32_TYPE__)
+    /* GCC */
+    typedef __UINT32_TYPE__  uint32_t;
+    typedef __INT32_TYPE__ int32_t;
+    #define HAVE_INT32
+#endif
+
+#ifdef HAVE_INT32
     #define UINT32_MAX  0xFFFFFFFF
     #define INT32_MIN   (-0x7FFFFFFF)
     #define INT32_MAX   0x7FFFFFFF
+    #undef HAVE_INT32
 #endif
 
 
 #if defined(INT_LEAST64_MAX) && (INT_LEAST64_MAX == 0x7FFFFFFFFFFFFFFFLL)
     typedef uint_least64_t uint64_t;
     typedef int_least64_t int64_t;
+    #define HAVE_INT64
+#elif defined(_MSC_VER)
+    /* Microsoft */
+    typedef unsigned __int64 uint64_t;
+    typedef signed __int64 int64_t;
+    #define HAVE_INT64
+#elif defined(__INT64_TYPE__)
+    /* GCC */
+    typedef __UINT64_TYPE__  uint64_t;
+    typedef __INT64_TYPE__ int64_t;
+    #define HAVE_INT64
+#endif
+
+#ifdef HAVE_INT64
     #define UINT64_MAX  0xFFFFFFFFFFFFFFFF
     #define INT64_MIN   (-0x7FFFFFFFFFFFFFFF)
     #define INT64_MAX   0x7FFFFFFFFFFFFFFF
+    #undef HAVE_INT64
 #endif
 
 
