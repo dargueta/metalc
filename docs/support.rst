@@ -45,4 +45,4 @@ These are additional features not part of the C standard library.
 Requirements
 ============
 
-Use of ``malloc()`` requires implementing the POSIX standard function ``brk()``
+Use of ``malloc()`` requires implementing the POSIX standard function ``mmap()``

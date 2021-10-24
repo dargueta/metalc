@@ -6,7 +6,7 @@
 #include "metalc/string.h"
 
 
-static const struct mclib_lconv _default_lconv_info = {
+static const struct mclib_lconv mcinternal_default_lconv_info = {
     ".",        /* decimal_point */
     "",         /* thousands_sep */
     "",         /* grouping */
@@ -41,7 +41,7 @@ struct LConvEntry {
 
 
 /* TODO (dargueta) Adjust this if the lib is compiled to only support ASCII. */
-static struct mcinternal_charset_info _supported_charsets[] = {
+static struct mcinternal_charset_info mcinternal_supported_charsets[] = {
     {
         "utf8",
         mcinternal_utf8_mblen,
@@ -52,21 +52,21 @@ static struct mcinternal_charset_info _supported_charsets[] = {
 };
 
 
-const struct LConvEntry _supported_locales[] = {
-    {"C", &_default_lconv_info},
-    {"", &_default_lconv_info},
+const struct LConvEntry mcinternal_supported_locales[] = {
+    {"C", &mcinternal_default_lconv_info},
+    {"", &mcinternal_default_lconv_info},
     {NULL, NULL}
 };
 
 
-struct mclib_lconv _current_lconv;
-const struct mcinternal_charset_info *_ptr_current_charset = &_supported_charsets[0];
+struct mclib_lconv mcinternal_current_lconv;
+const struct mcinternal_charset_info *mcinternal_ptr_current_charset = &mcinternal_supported_charsets[0];
 
 
-static const struct mclib_lconv *_find_lconv(const char *name) {
+static const struct mclib_lconv *find_lconv(const char *name) {
     const struct LConvEntry *ptr;
 
-    for (ptr = _supported_locales; ptr->name != NULL; ++ptr) {
+    for (ptr = mcinternal_supported_locales; ptr->name != NULL; ++ptr) {
         if (strcmp(ptr->name, name) == 0)
             return ptr->lconv_info;
     }
@@ -74,10 +74,10 @@ static const struct mclib_lconv *_find_lconv(const char *name) {
 }
 
 
-static const struct mcinternal_charset_info *_find_charset(const char *name) {
+static const struct mcinternal_charset_info *find_charset(const char *name) {
     const struct mcinternal_charset_info *ptr;
 
-    for (ptr = _supported_charsets; ptr->name != NULL; ++ptr) {
+    for (ptr = mcinternal_supported_charsets; ptr->name != NULL; ++ptr) {
         if (strcmp(ptr->name, name) == 0)
             return ptr;
     }
@@ -86,8 +86,8 @@ static const struct mcinternal_charset_info *_find_charset(const char *name) {
 
 
 METALC_API_INTERNAL int locale_init(void) {
-    const struct mclib_lconv *default_locale = _find_lconv("C");
-    memcpy(&_current_lconv, default_locale, sizeof(_current_lconv));
+    const struct mclib_lconv *default_locale = find_lconv("C");
+    memcpy(&mcinternal_current_lconv, default_locale, sizeof(mcinternal_current_lconv));
     return 0;
 }
 
@@ -104,19 +104,19 @@ int setlocale(int what, const char *name) {
     switch (what) {
         case mclib_LC_ALL:
             /* Caller wants to change the entire locale. */
-            locale = _find_lconv(name);
+            locale = find_lconv(name);
             if (locale == NULL)
                 return mclib_EINVAL;
 
-            memcpy(&_current_lconv, locale, sizeof(_current_lconv));
+            memcpy(&mcinternal_current_lconv, locale, sizeof(mcinternal_current_lconv));
             return 0;
 
         case mclib_LC_CTYPE:
             /* Caller wants to change the default character set. */
-            charset = _find_charset(name);
+            charset = find_charset(name);
             if (charset == NULL)
                 return mclib_EINVAL;
-            _ptr_current_charset = charset;
+            mcinternal_ptr_current_charset = charset;
             return 0;
 
         case mclib_LC_COLLATE:
@@ -136,7 +136,7 @@ int setlocale(int what, const char *name) {
 
 
 struct mclib_lconv *localeconv(void) {
-    return &_current_lconv;
+    return &mcinternal_current_lconv;
 }
 
 

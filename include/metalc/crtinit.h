@@ -9,8 +9,6 @@
 
 #include "internal/efi_shim.h"
 #include "metalc.h"
-#include "stddef.h"
-#include "stdint.h"
 
 
 /**
@@ -65,9 +63,9 @@ typedef struct {
      */
     cmetal_main_fn main;
 
-    intptr_t stdin_handle;
-    intptr_t stdout_handle;
-    intptr_t stderr_handle;
+    int stdin_handle;
+    int stdout_handle;
+    int stderr_handle;
 
     /**
      * On UEFI-aware builds, the EFI image handle.

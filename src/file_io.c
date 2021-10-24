@@ -19,28 +19,28 @@ struct mcinternal_FILE {
 };
 
 
-static struct mcinternal_FILE _internal_stdin;
-static struct mcinternal_FILE _internal_stdout;
-static struct mcinternal_FILE _internal_stderr;
+static struct mcinternal_FILE mcinternal_stdin;
+static struct mcinternal_FILE mcinternal_stdout;
+static struct mcinternal_FILE mcinternal_stderr;
 
-mclib_FILE * const mclib_stdin = &_internal_stdin;
-mclib_FILE * const mclib_stdout = &_internal_stdout;
-mclib_FILE * const mclib_stderr = &_internal_stderr;
+mclib_FILE * const mclib_stdin = &mcinternal_stdin;
+mclib_FILE * const mclib_stdout = &mcinternal_stdout;
+mclib_FILE * const mclib_stderr = &mcinternal_stderr;
 
 
 METALC_API_INTERNAL int fileio_init(void) {
-    memset(&_internal_stdin, 0, sizeof(_internal_stdin));
-    memset(&_internal_stdout, 0, sizeof(_internal_stdout));
-    memset(&_internal_stderr, 0, sizeof(_internal_stderr));
+    memset(&mcinternal_stdin, 0, sizeof(mcinternal_stdin));
+    memset(&mcinternal_stdout, 0, sizeof(mcinternal_stdout));
+    memset(&mcinternal_stderr, 0, sizeof(mcinternal_stderr));
 
-    _internal_stdin.descriptor = mcinternal_runtime_info->stdin_handle;
-    _internal_stdin.io_flags = O_RDONLY;
+    mcinternal_stdin.descriptor = mcinternal_runtime_info->stdin_handle;
+    mcinternal_stdin.io_flags = O_RDONLY;
 
-    _internal_stdout.descriptor = mcinternal_runtime_info->stdout_handle;
-    _internal_stdout.io_flags = O_WRONLY;
+    mcinternal_stdout.descriptor = mcinternal_runtime_info->stdout_handle;
+    mcinternal_stdout.io_flags = O_WRONLY;
 
-    _internal_stderr.descriptor = mcinternal_runtime_info->stderr_handle;
-    _internal_stderr.io_flags = O_WRONLY;
+    mcinternal_stderr.descriptor = mcinternal_runtime_info->stderr_handle;
+    mcinternal_stderr.io_flags = O_WRONLY;
     return 0;
 }
 
@@ -138,9 +138,9 @@ void fclose(mclib_FILE *stream) {
     /* Don't free the standard I/O streams, as they were never allocated with
      * malloc. */
     if (
-        (stream != &_internal_stdin)
-        && (stream != &_internal_stdout)
-        && (stream != &_internal_stderr)
+        (stream != &mcinternal_stdin)
+        && (stream != &mcinternal_stdout)
+        && (stream != &mcinternal_stderr)
     )
         free(stream);
 }

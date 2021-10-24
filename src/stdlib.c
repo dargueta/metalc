@@ -17,8 +17,8 @@ static const char *kIntAlphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
 extern MetalCRuntimeInfo *mcinternal_runtime_info;
 extern mclib_jmp_buf mcinternal_abort_target;
 
-extern const struct mclib_lconv _current_lconv;
-extern const struct mcinternal_charset_info *_ptr_current_charset;
+extern const struct mclib_lconv mcinternal_current_lconv;
+extern const struct mcinternal_charset_info *mcinternal_ptr_current_charset;
 
 
 void abort(void) {
@@ -273,17 +273,17 @@ mclib_ldiv_t ldiv(long numer, long denom) {
 
 
 int mblen(const char *str, size_t n) {
-    return _ptr_current_charset->f_mblen(str, n);
+    return mcinternal_ptr_current_charset->f_mblen(str, n);
 }
 
 
 int wctomb(char *str, mclib_wchar_t wchar) {
-    return _ptr_current_charset->f_wctomb(str, wchar);
+    return mcinternal_ptr_current_charset->f_wctomb(str, wchar);
 }
 
 
 int mbtowc(mclib_wchar_t *pwc, const char *str, size_t n) {
-    return _ptr_current_charset->f_mbtowc(pwc, str, n);
+    return mcinternal_ptr_current_charset->f_mbtowc(pwc, str, n);
 }
 
 

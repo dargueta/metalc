@@ -80,7 +80,7 @@ void *krnlhook_mmap(
 
 
 /**
- * Provided for symmetry with @ref krnlhook_mmap but may never be used.
+ * Provided for symmetry with @ref krnlhook_mmap but might never be used.
  *
  * For the time being, kernels need not implement this. The default stub will
  * always succeed, regardless of its arguments.

@@ -40,8 +40,8 @@ the program linking to it.
 * **UEFI Application:** Uses the UEFI boot services to provide I/O, memory
   allocation, etc. Useful for writing OS bootloaders and UEFI applications, but
   not OS kernels.
-* **Kernel:** Uses the UEFI runtime API. Useful for OS kernels that rely on UEFI
-  for certain hardware access.
+* **UEFI Kernel:** Uses the UEFI runtime API. Useful for OS kernels that rely on
+  UEFI for certain hardware access.
 
 Build Requirements
 ------------------
