@@ -348,6 +348,36 @@ size_t wcstombs(char *str, const mclib_wchar_t *pwcs, size_t n) {
 }
 
 
+void *bsearch(
+    const void *key, const void *base, size_t nitems, size_t size,
+    int (*cmp)(const void *, const void *)
+) {
+    const void *partition;
+    size_t partition_index;
+    int compare_result;
+
+    if (nitems == 0)
+        return NULL;
+    if (nitems == 1) {
+        if (cmp(key, base) == 0)
+            return (void *)base;
+        return NULL;
+    }
+
+    partition_index = nitems / 2;
+    partition = (const void *)((const char *)base + (size * partition_index));
+
+    compare_result = cmp(key, partition);
+    if (compare_result == 0)
+        return (void *)partition;
+    if (compare_result > 0)
+        /* Item we're looking for is larger than the partition. Readjust the base
+         * of our search to be one element past the partition. */
+        base = (const void *)((const char *)partition + size);
+
+    return bsearch(key, base, nitems - partition_index, size, cmp);
+}
+
 #if METALC_HAVE_LONG_LONG
     mclib_lldiv_t lldiv(long long numer, long long denom) {
         mclib_lldiv_t result;
@@ -420,6 +450,7 @@ size_t wcstombs(char *str, const mclib_wchar_t *pwcs, size_t n) {
 
 
 cstdlib_implement(abort);
+cstdlib_implement(bsearch);
 cstdlib_implement(srand);
 cstdlib_implement(exit);
 cstdlib_implement(abs);

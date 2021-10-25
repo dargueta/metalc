@@ -8,7 +8,7 @@ atof
 atoi
 atol
 atoll
-bsearch
+bsearch  Y
 calloc   Y
 div      Y
 exit     Y
