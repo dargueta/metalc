@@ -4,8 +4,8 @@ STRING.H FUNCTIONS
 ======== ============ ======= =============================================================================
 Function Implemented? Tested? Notes
 -------- ------------ ------- -----------------------------------------------------------------------------
-memchr   Y
-memcmp   Y
+memchr   Y            Y
+memcmp   Y            Y
 memcpy   Y
 memmove  Y
 memset   Y
