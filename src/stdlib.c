@@ -450,19 +450,19 @@ void *bsearch(
 
 
 cstdlib_implement(abort);
-cstdlib_implement(bsearch);
-cstdlib_implement(srand);
-cstdlib_implement(exit);
 cstdlib_implement(abs);
-cstdlib_implement(labs);
-cstdlib_implement(itoa);
-cstdlib_implement(utoa);
-cstdlib_implement(ltoa);
-cstdlib_implement(ultoa);
+cstdlib_implement(bsearch);
 cstdlib_implement(div);
+cstdlib_implement(exit);
+cstdlib_implement(itoa);
+cstdlib_implement(labs);
 cstdlib_implement(ldiv);
+cstdlib_implement(ltoa);
 cstdlib_implement(mblen);
 cstdlib_implement(mbstowcs);
 cstdlib_implement(mbtowc);
+cstdlib_implement(srand);
+cstdlib_implement(ultoa);
+cstdlib_implement(utoa);
 cstdlib_implement(wcstombs);
 cstdlib_implement(wctomb);

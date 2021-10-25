@@ -18,19 +18,19 @@ int isxdigit(int c);
 int tolower(int c);
 int toupper(int c);
 
-cstdlib_export_with_attr(isalnum, pure);
-cstdlib_export_with_attr(isalpha, pure);
-cstdlib_export_with_attr(isblank, pure);
-cstdlib_export_with_attr(iscntrl, pure);
+cstdlib_export_with_attr(isalnum, const);
+cstdlib_export_with_attr(isalpha, const);
+cstdlib_export_with_attr(isblank, const);
+cstdlib_export_with_attr(iscntrl, const);
 cstdlib_export_with_attr(isdigit, const);
-cstdlib_export_with_attr(isgraph, pure);
-cstdlib_export_with_attr(islower, pure);
-cstdlib_export_with_attr(isprint, pure);
-cstdlib_export_with_attr(ispunct, pure);
-cstdlib_export_with_attr(isspace, pure);
-cstdlib_export_with_attr(isupper, pure);
+cstdlib_export_with_attr(isgraph, const);
+cstdlib_export_with_attr(islower, const);
+cstdlib_export_with_attr(isprint, const);
+cstdlib_export_with_attr(ispunct, const);
+cstdlib_export_with_attr(isspace, const);
+cstdlib_export_with_attr(isupper, const);
 cstdlib_export_with_attr(isxdigit, const);
-cstdlib_export_with_attr(tolower, pure);
-cstdlib_export_with_attr(toupper, pure);
+cstdlib_export_with_attr(tolower, const);
+cstdlib_export_with_attr(toupper, const);
 
 #endif  /* INCLUDE_METALC_CTYPE_H_ */
