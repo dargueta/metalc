@@ -152,7 +152,7 @@ char *ultoa(unsigned long value, char *str, int base) {
 
 
 unsigned long strtoul(const char *str, const char **endptr, int base) {
-    unsigned long value;
+    unsigned long value, current_digit;
     char next_char;
     int n_digits_processed;
     char *p_digit;
@@ -170,7 +170,7 @@ unsigned long strtoul(const char *str, const char **endptr, int base) {
          * a '0' then it's either a radix or the entire value is 0. */
         if (*str == '0') {
             /* Starts with a 0; if it's followed by x then it's hexadecimal, if
-             * folowed by a digit then it's octal */
+             * followed by a digit then it's octal. */
             next_char = str[1];
 
             if ((next_char == 'x') || (next_char == 'X'))
@@ -198,14 +198,18 @@ unsigned long strtoul(const char *str, const char **endptr, int base) {
     }
 
     value = 0;
-
     for (n_digits_processed = 0; *str != '\0'; ++n_digits_processed, ++str) {
         p_digit = strchr(kIntAlphabet, tolower(*str));
         if (p_digit == NULL)
-            /* Hit something that's not a valid digit in the base we're operating in. */
             break;
 
-        value += (unsigned long)((intptr_t)p_digit - (intptr_t)kIntAlphabet);
+        current_digit = (unsigned long)((intptr_t)p_digit - (intptr_t)kIntAlphabet);
+        if (current_digit >= (unsigned long)base)
+            /* This is a valid digit in one of the bases we support, but not in
+             * the one we're operating in. Treat it as the end of the number. */
+            break;
+
+        value += current_digit;
         value *= base;
     }
 
