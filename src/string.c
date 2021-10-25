@@ -3,6 +3,7 @@
 #include "metalc/stdio.h"
 #include "metalc/stdlib.h"
 #include "metalc/string.h"
+#include "metalc/locale.h"
 
 
 /* These are copied and pasted from the Linux headers on Ubuntu 19.10. */
@@ -259,9 +260,7 @@ cstdlib_implement(strcmp);
 
 
 int strcoll(const char *str1, const char *str2) {
-    /* Pretty sure this only works if the current locale is "C"; anything else
-     * is a coincidence. */
-    return strcmp(str1, str2);
+    return mcinternal_ptr_current_coll->f_strcoll(str1, str2);
 }
 cstdlib_implement(strcoll);
 
@@ -456,9 +455,7 @@ cstdlib_implement(strtok);
 
 
 size_t strxfrm(char *destination, const char *source, size_t num) {
-    if ((destination != NULL) && (num != 0))
-        strncpy(destination, source, num);
-    return strlen(source);
+    return mcinternal_ptr_current_coll->f_strxfrm(destination, source, num);
 }
 cstdlib_implement(strxfrm);
 

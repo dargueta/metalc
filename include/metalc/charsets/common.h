@@ -14,7 +14,6 @@ typedef int (*fptr_mblen)(const char *str, size_t n);
 typedef int (*fptr_wctomb)(char *str, mclib_wchar_t wchar);
 typedef int (*fptr_mbtowc)(mclib_wchar_t *pwc, const char *str, size_t n);
 
-
 struct mcinternal_charset_info {
     /** The normalized name of the character set. */
     const char * const name;

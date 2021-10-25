@@ -1,7 +1,10 @@
-======== ============ =======================
-Function Implemented? Notes
--------- ------------ -----------------------
-abort    Y            Requires kernel support
+STDLIB.H FUNCTIONS
+==================
+
+======== ============ ======= =======================
+Function Implemented? Tested? Notes
+-------- ------------ ------- -----------------------
+abort    Y                    Requires kernel support
 abs      Y
 atexit
 atof
@@ -11,7 +14,7 @@ atoll
 bsearch  Y
 calloc   Y
 div      Y
-exit     Y
+exit     Y                    Requires kernel support
 free
 getenv
 itoa     Y
@@ -40,4 +43,4 @@ ultoa    Y
 utoa     Y
 wcstombs Y
 wctomb   Y
-======== ============ =======================
+======== ============ ======= =======================

@@ -18,10 +18,6 @@ void *memset(void *ptr, int value, size_t num);
 char *strcat(char *destination, const char *source);
 char *strchr(const char *str, int character);
 int strcmp(const char *str1, const char *str2);
-
-/**
- * @warning Standards violation: Identical to @ref strcmp.
- */
 int strcoll(const char *str1, const char *str2);
 char *strcpy(char *destination, const char *source);
 size_t strcspn(const char *str1, const char *str2);
@@ -35,11 +31,6 @@ char *strrchr(const char *str, int character);
 size_t strspn(const char *str1, const char *str2);
 char *strstr(const char *str, const char *substr);
 char *strtok(char *str, const char *delimiters);
-
-
-/**
- * @warning Standards violation: Performs no transform, nearly identical to @ref strncpy.
- */
 size_t strxfrm(char *destination, const char *source, size_t num);
 
 

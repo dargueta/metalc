@@ -5,6 +5,9 @@
 #include "metalc/locale.h"
 #include "metalc/string.h"
 
+static int default_strcoll(const char *str1, const char *str2);
+static size_t default_strxfrm(char *destination, const char *source, size_t num);
+
 
 static const struct mclib_lconv mcinternal_default_lconv_info = {
     ".",        /* decimal_point */
@@ -52,6 +55,17 @@ static struct mcinternal_charset_info mcinternal_supported_charsets[] = {
 };
 
 
+static struct mcinternal_collation_info mcinternal_supported_collation[] = {
+    {
+        "C",
+        default_strcoll,
+        default_strxfrm
+    },
+    {NULL, NULL, NULL}
+};
+
+
+METALC_API_INTERNAL
 const struct LConvEntry mcinternal_supported_locales[] = {
     {"C", &mcinternal_default_lconv_info},
     {"", &mcinternal_default_lconv_info},
@@ -59,8 +73,14 @@ const struct LConvEntry mcinternal_supported_locales[] = {
 };
 
 
+METALC_API_INTERNAL
 struct mclib_lconv mcinternal_current_lconv;
+
+METALC_API_INTERNAL
 const struct mcinternal_charset_info *mcinternal_ptr_current_charset = &mcinternal_supported_charsets[0];
+
+METALC_API_INTERNAL
+const struct mcinternal_collation_info *mcinternal_ptr_current_coll = &mcinternal_supported_collation[0];
 
 
 static const struct mclib_lconv *find_lconv(const char *name) {
@@ -85,6 +105,17 @@ static const struct mcinternal_charset_info *find_charset(const char *name) {
 }
 
 
+static const struct mcinternal_collation_info *find_collation(const char *name) {
+    const struct mcinternal_collation_info *ptr;
+
+    for (ptr = mcinternal_supported_collation; ptr->name != NULL; ++ptr) {
+        if (strcmp(ptr->name, name) == 0)
+            return ptr;
+    }
+    return NULL;
+}
+
+
 METALC_API_INTERNAL int locale_init(void) {
     const struct mclib_lconv *default_locale = find_lconv("C");
     memcpy(&mcinternal_current_lconv, default_locale, sizeof(mcinternal_current_lconv));
@@ -100,6 +131,7 @@ METALC_API_INTERNAL int locale_teardown(void) {
 int setlocale(int what, const char *name) {
     const struct mclib_lconv *locale;
     const struct mcinternal_charset_info *charset;
+    const struct mcinternal_collation_info *collation;
 
     switch (what) {
         case mclib_LC_ALL:
@@ -120,6 +152,13 @@ int setlocale(int what, const char *name) {
             return 0;
 
         case mclib_LC_COLLATE:
+            /* Caller wants to change the collation order. */
+            collation = find_collation(name);
+            if (collation == NULL)
+                return mclib_EINVAL;
+            mcinternal_ptr_current_coll = collation;
+            return 0;
+
         case mclib_LC_MONETARY:
         case mclib_LC_NUMERIC:
         case mclib_LC_TIME:
@@ -133,12 +172,22 @@ int setlocale(int what, const char *name) {
             return mclib_EINVAL;
     }
 }
+cstdlib_implement(setlocale);
 
 
 struct mclib_lconv *localeconv(void) {
     return &mcinternal_current_lconv;
 }
-
-
-cstdlib_implement(setlocale);
 cstdlib_implement(localeconv);
+
+
+static int default_strcoll(const char *str1, const char *str2) {
+    return strcmp(str1, str2);
+}
+
+
+static size_t default_strxfrm(char *destination, const char *source, size_t num) {
+    if ((destination != NULL) && (num != 0))
+        strncpy(destination, source, num);
+    return strlen(source);
+}
