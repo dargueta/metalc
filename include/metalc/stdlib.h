@@ -32,19 +32,19 @@ long atol(const char *str);
 long strtol(const char *str, const char **endptr, int base);
 unsigned long strtoul(const char *str, const char **endptr, int base);
 double strtod(const char *str, const char **endptr);
-void abort(void);  /* done */
+void abort(void);
 void atexit(void (*func)(void));
 void exit(int status);
 char *getenv(const char *name);
 int system(const char *string);
 void *bsearch(const void *key, const void *base, size_t nitems, size_t size, int (*cmp)(const void *, const void *));
 void qsort(void *base, size_t nitems, size_t size, int (*cmp)(const void *, const void *));
-int abs(int x);                        /* done */
-long labs(long x);                     /* done */
-mclib_div_t div(int numer, int denom);       /* done */
-mclib_ldiv_t ldiv(long numer, long denom);   /* done */
+int abs(int x);
+long labs(long x);
+mclib_div_t div(int numer, int denom);
+mclib_ldiv_t ldiv(long numer, long denom);
 int rand(void);
-void srand(unsigned seed);             /* done */
+void srand(unsigned seed);
 int mblen(const char *str, size_t n);
 size_t mbstowcs(mclib_wchar_t *pwcs, const char *str, size_t n);
 int mbtowc(mclib_wchar_t *pwc, const char *str, size_t n);
