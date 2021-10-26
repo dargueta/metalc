@@ -21,9 +21,6 @@ else()
     message(FATAL_ERROR "Unsupported compiler: ${CMAKE_C_COMPILER_ID}")
 endif()
 
-# Enable all warnings, make warnings errors. This applies to *all* targets.
-add_compile_options(-Wall -Werror)
-
 include("settings.cmake")
 
 enable_testing()
