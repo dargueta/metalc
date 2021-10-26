@@ -30,7 +30,7 @@ mbstowcs Y
 mbtowc   Y
 qsort
 rand
-realloc  Y            Naive implementation
+realloc  Y                    Naive implementation
 srand    Y
 strtod
 strtol   Y
