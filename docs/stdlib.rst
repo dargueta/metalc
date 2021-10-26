@@ -8,9 +8,9 @@ abort    Y                    Requires kernel support
 abs      Y
 atexit
 atof
-atoi
-atol
-atoll
+atoi     Y                    Implemented as a macro
+atol     Y                    Implemented as a macro
+atoll    Y                    Implemented as a macro
 bsearch  Y
 calloc   Y
 div      Y

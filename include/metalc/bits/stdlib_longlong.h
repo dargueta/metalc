@@ -15,8 +15,9 @@ typedef struct {
 } mclib_lldiv_t;
 
 
+#define atoll(str)  strtoll((str), NULL, 10)
+
 long long llabs(long long x);      /* done */
-long long atoll(const char *str);
 long long strtoll(const char *str, const char **endptr, int base);
 unsigned long long strtoull(const char *str, const char **endptr, int base);
 mclib_lldiv_t lldiv(long long numer, long long denom);
@@ -30,7 +31,6 @@ char *ulltoa(unsigned long long value, char *str, int base);
 #endif
 
 cstdlib_export_with_attr(llabs, const);
-cstdlib_export_with_attr(atoll, pure);
 cstdlib_export_with_attr(strtoll, pure);
 cstdlib_export_with_attr(strtoull, pure);
 cstdlib_export_with_attr(lldiv, const);

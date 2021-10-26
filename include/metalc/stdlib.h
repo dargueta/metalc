@@ -26,9 +26,10 @@ typedef struct {
 #endif
 
 
+#define atoi(str)   ((int)strtol((str), NULL, 10))
+#define atol(str)   strtol((str), NULL, 10)
+
 double atof(const char *str);
-int atoi(const char *str);
-long atol(const char *str);
 long strtol(const char *str, const char **endptr, int base);
 unsigned long strtoul(const char *str, const char **endptr, int base);
 double strtod(const char *str, const char **endptr);
@@ -57,8 +58,6 @@ void free(void *ptr);
 
 
 cstdlib_export_with_attr(atof, nonnull, pure);
-cstdlib_export_with_attr(atoi, nonnull, pure);
-cstdlib_export_with_attr(atol, nonnull, pure);
 cstdlib_export_with_attr(strtol, nonnull(1));
 cstdlib_export_with_attr(strtoul, nonnull(1));
 cstdlib_export_with_attr(strtod, nonnull(1));
