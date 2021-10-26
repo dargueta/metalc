@@ -38,17 +38,28 @@ END_TEST()
 
 
 BEGIN_TEST(isblank__basic)
+    CHECK_NE(' ', 0);
+    CHECK_NE('\t', 0);
+
+    CHECK_EQ('\n', 0);
 END_TEST()
 
 
 BEGIN_TEST(iscntrl__basic)
+    CHECK_EQ(' ', 0);
+    CHECK_NE('\t', 0);
 END_TEST()
 
 
 BEGIN_TEST(isdigit__basic)
+    CHECK_NE('0', 0);
+    CHECK_NE('5', 0);
+    CHECK_NE('9', 0);
+
+    CHECK_EQ('A', 0);
 END_TEST()
 
-
+#if 0
 BEGIN_TEST(isgraph__basic)
 END_TEST()
 
@@ -83,7 +94,7 @@ END_TEST()
 
 BEGIN_TEST(toupper__basic)
 END_TEST()
-
+#endif
 
 const struct UnitTestEntry kCtypeUnitTests[] = {
     {isalnum__basic, "isalnum: basic"},
@@ -91,6 +102,7 @@ const struct UnitTestEntry kCtypeUnitTests[] = {
     {isblank__basic, "isblank: basic"},
     {iscntrl__basic, "iscntrl: basic"},
     {isdigit__basic, "isdigit: basic"},
+    /*
     {isgraph__basic, "isgraph: basic"},
     {islower__basic, "islower: basic"},
     {isprint__basic, "isprint: basic"},
@@ -100,5 +112,6 @@ const struct UnitTestEntry kCtypeUnitTests[] = {
     {isxdigit__basic, "isxdigit: basic"},
     {tolower__basic, "tolower: basic"},
     {toupper__basic, "toupper: basic"},
+     */
     {NULL, NULL}
 };
