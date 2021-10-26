@@ -15,6 +15,9 @@
     #define MAP_SHARED      mclib_MAP_SHARED
     #define MAP_ANONYMOUS   mclib_MAP_ANONYMOUS
     #define MAP_FIXED       mclib_MAP_FIXED
+    #define MREMAP_MAYMOVE      mclib_MREMAP_MAYMOVE
+    #define MREMAP_FIXED        mclib_MREMAP_FIXED
+    #define MREMAP_DONTUNMAP    mclib_MREMAP_DONTUNMAP
 #endif  /* METALC_DISABLE_STDLIB_DEFS */
 
 #endif  /* INCLUDE_METALC_BITS_SYS_MMAN_H_ */

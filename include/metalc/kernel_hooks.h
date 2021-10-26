@@ -80,6 +80,21 @@ void *krnlhook_mmap(
 
 
 /**
+ * A hook function that implements at least part of the POSIX `mremap()` function.
+ *
+ * @param old_address
+ * @param old_size
+ * @param new_size
+ * @param flags
+ * @param new_address
+ * @return
+ */
+void *krnlhook_mremap(
+    void *old_address, size_t old_size, size_t new_size, int flags, ... /* void *new_address */
+) __attribute__((weak, nonnull(1)));
+
+
+/**
  * Provided for symmetry with @ref krnlhook_mmap but might never be used.
  *
  * For the time being, kernels need not implement this. The default stub will

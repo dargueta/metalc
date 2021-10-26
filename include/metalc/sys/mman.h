@@ -44,4 +44,13 @@
  */
 #define mclib_MAP_FIXED   8
 
+/** Allow `mremap` to move the mapped memory if it can't extend the block. */
+#define mclib_MREMAP_MAYMOVE    1
+
+/** Move the memory mapping to a new location, and unmap the old location. */
+#define mclib_MREMAP_FIXED      3
+
+/** Remap a mapping to a new address but don't unmap the old block. */
+#define mclib_MREMAP_DONTUNMAP  5
+
 #endif  /* INCLUDE_METALC_SYS_MMAN_H_ */

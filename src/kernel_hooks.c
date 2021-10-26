@@ -41,6 +41,15 @@ void *krnlhook_mmap(
 }
 
 
+void *krnlhook_mremap(
+    void *old_address, size_t old_size, size_t new_size, int flags, ... /* void *new_address */
+) {
+    (void)old_address, (void)old_size, (void)new_size, (void)flags;
+    mclib_errno = mclib_ENOSYS;
+    return mclib_MAP_FAILED;
+}
+
+
 int krnlhook_munmap(void *addr, size_t length, void *udata) {
     (void)addr, (void)length, (void)udata;
     /* Succeed unconditionally. This probably won't ever be called anyway. */
