@@ -11,7 +11,7 @@
 
 
 #ifndef METALC_DISABLE_STDLIB_DEFS
-    #define assert  mclib_assert
+    #define assert(expression)  mclib_assert(expression)
 #endif
 
 
