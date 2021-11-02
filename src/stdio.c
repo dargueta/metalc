@@ -27,6 +27,13 @@ METALC_API_INTERNAL int stdio_teardown(void) {
 }
 
 
+static int saturated_cast_to_int(size_t value) {
+    if (value > INT_MAX)
+        return INT_MAX;
+    return (int)value;
+}
+
+
 int mcinternal_evaluate_format_specifier(
     const char **format, va_list arg_list, char **output, int n_chars_written,
     size_t limit
@@ -77,7 +84,7 @@ int mcinternal_evaluate_format_specifier(
              * We don't care if the argument is a short or byte, since they get
              * promoted to integers when passed as arguments.
              *
-             * FIXME: We need to output the radix first.
+             * FIXME: We need to output the radix first if # is present.
              */
             if (info.is_unsigned)
                 /* `x`, `X`, `u`, or `o` */
@@ -86,7 +93,10 @@ int mcinternal_evaluate_format_specifier(
                 /* d or i */
                 itoa(va_arg(arg_list, int), temp, info.radix);
 
-            return strncpy_and_update_buffer(temp, (void **)output, remaining_chars);
+            string_length = strncpy_and_update_buffer(
+                temp, (void **)output, remaining_chars
+            );
+            return saturated_cast_to_int(string_length);
 
         case MC_AT_LONG:
             if (info.is_unsigned)
@@ -94,7 +104,8 @@ int mcinternal_evaluate_format_specifier(
             else
                 itoa(va_arg(arg_list, long), temp, info.radix);
 
-            return strcpy_and_update_buffer(temp, (void **)output);
+            string_length = strcpy_and_update_buffer(temp, (void **)output);
+            return saturated_cast_to_int(string_length);
 
         #if METALC_HAVE_LONG_LONG
             case MC_AT_LONGLONG:
@@ -103,7 +114,10 @@ int mcinternal_evaluate_format_specifier(
                 else
                     itoa(va_arg(arg_list, long long), temp, info.radix);
 
-                return strncpy_and_update_buffer(temp, (void **)output, remaining_chars);
+                string_length = strncpy_and_update_buffer(
+                    temp, (void **)output, remaining_chars
+                );
+                return saturated_cast_to_int(string_length);
         #endif
 
         case MC_AT_N_WRITTEN_POINTER:
@@ -131,7 +145,7 @@ int mcinternal_evaluate_format_specifier(
             }
 
             if (!output)
-                return string_length;
+                return saturated_cast_to_int(string_length);
 
             /* Don't bother with padding crap, just output the string. */
             strncpy(
@@ -139,7 +153,7 @@ int mcinternal_evaluate_format_specifier(
                 string_pointer,
                 (string_length < remaining_chars) ? string_length : remaining_chars
             );
-            return (int)string_length;
+            return saturated_cast_to_int(string_length);
 
         case MC_AT_FLOAT:
         case MC_AT_DOUBLE:
