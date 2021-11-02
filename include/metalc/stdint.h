@@ -1,3 +1,9 @@
+/**
+ * Definitions of sized integers.
+ *
+ * @file stdint.h
+ */
+
 #ifndef INCLUDE_METALC_STDINT_H_
 #define INCLUDE_METALC_STDINT_H_
 
@@ -112,9 +118,9 @@ typedef unsigned char uint_least8_t;
 #endif
 
 #ifdef HAVE_INT8
-    #define UINT8_MAX   255
+    #define UINT8_MAX   (255U)
     #define INT8_MIN    (-127)
-    #define INT8_MAX    127
+    #define INT8_MAX    (127)
     #undef HAVE_INT8
 #endif
 
@@ -136,9 +142,9 @@ typedef unsigned char uint_least8_t;
 #endif
 
 #ifdef HAVE_INT16
-    #define UINT16_MAX  65535
+    #define UINT16_MAX  (65535U)
     #define INT16_MIN   (-32767)
-    #define INT16_MAX   32767
+    #define INT16_MAX   (32767)
     #undef HAVE_INT16
 #endif
 
@@ -160,9 +166,9 @@ typedef unsigned char uint_least8_t;
 #endif
 
 #ifdef HAVE_INT32
-    #define UINT32_MAX  0xFFFFFFFF
+    #define UINT32_MAX  (0xFFFFFFFFU)
     #define INT32_MIN   (-0x7FFFFFFF)
-    #define INT32_MAX   0x7FFFFFFF
+    #define INT32_MAX   (0x7FFFFFFF)
     #undef HAVE_INT32
 #endif
 
@@ -184,9 +190,9 @@ typedef unsigned char uint_least8_t;
 #endif
 
 #ifdef HAVE_INT64
-    #define UINT64_MAX  0xFFFFFFFFFFFFFFFF
-    #define INT64_MIN   (-0x7FFFFFFFFFFFFFFF)
-    #define INT64_MAX   0x7FFFFFFFFFFFFFFF
+    #define UINT64_MAX  (0xFFFFFFFFFFFFFFFFULL)
+    #define INT64_MIN   (-0x7FFFFFFFFFFFFFFFLL)
+    #define INT64_MAX   (0x7FFFFFFFFFFFFFFFLL)
     #undef HAVE_INT64
 #endif
 
