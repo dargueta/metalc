@@ -36,18 +36,14 @@ void log_raw_message(
 
 
 #define ASSERT_MSG(expr, msg, ...)                                      \
-    if (expr)                                                           \
-        log_raw_message("OK", _test_name,  __LINE__, __FILE__, #expr);  \
-    else {                                                              \
+    if (!(expr)) {                                                      \
         log_message("FAILED", _test_name, __LINE__, __FILE__, (msg), __VA_ARGS__);   \
         return 1;                                                       \
     }
 
 
 #define ASSERT(expr)                                                        \
-    if (expr)                                                               \
-        log_raw_message("OK", _test_name,  __LINE__, __FILE__, #expr);      \
-    else {                                                                  \
+    if (!(expr)) {                                                          \
         log_raw_message("FAILED", _test_name, __LINE__, __FILE__, #expr);   \
         return 1;                                                           \
     }
