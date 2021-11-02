@@ -27,7 +27,7 @@ __attribute__((noreturn)) static void _sighandler_term(int sig) {
              * crt_teardown() will *not* be called and no resources are released.
              * It's up to the operating system to release memory, file handles,
              * etc. */
-            krnlhook_core_dump(sig, mcinternal_runtime_info->udata);
+            krnlhook_core_dump(sig);
             break;
 
         default:
@@ -45,13 +45,13 @@ static void _sighandler_ignore(int sig) {
 
 /* Signal handler pauses the current process. */
 static void _sighandler_stop(int sig) {
-    krnlhook_suspend(sig, mcinternal_runtime_info->udata);
+    krnlhook_suspend(sig);
 }
 
 
 /* Signal handler resumes the current process. */
 static void _sighandler_resume(int sig) {
-    krnlhook_resume(sig, mcinternal_runtime_info->udata);
+    krnlhook_resume(sig);
 }
 
 

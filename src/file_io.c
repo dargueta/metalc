@@ -132,8 +132,8 @@ void clearerr(mclib_FILE *stream) {
 
 
 void fclose(mclib_FILE *stream) {
-    krnlhook_fsync(stream->descriptor, mcinternal_runtime_info->udata);
-    krnlhook_close(stream->descriptor, mcinternal_runtime_info->udata);
+    krnlhook_fsync(stream->descriptor);
+    krnlhook_close(stream->descriptor);
 
     /* Don't free the standard I/O streams, as they were never allocated with
      * malloc. */
@@ -173,10 +173,9 @@ mclib_FILE *fopen(const char *path, const char *mode) {
         return NULL;
 
     /* Open the file, always using mode 0644 if we're creating a new file. */
-    stream->descriptor = krnlhook_open(
-        path, io_flags, 0644, mcinternal_runtime_info->udata
-    );
+    stream->descriptor = krnlhook_open(path, io_flags, 0644);
     if (stream->descriptor == -1) {
+        /* Failed to open the file. */
         free(stream);
         return NULL;
     }
@@ -199,9 +198,7 @@ size_t fwrite(const void *ptr, size_t size, size_t count, mclib_FILE *stream) {
     if (stream->io_flags & O_APPEND)
         fseek(stream, 0, mclib_SEEK_END);
 
-    return krnlhook_write(
-        stream->descriptor, ptr, size * count, mcinternal_runtime_info->udata
-    );
+    return krnlhook_write(stream->descriptor, ptr, size * count);
 }
 
 
@@ -212,16 +209,12 @@ size_t fread(void *ptr, size_t size, size_t count, mclib_FILE *stream) {
         return ~0;
     }
 
-    return krnlhook_read(
-        stream->descriptor, ptr, size * count, mcinternal_runtime_info->udata
-    );
+    return krnlhook_read(stream->descriptor, ptr, size * count);
 }
 
 
 mclib_fpos_t fseek(mclib_FILE *stream, long offset, int whence) {
-    return krnlhook_seek(
-        stream->descriptor, offset, whence, mcinternal_runtime_info->udata
-    );
+    return krnlhook_seek(stream->descriptor, offset, whence);
 }
 
 

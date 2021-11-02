@@ -47,8 +47,7 @@ static void *allocate_pages(size_t n_pages, void *suggested_address) {
         mclib_PROT_READ | mclib_PROT_WRITE,
         mclib_MAP_ANONYMOUS,
         -1,
-        0,
-        mcinternal_runtime_info->udata
+        0
     );
 }
 
