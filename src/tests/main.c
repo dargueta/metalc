@@ -11,12 +11,14 @@
 extern const struct UnitTestEntry kStringUnitTests[];
 extern const struct UnitTestEntry kFileIOUnitTests[];
 extern const struct UnitTestEntry kCtypeUnitTests[];
+extern const struct UnitTestEntry kWcharUtf8UnitTests[];
 
 
 const struct UnitTestEntry *kAllUnitTestGroups[] = {
     kStringUnitTests,
     kFileIOUnitTests,
     kCtypeUnitTests,
+    kWcharUtf8UnitTests,
     NULL
 };
 

@@ -5,58 +5,57 @@
 
 
 BEGIN_TEST(isalnum__basic)
-    CHECK_NE(isalnum('A'), 0);
-    CHECK_NE(isalnum('F'), 0);
-    CHECK_NE(isalnum('Z'), 0);
-    CHECK_NE(isalnum('a'), 0);
-    CHECK_NE(isalnum('j'), 0);
-    CHECK_NE(isalnum('z'), 0);
-    CHECK_NE(isalnum('0'), 0);
-    CHECK_NE(isalnum('9'), 0);
+    CHECK_NE(mclib_isalnum('A'), 0);
+    CHECK_NE(mclib_isalnum('F'), 0);
+    CHECK_NE(mclib_isalnum('Z'), 0);
+    CHECK_NE(mclib_isalnum('a'), 0);
+    CHECK_NE(mclib_isalnum('j'), 0);
+    CHECK_NE(mclib_isalnum('z'), 0);
+    CHECK_NE(mclib_isalnum('0'), 0);
+    CHECK_NE(mclib_isalnum('9'), 0);
 
-    CHECK_EQ(isalnum('\0'), 0);
-    CHECK_EQ(isalnum('~'), 0);
-    CHECK_EQ(isalnum(' '), 0);
-    CHECK_EQ(isalnum('\377'), 0);
-    CHECK_EQ(isalnum('{'), 0);
-    CHECK_EQ(isalnum('}'), 0);
+    CHECK_EQ(mclib_isalnum('\0'), 0);
+    CHECK_EQ(mclib_isalnum('~'), 0);
+    CHECK_EQ(mclib_isalnum(' '), 0);
+    CHECK_EQ(mclib_isalnum('\377'), 0);
+    CHECK_EQ(mclib_isalnum('{'), 0);
+    CHECK_EQ(mclib_isalnum('}'), 0);
 END_TEST()
 
 
 BEGIN_TEST(isalpha__basic)
-    CHECK_NE(isalnum('A'), 0);
-    CHECK_NE(isalnum('N'), 0);
-    CHECK_NE(isalnum('q'), 0);
-    CHECK_NE(isalnum('r'), 0);
+    CHECK_NE(mclib_isalnum('A'), 0);
+    CHECK_NE(mclib_isalnum('N'), 0);
+    CHECK_NE(mclib_isalnum('q'), 0);
+    CHECK_NE(mclib_isalnum('r'), 0);
 
-
-    CHECK_EQ(isalnum('\0'), 0);
-    CHECK_EQ(isalnum('~'), 0);
-    CHECK_EQ(isalnum(' '), 0);
-    CHECK_EQ(isalnum('\377'), 0);
+    CHECK_EQ(mclib_isalnum('\0'), 0);
+    CHECK_EQ(mclib_isalnum('~'), 0);
+    CHECK_EQ(mclib_isalnum(' '), 0);
+    CHECK_EQ(mclib_isalnum('\377'), 0);
 END_TEST()
 
 
 BEGIN_TEST(isblank__basic)
-    CHECK_NE(' ', 0);
-    CHECK_NE('\t', 0);
+    CHECK_NE(mclib_isblank(' ' ), 0);
+    CHECK_NE(mclib_isblank('\t'), 0);
 
-    CHECK_EQ('\n', 0);
+    CHECK_EQ(mclib_isblank('\n'), 0);
 END_TEST()
 
 
 BEGIN_TEST(iscntrl__basic)
-    CHECK_EQ(' ', 0);
-    CHECK_NE('\t', 0);
+    CHECK_EQ(mclib_iscntrl(' '), 0);
+    CHECK_NE(mclib_iscntrl('\t'), 0);
 END_TEST()
 
 
 BEGIN_TEST(isdigit__basic)
-    CHECK_NE('0', 0);
-    CHECK_NE('5', 0);
-    CHECK_NE('9', 0);
+    CHECK_NE(mclib_isdigit('0'), 0);
+    CHECK_NE(mclib_isdigit('5'), 0);
+    CHECK_NE(mclib_isdigit('9'), 0);
 
-    CHECK_EQ('A', 0);
+    CHECK_EQ(mclib_isdigit('A'), 0);
 END_TEST()
 
 #if 0

@@ -97,6 +97,7 @@ set(TEST_SOURCE_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/string.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/testing.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/testing.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/wchar/utf8.c"
 )
 
 include_directories("${CMAKE_BINARY_DIR}/include")

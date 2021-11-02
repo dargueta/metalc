@@ -22,19 +22,36 @@ void log_message(
 );
 
 
+void log_raw_message(
+    const char *level,
+    const char *test_name,
+    unsigned line,
+    const char *filename,
+    const char *message
+);
+
+
+
 #define info_message(msg, ...)  log_message("INFO", _test_name, __LINE__, __FILE__, (msg), __VA_ARGS__)
 
 
 #define ASSERT_MSG(expr, msg, ...)                                      \
     if (expr)                                                           \
-        log_message("OK", _test_name,  __LINE__, __FILE__, "");         \
+        log_raw_message("OK", _test_name,  __LINE__, __FILE__, #expr);  \
     else {                                                              \
         log_message("FAILED", _test_name, __LINE__, __FILE__, (msg), __VA_ARGS__);   \
         return 1;                                                       \
     }
 
 
-#define ASSERT(expr)    ASSERT_MSG((expr), NULL)
+#define ASSERT(expr)                                                        \
+    if (expr)                                                               \
+        log_raw_message("OK", _test_name,  __LINE__, __FILE__, #expr);      \
+    else {                                                                  \
+        log_raw_message("FAILED", _test_name, __LINE__, __FILE__, #expr);   \
+        return 1;                                                           \
+    }
+
 
 #define CHECK_EQ(x, y)  ASSERT_MSG(((x) == (y)), "Assertion failed: %s == %s -- left=%d, right=%d", #x, #y, x, y)
 #define CHECK_NE(x, y)  ASSERT_MSG(((x) != (y)), "Assertion failed: %s != %s -- left=%d, right=%d", #x, #y, x, y)

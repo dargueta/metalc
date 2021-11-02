@@ -4,7 +4,8 @@
 #include <metalc/wchar.h>
 
 
-METALC_API_INTERNAL int mcinternal_utf8_mblen(const char *str, size_t n) {
+METALC_API_INTERNAL
+int mcinternal_utf8_mblen(const char *str, size_t n) {
     unsigned uchr;
 
     /* A NULL pointer means the caller is asking if the character set is state-dependent.
@@ -35,7 +36,8 @@ METALC_API_INTERNAL int mcinternal_utf8_mblen(const char *str, size_t n) {
 }
 
 
-METALC_API_INTERNAL int mcinternal_utf8_mbtowc(mclib_wchar_t *pwc, const char *str, size_t n) {
+METALC_API_INTERNAL
+int mcinternal_utf8_mbtowc(mclib_wchar_t *pwc, const char *str, size_t n) {
     mclib_wchar_t result;
     int current_char_len;
 
@@ -85,7 +87,8 @@ METALC_API_INTERNAL int mcinternal_utf8_mbtowc(mclib_wchar_t *pwc, const char *s
 }
 
 
-METALC_API_INTERNAL int mcinternal_utf8_wctomb(char *str, mclib_wchar_t wchar) {
+METALC_API_INTERNAL
+int mcinternal_utf8_wctomb(char *str, mclib_wchar_t wchar) {
     /* Caller is asking if this encoding is state-dependent. It isn't. */
     if (str == NULL)
         return 0;
@@ -95,21 +98,21 @@ METALC_API_INTERNAL int mcinternal_utf8_wctomb(char *str, mclib_wchar_t wchar) {
         return 1;
     }
     else if (wchar < 0x800) {
-        str[0] = 0xc0 | ((wchar >> 6) & 0x1f);
-        str[1] = 0x80 | (wchar & 0x3f);
+        str[0] = (char)(0xc0 | ((wchar >> 6) & 0x1f));
+        str[1] = (char)(0x80 | (wchar & 0x3f));
         return 2;
     }
     else if (wchar < 0x10000) {
-        str[0] = 0xe0 | ((wchar >> 12) & 0x0f);
-        str[1] = 0x80 | ((wchar >> 6) & 0x3f);
-        str[2] = 0x80 | (wchar & 0x3f);
+        str[0] = (char)(0xe0 | ((wchar >> 12) & 0x0f));
+        str[1] = (char)(0x80 | ((wchar >> 6) & 0x3f));
+        str[2] = (char)(0x80 | (wchar & 0x3f));
         return 3;
     }
     else if (wchar < 0x110000) {
-        str[0] = 0xf0 | ((wchar >> 18) & 0x07);
-        str[1] = 0x80 | ((wchar >> 12) & 0x3f);
-        str[2] = 0x80 | ((wchar >> 6) & 0x3f);
-        str[3] = 0x80 | (wchar & 0x3f);
+        str[0] = (char)(0xf0 | ((wchar >> 18) & 0x07));
+        str[1] = (char)(0x80 | ((wchar >> 12) & 0x3f));
+        str[2] = (char)(0x80 | ((wchar >> 6) & 0x3f));
+        str[3] = (char)(0x80 | (wchar & 0x3f));
         return 3;
     }
     else {

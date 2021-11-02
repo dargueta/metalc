@@ -60,3 +60,28 @@ void log_message(
     }
     fputc('\n', test_output_fd);
 }
+
+
+void log_raw_message(
+    const char *level,
+    const char *test_name,
+    unsigned line,
+    const char *filename,
+    const char *message
+) {
+    write_csv_string(level);
+    fputc('\t', test_output_fd);
+
+    write_csv_string(test_name);
+    fputc('\t', test_output_fd);
+
+    if (filename != NULL)
+        write_csv_string(filename);
+    fputc('\t', test_output_fd);
+
+    fprintf(test_output_fd, "%u\t%d\t", line, mclib_errno);
+
+    if (message != NULL)
+        fprintf(test_output_fd, "%s", message);
+    fputc('\n', test_output_fd);
+}
