@@ -77,15 +77,15 @@ struct MCFormatSpecifier {
     enum MCArgumentType argument_type;
     enum MCArgumentWidth argument_width;
     /** The minimum width of the field, or 0 if not defined. */
-    unsigned minimum_field_width;
-    unsigned radix;
+    int minimum_field_width;
+    int radix;
     int is_unsigned;
     int is_zero_padded;
     int has_radix_prefix;
     int use_scientific_notation;    /**< -1 maybe (%g), 1 force (%e) */
-    unsigned padding;
-    unsigned fraction_zero_padding;
-    unsigned fraction_precision;
+    int padding;
+    int fraction_zero_padding;
+    int fraction_precision;
 };
 
 

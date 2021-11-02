@@ -94,6 +94,7 @@ set(TEST_SOURCE_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/main.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/ctype.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/file_io.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/printf.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/string.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/testing.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/testing.h"

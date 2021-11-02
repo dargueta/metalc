@@ -1,3 +1,9 @@
+/**
+ * Standard I/O utilities.
+ *
+ * @file stdio.h
+ */
+
 #ifndef INCLUDE_METALC_STDIO_H_
 #define INCLUDE_METALC_STDIO_H_
 
@@ -10,9 +16,9 @@
 struct mcinternal_FILE;
 typedef struct mcinternal_FILE mclib_FILE;
 
-extern mclib_FILE * const mclib_stdin;
-extern mclib_FILE * const mclib_stdout;
-extern mclib_FILE * const mclib_stderr;
+extern mclib_FILE * const mclib_stdin;      /**< Standard input file handle */
+extern mclib_FILE * const mclib_stdout;     /**< Standard output file handle */
+extern mclib_FILE * const mclib_stderr;     /**< Standard error output file handle */
 
 
 int vsprintf(char *buffer, const char *format, va_list arg_list);
@@ -21,6 +27,15 @@ int snprintf(char *buffer, size_t length, const char *format, ...);
 int sprintf(char *buffer, const char *format, ...);
 int vprintf(const char *format, va_list arg_list);
 int printf(const char *format, ...);
+
+/**
+ * Write formatted output to a file using a variadic argument list.
+ *
+ * The current implementation is inefficient in that it defers to @ref vsprintf
+ * to write the entirety of the output to a buffer, then @ref fwrite s it to
+ * @a stream. A more efficient way to do this would be to write directly into
+ * @a stream without holding the entire result in memory.
+ */
 int vfprintf(mclib_FILE *stream, const char *format, va_list arg_list);
 int fprintf(mclib_FILE *stream, const char *format, ...);
 void clearerr(mclib_FILE *stream);
@@ -32,7 +47,8 @@ size_t fwrite(const void *ptr, size_t size, size_t count, mclib_FILE *stream);
 size_t fread(void *ptr, size_t size, size_t count, mclib_FILE *stream);
 mclib_fpos_t fseek(mclib_FILE *stream, long offset, int whence);
 
-int mcinternal_mode_string_to_flags(const char *mode) __attribute__((nonnull));
+METALC_API_INTERAL_WITH_ATTR(nonnull)
+int mcinternal_mode_string_to_flags(const char *mode);
 
 
 cstdlib_export_with_attr(vsprintf, nonnull(2));
