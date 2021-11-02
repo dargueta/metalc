@@ -106,8 +106,15 @@ int parse_printf_format_precision(const char *format, struct MCFormatSpecifier *
 
     if (mclib_errno != 0)
         return -1;
+    if (precision > INT_MAX) {
+        /* If the format string specifies an absurd width that's bigger than an
+         * integer can represent, complain. This is most likely an error in the
+         * format string. */
+        mclib_errno = mclib_EINVAL;
+        return -1;
+    }
 
-    info->fraction_precision = precision;
+    info->fraction_precision = (int)precision;
     return (int)(end - format);
 }
 
@@ -256,7 +263,6 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
             mclib_errno = mclib_EINVAL;
             return -1;
     }
-
     return n_read;
 }
 
@@ -269,7 +275,7 @@ int mcinternal_parse_printf_format_specifier(
     int total_read;
     int current_read;
 
-    total_read = current_read = 0;
+    total_read = 0;
 
     current_read = parse_printf_format_flags(format, info);
     if (current_read < 0)
@@ -286,5 +292,8 @@ int mcinternal_parse_printf_format_specifier(
         return -total_read;
     total_read += current_read;
 
-    return total_read;
+    current_read = parse_printf_format_type(format + total_read, info);
+    if (current_read < 0)
+        return -total_read;
+    return total_read + current_read;
 }
