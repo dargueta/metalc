@@ -209,8 +209,8 @@ unsigned long strtoul(const char *str, const char **endptr, int base) {
              * the one we're operating in. Treat it as the end of the number. */
             break;
 
-        value += current_digit;
         value *= base;
+        value += current_digit;
     }
 
     if (n_digits_processed == 0) {
