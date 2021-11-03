@@ -16,6 +16,7 @@
  * The data type of the element in the format string.
  */
 enum MCArgumentType {
+    MC_AT_UNKNOWN,
     MC_AT_CHAR,     /**< For `%%c` */
     MC_AT_STRING,   /**< For `%%s` */
     MC_AT_BYTE,     /**< For `%%hhd`, `%%hhi`, `%%hhu`, `%%hho`, or `%%hhx` */
@@ -58,7 +59,6 @@ enum MCSignRepr {
 };
 
 
-
 /**
  * Information about a format specifier in a printf format string.
  */
@@ -90,6 +90,38 @@ struct MCFormatSpecifier {
 
 
 /**
+ * Examine a format specifier and read the flags, but not the width or type indicators.
+ *
+ * For example, for a format specifier "%-04d", @a format is expected to point
+ * to the '-' and only "-0" will be read. "4d" are the width and type indicators
+ * so they're ignored.
+ *
+ * @a format is expected to point to the first character past a `%` sign.
+ *
+ * On success, the function returns the number of characters it read. On failure,
+ * the number will be negative and errno will be set. The absolute value of the
+ * return value is still the number of characters read.
+ */
+METALC_API_INTERAL_WITH_ATTR(nonnull)
+int parse_printf_format_flags(const char *format, struct MCFormatSpecifier *info);
+
+
+/**
+ * Examine a format string and read the field width.
+ *
+ * This function must be called after all flags are read. Thus, the width (if
+ * present) will be a positive integer @e not starting with `0`. For example,
+ * for a format string "%-04d", @a format will point to the '4', and only '4'
+ * will be read.
+ *
+ * The function returns the number of characters read. If the width isn't present,
+ * the return value will be 0 and `info->width` will also be 0.
+ */
+METALC_API_INTERAL_WITH_ATTR(nonnull)
+int parse_printf_format_width(const char *format, struct MCFormatSpecifier *info);
+
+
+/**
  * Parse a printf format specifier and extract the information in them.
  *
  * @param format    A pointer to the beginning of the format string specifier,
@@ -104,8 +136,32 @@ struct MCFormatSpecifier {
  *          processing the format specifier. If an error occurred, the return
  *          value will be negative and @ref errno will be set accordingly.
  */
-METALC_API_INTERNAL
+METALC_API_INTERAL_WITH_ATTR(nonnull)
 int mcinternal_parse_printf_format_specifier(const char *format, struct MCFormatSpecifier *info);
+
+
+/**
+ * Examine a format string and determine the floating-point precision.
+ *
+ * This must be called immediately after @ref parse_printf_format_width. It
+ * expects `.` to be the first character. If not, it assumes there's no precision
+ * specifier and returns immediately.
+ */
+METALC_API_INTERAL_WITH_ATTR(nonnull)
+int parse_printf_format_precision(const char *format, struct MCFormatSpecifier *info);
+
+
+METALC_API_INTERNAL
+enum MCArgumentType int_argtype_from_width(enum MCArgumentWidth width_kind);
+
+
+METALC_API_INTERNAL
+enum MCArgumentType float_argtype_from_width(enum MCArgumentWidth width_kind);
+
+
+METALC_API_INTERAL_WITH_ATTR(nonnull)
+int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info);
+
 
 /**
  * Given a format string, write a single value to the buffer.
