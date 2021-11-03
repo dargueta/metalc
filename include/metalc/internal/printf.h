@@ -86,6 +86,7 @@ struct MCFormatSpecifier {
     int padding;
     int fraction_zero_padding;
     int fraction_precision;
+    int use_uppercase;
 };
 
 

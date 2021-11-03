@@ -105,7 +105,7 @@ enum MCArgumentType int_argtype_from_width(enum MCArgumentWidth width_kind) {
     mclib_errno = 0;
     switch (width_kind) {
         case MCAW_BYTE:
-            return MC_AT_CHAR;
+            return MC_AT_BYTE;
         case MCAW_SHORT:
             return MC_AT_SHORT;
         case MCAW_DEFAULT:
@@ -116,7 +116,7 @@ enum MCArgumentType int_argtype_from_width(enum MCArgumentWidth width_kind) {
             return MC_AT_LONGLONG;
         default:
             mclib_errno = mclib_EINVAL;
-            return -1;
+            return MC_AT_UNKNOWN;
     }
 }
 
@@ -125,16 +125,20 @@ enum MCArgumentType float_argtype_from_width(enum MCArgumentWidth width_kind) {
     mclib_errno = 0;
     if (width_kind == MCAW_DEFAULT)
         return MC_AT_DOUBLE;
+
+#ifdef METALC_COMPILE_OPTION_ENABLE_LONGLONG
     if (width_kind == MCAW_LONG_DOUBLE)
         return MC_AT_LONGDOUBLE;
+#endif
 
     mclib_errno = mclib_EINVAL;
-    return -1;
+    return MC_AT_UNKNOWN;
 }
 
 
 int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info) {
     enum MCArgumentWidth width;
+    enum MCArgumentType arg_type;
     int n_read;
 
     mclib_errno = 0;
@@ -195,45 +199,62 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
     }
 
     info->argument_width = width;
+    info->use_uppercase = 0;
 
     switch(format[n_read]) {
         case 'c':
-            info->argument_type = MC_AT_CHAR;
+            info->radix = 0;
+            arg_type = MC_AT_CHAR;
             break;
         case 'd':
         case 'i':
             info->is_unsigned = 0;
             info->radix = 10;
-            info->argument_type = int_argtype_from_width(width);
+            arg_type = int_argtype_from_width(width);
             break;
         case 'u':
             info->is_unsigned = 1;
             info->radix = 10;
-            info->argument_type = int_argtype_from_width(width);
+            arg_type = int_argtype_from_width(width);
             break;
         case 'o':
             info->is_unsigned = 1;
             info->radix = 8;
-            info->argument_type = int_argtype_from_width(width);
+            arg_type = int_argtype_from_width(width);
             break;
-        case 'x':
         case 'X':
+            info->use_uppercase = 1;
+            /* fall through */
+        case 'x':
             info->is_unsigned = 1;
             info->radix = 16;
-            info->argument_type = int_argtype_from_width(width);
+            arg_type = int_argtype_from_width(width);
+            break;
+        case 'A':
+            info->radix = 16;
+            info->use_uppercase = 1;
+            arg_type = float_argtype_from_width(width);
+            break;
+        case 'E':
+        case 'F':
+        case 'G':
+            info->use_uppercase = 1;
+            info->radix = 10;
+            arg_type = float_argtype_from_width(width);
             break;
         case 'a':
-        case 'A':
+            info->radix = 16;
+            arg_type = float_argtype_from_width(width);
+            break;
         case 'e':
-        case 'E':
         case 'f':
-        case 'F':
         case 'g':
-        case 'G':
-            info->radix = 0;
-            info->argument_type = float_argtype_from_width(width);
+            info->radix = 10;
+            arg_type = float_argtype_from_width(width);
             break;
         case 'n':
+            info->radix = 0;
+            /* fall through */
         case 'p':
         case 's':
             mclib_errno = mclib_ENOSYS;
@@ -242,7 +263,10 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
             mclib_errno = mclib_EINVAL;
             return -1;
     }
-    return n_read;
+
+    info->argument_type = arg_type;
+    /* The +1 is for the argument type */
+    return n_read + 1;
 }
 
 

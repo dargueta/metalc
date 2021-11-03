@@ -123,6 +123,77 @@ BEGIN_TEST(parse_printf_format_precision__not_zero_padded)
 END_TEST()
 
 
+BEGIN_TEST(parse_printf_format_type__d)
+    struct MCFormatSpecifier info;
+    int result;
+
+    result = parse_printf_format_type("d", &info);
+    CHECK_EQ(mclib_errno, 0);
+    CHECK_EQ(result, 1);
+    CHECK_EQ(info.argument_type, MC_AT_INT);
+    CHECK_EQ(info.argument_width, MCAW_DEFAULT);
+    CHECK_EQ(info.is_unsigned, 0);
+    CHECK_EQ(info.use_uppercase, 0);
+    CHECK_EQ(info.radix, 10);
+END_TEST()
+
+
+BEGIN_TEST(parse_printf_format_type__hu)
+    struct MCFormatSpecifier info;
+    int result;
+
+    result = parse_printf_format_type("hu", &info);
+    CHECK_EQ(mclib_errno, 0);
+    CHECK_EQ(result, 2);
+    CHECK_EQ(info.argument_type, MC_AT_SHORT);
+    CHECK_EQ(info.argument_width, MCAW_SHORT);
+    CHECK_EQ(info.is_unsigned, 1);
+    CHECK_EQ(info.use_uppercase, 0);
+    CHECK_EQ(info.radix, 10);
+END_TEST()
+
+
+BEGIN_TEST(parse_printf_format_type__hhX)
+    struct MCFormatSpecifier info;
+    int result;
+
+    result = parse_printf_format_type("hhX", &info);
+    CHECK_EQ(mclib_errno, 0);
+    CHECK_EQ(result, 3);
+    CHECK_EQ(info.argument_type, MC_AT_BYTE);
+    CHECK_EQ(info.argument_width, MCAW_BYTE);
+    CHECK_EQ(info.use_uppercase, 1);
+    CHECK_EQ(info.radix, 16);
+END_TEST()
+
+
+BEGIN_TEST(parse_printf_format_type__A)
+    struct MCFormatSpecifier info;
+    int result;
+
+    result = parse_printf_format_type("A", &info);
+    CHECK_EQ(mclib_errno, 0);
+    CHECK_EQ(result, 1);
+    CHECK_EQ(info.argument_type, MC_AT_DOUBLE);
+    CHECK_EQ(info.argument_width, MCAW_DEFAULT);
+    CHECK_EQ(info.use_uppercase, 1);
+    CHECK_EQ(info.radix, 16);
+END_TEST()
+
+
+BEGIN_TEST(parse_printf_format_type__a)
+    struct MCFormatSpecifier info;
+    int result;
+
+    result = parse_printf_format_type("a", &info);
+    CHECK_EQ(mclib_errno, 0);
+    CHECK_EQ(result, 1);
+    CHECK_EQ(info.argument_type, MC_AT_DOUBLE);
+    CHECK_EQ(info.argument_width, MCAW_DEFAULT);
+    CHECK_EQ(info.use_uppercase, 0);
+    CHECK_EQ(info.radix, 16);
+END_TEST()
+
 
 BEGIN_TEST(parse_printf_format_specifier__simple__d)
     struct MCFormatSpecifier info;
@@ -156,8 +227,13 @@ const struct UnitTestEntry kPrintfUnitTests[] = {
     {parse_printf_format_width__width_overflow, "printf: width flags overflow 32-bit int"},
     {parse_printf_format_precision__empty, "printf: floating-point precision, empty string"},
     {parse_printf_format_precision__not_defined, "printf: floating-point precision, not defined"},
-    {parse_printf_format_precision__zero_padded, "prntf: floating-point precision, `%.03f`"},
-    {parse_printf_format_precision__not_zero_padded, "prntf: floating-point precision, `%.149f`"},
+    {parse_printf_format_precision__zero_padded, "printf: floating-point precision, `%.03f`"},
+    {parse_printf_format_precision__not_zero_padded, "printf: floating-point precision, `%.149f`"},
+    {parse_printf_format_type__d, "printf: type: `%d`"},
+    {parse_printf_format_type__hu, "printf: type: `%hu`"},
+    {parse_printf_format_type__hhX, "printf: type: `%hu`"},
+    {parse_printf_format_type__a, "printf: type: `%a`"},
+    {parse_printf_format_type__A, "printf: type: `%A`"},
     {parse_printf_format_specifier__simple__d, "printf: Analyze `%d`"},
     {NULL, NULL}
 };
