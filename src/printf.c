@@ -227,24 +227,46 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
             arg_type = int_argtype_from_width(info->argument_width);
             break;
         case 'A':
+            info->use_scientific_notation = MCFMT_SCINOT__ALWAYS;
             info->radix = 16;
             info->use_uppercase = 1;
             arg_type = float_argtype_from_width(info->argument_width);
             break;
         case 'E':
+            info->use_scientific_notation = MCFMT_SCINOT__ALWAYS;
+            info->radix = 10;
+            info->use_uppercase = 1;
+            arg_type = float_argtype_from_width(info->argument_width);
+            break;
         case 'F':
+            info->use_scientific_notation = MCFMT_SCINOT__NEVER;
+            info->radix = 10;
+            info->use_uppercase = 1;
+            arg_type = float_argtype_from_width(info->argument_width);
+            break;
         case 'G':
+            info->use_scientific_notation = MCFMT_SCINOT__IF_NEEDED;
             info->use_uppercase = 1;
             info->radix = 10;
             arg_type = float_argtype_from_width(info->argument_width);
             break;
         case 'a':
+            info->use_scientific_notation = MCFMT_SCINOT__ALWAYS;
             info->radix = 16;
             arg_type = float_argtype_from_width(info->argument_width);
             break;
         case 'e':
+            info->use_scientific_notation = MCFMT_SCINOT__ALWAYS;
+            info->radix = 10;
+            arg_type = float_argtype_from_width(info->argument_width);
+            break;
         case 'f':
+            info->use_scientific_notation = MCFMT_SCINOT__NEVER;
+            info->radix = 10;
+            arg_type = float_argtype_from_width(info->argument_width);
+            break;
         case 'g':
+            info->use_scientific_notation = MCFMT_SCINOT__IF_NEEDED;
             info->radix = 10;
             arg_type = float_argtype_from_width(info->argument_width);
             break;
