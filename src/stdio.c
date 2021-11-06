@@ -68,7 +68,7 @@ int mcinternal_evaluate_format_specifier(
      * introductory '%'. Look at that character and increment `*format` so we
      * don't have to do that later. */
     switch (info.argument_type) {
-        case MC_AT_CHAR:
+        case MCFMT_ARGT__CHAR:
             /* n.b. `char` is promoted to `int` when passed as an argument */
             temp[0] = (char)va_arg(arg_list, int);
             if (output && (remaining_chars > 0)) {
@@ -77,9 +77,9 @@ int mcinternal_evaluate_format_specifier(
             }
             return 1;
 
-        case MC_AT_BYTE:
-        case MC_AT_SHORT:
-        case MC_AT_INT:
+        case MCFMT_ARGT__BYTE:
+        case MCFMT_ARGT__SHORT:
+        case MCFMT_ARGT__INT:
             /* This can be d, i, u, x, X, o, and their h or hh variants.
              * We don't care if the argument is a short or byte, since they get
              * promoted to integers when passed as arguments.
@@ -98,7 +98,7 @@ int mcinternal_evaluate_format_specifier(
             );
             return saturated_cast_to_int(string_length);
 
-        case MC_AT_LONG:
+        case MCFMT_ARGT__LONG:
             if (info.is_unsigned)
                 itoa(va_arg(arg_list, unsigned long), temp, info.radix);
             else
@@ -108,7 +108,7 @@ int mcinternal_evaluate_format_specifier(
             return saturated_cast_to_int(string_length);
 
         #if METALC_HAVE_LONG_LONG
-            case MC_AT_LONGLONG:
+            case MCFMT_ARGT__LONGLONG:
                 if (info.is_unsigned)
                     itoa(va_arg(arg_list, unsigned long long), temp, info.radix);
                 else
@@ -120,11 +120,11 @@ int mcinternal_evaluate_format_specifier(
                 return saturated_cast_to_int(string_length);
         #endif
 
-        case MC_AT_N_WRITTEN_POINTER:
+        case MCFMT_ARGT__N_WRITTEN_POINTER:
             *va_arg(arg_list, int *) = n_chars_written;
             return 0;
 
-        case MC_AT_STRING:
+        case MCFMT_ARGT__STRING:
             string_pointer = va_arg(arg_list, char *);
 
             /* Determine the length of the string we need to copy, and fail if
@@ -155,9 +155,9 @@ int mcinternal_evaluate_format_specifier(
             );
             return saturated_cast_to_int(string_length);
 
-        case MC_AT_FLOAT:
-        case MC_AT_DOUBLE:
-        case MC_AT_LONGDOUBLE:
+        case MCFMT_ARGT__FLOAT:
+        case MCFMT_ARGT__DOUBLE:
+        case MCFMT_ARGT__LONGDOUBLE:
             mclib_errno = mclib_ENOSYS;
             return -1;
 

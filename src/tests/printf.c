@@ -130,8 +130,8 @@ BEGIN_TEST(parse_printf_format_type__d)
     result = parse_printf_format_type("d", &info);
     CHECK_EQ(mclib_errno, 0);
     CHECK_EQ(result, 1);
-    CHECK_EQ(info.argument_type, MC_AT_INT);
-    CHECK_EQ(info.argument_width, MCAW_DEFAULT);
+    CHECK_EQ(info.argument_type, MCFMT_ARGT__INT);
+    CHECK_EQ(info.argument_width, MCFMT_ARGW__DEFAULT);
     CHECK_EQ(info.is_unsigned, 0);
     CHECK_EQ(info.use_uppercase, 0);
     CHECK_EQ(info.radix, 10);
@@ -145,8 +145,8 @@ BEGIN_TEST(parse_printf_format_type__hu)
     result = parse_printf_format_type("hu", &info);
     CHECK_EQ(mclib_errno, 0);
     CHECK_EQ(result, 2);
-    CHECK_EQ(info.argument_type, MC_AT_SHORT);
-    CHECK_EQ(info.argument_width, MCAW_SHORT);
+    CHECK_EQ(info.argument_type, MCFMT_ARGT__SHORT);
+    CHECK_EQ(info.argument_width, MCFMT_ARGW__SHORT);
     CHECK_EQ(info.is_unsigned, 1);
     CHECK_EQ(info.use_uppercase, 0);
     CHECK_EQ(info.radix, 10);
@@ -160,8 +160,8 @@ BEGIN_TEST(parse_printf_format_type__hhX)
     result = parse_printf_format_type("hhX", &info);
     CHECK_EQ(mclib_errno, 0);
     CHECK_EQ(result, 3);
-    CHECK_EQ(info.argument_type, MC_AT_BYTE);
-    CHECK_EQ(info.argument_width, MCAW_BYTE);
+    CHECK_EQ(info.argument_type, MCFMT_ARGT__BYTE);
+    CHECK_EQ(info.argument_width, MCFMT_ARGW__BYTE);
     CHECK_EQ(info.use_uppercase, 1);
     CHECK_EQ(info.radix, 16);
 END_TEST()
@@ -174,8 +174,8 @@ BEGIN_TEST(parse_printf_format_type__A)
     result = parse_printf_format_type("A", &info);
     CHECK_EQ(mclib_errno, 0);
     CHECK_EQ(result, 1);
-    CHECK_EQ(info.argument_type, MC_AT_DOUBLE);
-    CHECK_EQ(info.argument_width, MCAW_DEFAULT);
+    CHECK_EQ(info.argument_type, MCFMT_ARGT__DOUBLE);
+    CHECK_EQ(info.argument_width, MCFMT_ARGW__DEFAULT);
     CHECK_EQ(info.use_uppercase, 1);
     CHECK_EQ(info.radix, 16);
 END_TEST()
@@ -188,8 +188,8 @@ BEGIN_TEST(parse_printf_format_type__a)
     result = parse_printf_format_type("a", &info);
     CHECK_EQ(mclib_errno, 0);
     CHECK_EQ(result, 1);
-    CHECK_EQ(info.argument_type, MC_AT_DOUBLE);
-    CHECK_EQ(info.argument_width, MCAW_DEFAULT);
+    CHECK_EQ(info.argument_type, MCFMT_ARGT__DOUBLE);
+    CHECK_EQ(info.argument_width, MCFMT_ARGW__DEFAULT);
     CHECK_EQ(info.use_uppercase, 0);
     CHECK_EQ(info.radix, 16);
 END_TEST()
@@ -213,8 +213,8 @@ BEGIN_TEST(parse_printf_format_specifier__simple__d)
     CHECK_EQ(mclib_errno, 0);
     CHECK_EQ(info.justify, MCFMT_JUSTIFY__UNSPECIFIED);
     CHECK_EQ(info.sign_representation, MCFMT_SIGN__ONLY_NEGATIVE);
-    CHECK_EQ(info.argument_type, MC_AT_INT);
-    CHECK_EQ(info.argument_width, MCAW_DEFAULT);
+    CHECK_EQ(info.argument_type, MCFMT_ARGT__INT);
+    CHECK_EQ(info.argument_width, MCFMT_ARGW__DEFAULT);
     CHECK_EQ(info.minimum_field_width, 0);
     CHECK_EQ(info.radix, 10);
     CHECK_EQ(info.is_unsigned, 0);
@@ -236,8 +236,8 @@ BEGIN_TEST(parse_printf_format_specifier__03hu)
     CHECK_EQ(mclib_errno, 0);
     CHECK_EQ(info.justify, 0);
     CHECK_EQ(info.sign_representation, MCFMT_SIGN__ONLY_NEGATIVE);
-    CHECK_EQ(info.argument_type, MC_AT_INT);
-    CHECK_EQ(info.argument_width, MCAW_DEFAULT);
+    CHECK_EQ(info.argument_type, MCFMT_ARGT__INT);
+    CHECK_EQ(info.argument_width, MCFMT_ARGW__DEFAULT);
     CHECK_EQ(info.minimum_field_width, 3);
     CHECK_EQ(info.radix, 10);
     CHECK_EQ(info.is_unsigned, 1);

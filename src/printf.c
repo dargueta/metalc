@@ -104,37 +104,37 @@ int parse_printf_format_precision(const char *format, struct MCFormatSpecifier *
 enum MCArgumentType int_argtype_from_width(enum MCArgumentWidth width_kind) {
     mclib_errno = 0;
     switch (width_kind) {
-        case MCAW_BYTE:
-            return MC_AT_BYTE;
-        case MCAW_SHORT:
-            return MC_AT_SHORT;
-        case MCAW_DEFAULT:
-            return MC_AT_INT;
-        case MCAW_LONG:
-            return MC_AT_LONG;
+        case MCFMT_ARGW__BYTE:
+            return MCFMT_ARGT__BYTE;
+        case MCFMT_ARGW__SHORT:
+            return MCFMT_ARGT__SHORT;
+        case MCFMT_ARGW__DEFAULT:
+            return MCFMT_ARGT__INT;
+        case MCFMT_ARGW__LONG:
+            return MCFMT_ARGT__LONG;
 #if METALC_COMPILE_OPTION_ENABLE_LONGLONG
-        case MCAW_LONGLONG:
-            return MC_AT_LONGLONG;
+        case MCFMT_ARGW__LONGLONG:
+            return MCFMT_ARGT__LONGLONG;
 #endif
         default:
             mclib_errno = mclib_EINVAL;
-            return MC_AT_UNKNOWN;
+            return MCFMT_ARGT__UNKNOWN;
     }
 }
 
 
 enum MCArgumentType float_argtype_from_width(enum MCArgumentWidth width_kind) {
     mclib_errno = 0;
-    if (width_kind == MCAW_DEFAULT)
-        return MC_AT_DOUBLE;
+    if (width_kind == MCFMT_ARGW__DEFAULT)
+        return MCFMT_ARGT__DOUBLE;
 
 #ifdef METALC_COMPILE_OPTION_ENABLE_LONGLONG
-    if (width_kind == MCAW_LONG_DOUBLE)
-        return MC_AT_LONGDOUBLE;
+    if (width_kind == MCFMT_ARGW__LONG_DOUBLE)
+        return MCFMT_ARGT__LONGDOUBLE;
 #endif
 
     mclib_errno = mclib_EINVAL;
-    return MC_AT_UNKNOWN;
+    return MCFMT_ARGT__UNKNOWN;
 }
 
 
@@ -153,49 +153,49 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
             /* Check for `hh` */
             if (format[1] == 'h') {
                 /* Yep, this is %hh (possibly with some flags). */
-                width = MCAW_BYTE;
+                width = MCFMT_ARGW__BYTE;
                 n_read = 2;
             }
             else {
                 /* Only got %h (possibly with some flags). */
-                width = MCAW_SHORT;
+                width = MCFMT_ARGW__SHORT;
                 n_read = 1;
             }
             break;
         case 'j':
-            width = MCAW_INTMAX;
+            width = MCFMT_ARGW__INTMAX;
             n_read = 1;
             break;
         case 'l':
             /* Check for `ll` *if* we have long long support */
             #if METALC_COMPILE_OPTION_ENABLE_LONGLONG
                 if(format[1] == 'l') {
-                    width = MCAW_LONGLONG;
+                    width = MCFMT_ARGW__LONGLONG;
                     n_read = 2;
                 }
                 else {
-                    width = MCAW_LONG;
+                    width = MCFMT_ARGW__LONG;
                     n_read = 1;
                 }
             #else
-                width = MCAW_LONG;
+                width = MCFMT_ARGW__LONG;
                 n_read = 1;
             #endif
             break;
         case 'L':
-            width = MCAW_LONG_DOUBLE;
+            width = MCFMT_ARGW__LONG_DOUBLE;
             n_read = 1;
             break;
         case 't':
-            width = MCAW_PTRDIFF;
+            width = MCFMT_ARGW__PTRDIFF;
             n_read = 1;
             break;
         case 'z':
-            width = MCAW_SIZE_T;
+            width = MCFMT_ARGW__SIZE_T;
             n_read = 1;
             break;
         default:
-            width = MCAW_DEFAULT;
+            width = MCFMT_ARGW__DEFAULT;
             n_read = 0;
             break;
     }
@@ -206,7 +206,7 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
     switch(format[n_read]) {
         case 'c':
             info->radix = 0;
-            arg_type = MC_AT_CHAR;
+            arg_type = MCFMT_ARGT__CHAR;
             break;
         case 'd':
         case 'i':
@@ -282,7 +282,7 @@ int mcinternal_parse_printf_format_specifier(
 
     /* This tells the caller that the results are invalid. */
     memset(info, 0, sizeof(*info));
-    info->argument_type = MC_AT_UNKNOWN;
+    info->argument_type = MCFMT_ARGT__UNKNOWN;
 
     current_read = parse_printf_format_flags(format, info);
     if (mclib_errno != 0)

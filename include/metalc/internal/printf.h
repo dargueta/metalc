@@ -16,40 +16,40 @@
  * The data type of the element in the format string.
  */
 enum MCArgumentType {
-    MC_AT_UNKNOWN,
-    MC_AT_CHAR,     /**< For `%%c` */
-    MC_AT_STRING,   /**< For `%%s` */
-    MC_AT_BYTE,     /**< For `%%hhd`, `%%hhi`, `%%hhu`, `%%hho`, or `%%hhx` */
-    MC_AT_SHORT,    /**< For `%%hd`, `%%hi`, `%%hu`, `%%ho`, or `%%hx` */
-    MC_AT_INT,      /**< For `%%d`, `%%i`, `%%u`, or `%%x` */
-    MC_AT_LONG,     /**< For `%%ld`, `%%li`, `%%lu`, or `%%lx` */
+    MCFMT_ARGT__UNKNOWN,
+    MCFMT_ARGT__CHAR,     /**< For `%%c` */
+    MCFMT_ARGT__STRING,   /**< For `%%s` */
+    MCFMT_ARGT__BYTE,     /**< For `%%hhd`, `%%hhi`, `%%hhu`, `%%hho`, or `%%hhx` */
+    MCFMT_ARGT__SHORT,    /**< For `%%hd`, `%%hi`, `%%hu`, `%%ho`, or `%%hx` */
+    MCFMT_ARGT__INT,      /**< For `%%d`, `%%i`, `%%u`, or `%%x` */
+    MCFMT_ARGT__LONG,     /**< For `%%ld`, `%%li`, `%%lu`, or `%%lx` */
     /** For `%%lld`, `%%lli`, `%%llu`, or `%%llx`. Not supported on all platforms. */
-    MC_AT_LONGLONG,
-    MC_AT_FLOAT,    /**< For `%%hf` */
-    MC_AT_DOUBLE,   /**< For `%%f`, `%%e`, or `%%g` */
+    MCFMT_ARGT__LONGLONG,
+    MCFMT_ARGT__FLOAT,    /**< For `%%hf` */
+    MCFMT_ARGT__DOUBLE,   /**< For `%%f`, `%%e`, or `%%g` */
 
     /** For `%%lf`, `%%le`, or `%%lg`. Not supported on all platforms. */
-    MC_AT_LONGDOUBLE,
-    MC_AT_POINTER,  /**< `p` */
-    MC_AT_N_WRITTEN_POINTER,    /**< `%%n` */
+    MCFMT_ARGT__LONGDOUBLE,
+    MCFMT_ARGT__POINTER,  /**< `p` */
+    MCFMT_ARGT__N_WRITTEN_POINTER,    /**< `%%n` */
 };
 
 
 enum MCArgumentWidth {
-    MCAW_DEFAULT,
-    MCAW_BYTE,
-    MCAW_SHORT,
-    MCAW_INT,
-    MCAW_LONG,
-    MCAW_LONGLONG,
-    MCAW_INTPTR,
-    MCAW_SIZE_T,
-    MCAW_PTRDIFF,
-    MCAW_LONG_DOUBLE
+    MCFMT_ARGW__DEFAULT,
+    MCFMT_ARGW__BYTE,
+    MCFMT_ARGW__SHORT,
+    MCFMT_ARGW__INT,
+    MCFMT_ARGW__LONG,
+    MCFMT_ARGW__LONGLONG,
+    MCFMT_ARGW__INTPTR,
+    MCFMT_ARGW__SIZE_T,
+    MCFMT_ARGW__PTRDIFF,
+    MCFMT_ARGW__LONG_DOUBLE
 };
 
 
-#define MCAW_INTMAX MCAW_INTPTR
+#define MCFMT_ARGW__INTMAX MCFMT_ARGW__INTPTR
 
 
 enum MCSignRepr {
