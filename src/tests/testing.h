@@ -31,13 +31,12 @@ void log_raw_message(
 );
 
 
-
 #define info_message(msg, ...)  log_message("INFO", _test_name, __LINE__, __FILE__, (msg), __VA_ARGS__)
 
 
 #define ASSERT_MSG(expr, msg, ...)                                      \
     if (!(expr)) {                                                      \
-        log_message("FAILED", _test_name, __LINE__, __FILE__, (msg), __VA_ARGS__);   \
+        log_message("FAILED", _test_name, __LINE__, __FILE__, msg, __VA_ARGS__);   \
         return 1;                                                       \
     }
 
@@ -67,7 +66,7 @@ void log_raw_message(
 
 
 #define BEGIN_TEST(name)    \
-    int (name)(int argc, char **argv, char **env) {  \
+    static int (name)(int argc, char **argv, char **env) {  \
         (void)argc, (void)argv, (void)env;          \
         static const char *_test_name = #name;
 

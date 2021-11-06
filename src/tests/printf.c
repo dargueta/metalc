@@ -13,7 +13,7 @@ BEGIN_TEST(parse_printf_format_flags__empty)
     result = parse_printf_format_flags(".02f", &info);
     CHECK_EQ(mclib_errno, 0);
     CHECK_EQ(result, 0);
-    CHECK_EQ(info.justify, 0);
+    CHECK_EQ(info.justify, MCFMT_JUSTIFY__UNSPECIFIED);
     CHECK_EQ(info.sign_representation, MCFMT_SIGN__ONLY_NEGATIVE);
     CHECK_EQ(info.has_radix_prefix, 0);
     CHECK_EQ(info.is_zero_padded, 0);
@@ -28,7 +28,7 @@ BEGIN_TEST(parse_printf_format_flags__left_align_zero)
     result = parse_printf_format_flags("-05d", &info);
     CHECK_EQ(mclib_errno, 0);
     CHECK_EQ(result, 2);
-    CHECK_EQ(info.justify, -1);
+    CHECK_EQ(info.justify, MCFMT_JUSTIFY__LEFT);
     CHECK_EQ(info.sign_representation, MCFMT_SIGN__ONLY_NEGATIVE);
     CHECK_EQ(info.has_radix_prefix, 0);
     CHECK_EQ(info.is_zero_padded, 1);
@@ -194,15 +194,24 @@ BEGIN_TEST(parse_printf_format_type__a)
     CHECK_EQ(info.radix, 16);
 END_TEST()
 
+BEGIN_TEST(parse_printf_format_type__unexpected_eos)
+    struct MCFormatSpecifier info;
+    int result;
+
+    result = parse_printf_format_type("", &info);
+    CHECK_EQ(mclib_errno, mclib_EINVAL);
+    CHECK_EQ(result, -1);
+END_TEST()
+
 
 BEGIN_TEST(parse_printf_format_specifier__simple__d)
     struct MCFormatSpecifier info;
     int result;
 
     result = mcinternal_parse_printf_format_specifier("d", &info);
-    CHECK_EQ(mclib_errno, 0);
     CHECK_EQ(result, 1);
-    CHECK_EQ(info.justify, 0);
+    CHECK_EQ(mclib_errno, 0);
+    CHECK_EQ(info.justify, MCFMT_JUSTIFY__UNSPECIFIED);
     CHECK_EQ(info.sign_representation, MCFMT_SIGN__ONLY_NEGATIVE);
     CHECK_EQ(info.argument_type, MC_AT_INT);
     CHECK_EQ(info.argument_width, MCAW_DEFAULT);
@@ -211,11 +220,33 @@ BEGIN_TEST(parse_printf_format_specifier__simple__d)
     CHECK_EQ(info.is_unsigned, 0);
     CHECK_EQ(info.is_zero_padded, 0);
     CHECK_EQ(info.has_radix_prefix, 0);
-    CHECK_EQ(info.use_scientific_notation, 0);
-    CHECK_EQ(info.padding, 0);
+    CHECK_EQ(info.use_scientific_notation, MCFMT_SCINOT__UNSPECIFIED);
     CHECK_EQ(info.fraction_zero_padding, 0);
     CHECK_EQ(info.fraction_precision, 0);
+    CHECK_EQ(info.use_uppercase, 0);
+END_TEST()
+
+
+BEGIN_TEST(parse_printf_format_specifier__03hu)
+    struct MCFormatSpecifier info;
+    int result;
+
+    result = mcinternal_parse_printf_format_specifier("03hu", &info);
+    CHECK_EQ(result, 4);
     CHECK_EQ(mclib_errno, 0);
+    CHECK_EQ(info.justify, 0);
+    CHECK_EQ(info.sign_representation, MCFMT_SIGN__ONLY_NEGATIVE);
+    CHECK_EQ(info.argument_type, MC_AT_INT);
+    CHECK_EQ(info.argument_width, MCAW_DEFAULT);
+    CHECK_EQ(info.minimum_field_width, 3);
+    CHECK_EQ(info.radix, 10);
+    CHECK_EQ(info.is_unsigned, 1);
+    CHECK_EQ(info.is_zero_padded, 1);
+    CHECK_EQ(info.has_radix_prefix, 0);
+    CHECK_EQ(info.use_scientific_notation, MCFMT_SCINOT__UNSPECIFIED);
+    CHECK_EQ(info.fraction_zero_padding, 0);
+    CHECK_EQ(info.fraction_precision, 0);
+    CHECK_EQ(info.use_uppercase, 0);
 END_TEST()
 
 
@@ -234,6 +265,8 @@ const struct UnitTestEntry kPrintfUnitTests[] = {
     {parse_printf_format_type__hhX, "printf: type: `%hu`"},
     {parse_printf_format_type__a, "printf: type: `%a`"},
     {parse_printf_format_type__A, "printf: type: `%A`"},
+    {parse_printf_format_type__unexpected_eos, "printf: type: invalid `%` at end of string"},
     {parse_printf_format_specifier__simple__d, "printf: Analyze `%d`"},
+    {parse_printf_format_specifier__03hu, "printf: Analyze `%03hu`"},
     {NULL, NULL}
 };

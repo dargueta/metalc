@@ -59,33 +59,59 @@ enum MCSignRepr {
 };
 
 
+enum MCFieldJustify {
+    MCFMT_JUSTIFY__UNSPECIFIED,
+    MCFMT_JUSTIFY__LEFT,
+    MCFMT_JUSTIFY__RIGHT
+};
+
+enum MCSciNotation {
+    MCFMT_SCINOT__UNSPECIFIED,
+    MCFMT_SCINOT__IF_NEEDED,
+    MCFMT_SCINOT__ALWAYS
+};
+
+
 /**
  * Information about a format specifier in a printf format string.
  */
 struct MCFormatSpecifier {
-    /**
-     * How to align the field.
-     *
-     * There are three possible values:
-     *
-     * * -1: Left-justify the field.
-     * * 0: The alignment of the field wasn't defined in the format specifier.
-     * * 1: Right-justify the field.
-     */
-    int justify;
+    /** How to align the text in the rendered field. */
+    enum MCFieldJustify justify;
+
+    /** How to represent the sign of numeric arguments. */
     enum MCSignRepr sign_representation;
+
+    /** The datatype of the argument. */
     enum MCArgumentType argument_type;
+
+    /** The width modifier for the argument, if any. */
     enum MCArgumentWidth argument_width;
-    /** The minimum width of the field, or 0 if not defined. */
+
+    /** The minimum width of the fully rendered field, or 0 if not defined. */
     int minimum_field_width;
+
+    /** The radix of the representation of a numeric argument, 0 if not applicable. */
     int radix;
+
+    /** Nonzero if the argument is an unsigned integer, 0 otherwise. */
     int is_unsigned;
     int is_zero_padded;
+
+    /** For numeric arguments, nonzero if the output requires a prefix indicating the
+     * radix, i.e. "0", "0x", or "0X". */
     int has_radix_prefix;
-    int use_scientific_notation;    /**< -1 maybe (%g), 1 force (%e) */
-    int padding;
+
+    /** If/when to use scientific notation when rendering this field. */
+    enum MCSciNotation use_scientific_notation;
+
+    /** The number of trailing zeros to append to the end of a floating-point number.*/
     int fraction_zero_padding;
+
+    /** The number of digits in the fraction portion of the */
     int fraction_precision;
+
+    /** Use uppercase letters for numeric arguments using a radix >10. */
     int use_uppercase;
 };
 

@@ -13,7 +13,7 @@ int parse_printf_format_flags(const char *format, struct MCFormatSpecifier *info
     for (i = 0; format[i] != '\0'; ++i) {
         switch (format[i]) {
             case '-':
-                info->justify = -1;
+                info->justify = MCFMT_JUSTIFY__LEFT;
                 break;
             case '+':
                 info->sign_representation = MCFMT_SIGN__FORCE_POSITIVE;
@@ -112,8 +112,10 @@ enum MCArgumentType int_argtype_from_width(enum MCArgumentWidth width_kind) {
             return MC_AT_INT;
         case MCAW_LONG:
             return MC_AT_LONG;
+#if METALC_COMPILE_OPTION_ENABLE_LONGLONG
         case MCAW_LONGLONG:
             return MC_AT_LONGLONG;
+#endif
         default:
             mclib_errno = mclib_EINVAL;
             return MC_AT_UNKNOWN;
