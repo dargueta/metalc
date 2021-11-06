@@ -43,7 +43,6 @@ struct ModeStringTestCase mode_string_to_flags_cases[] = {
 };
 
 
-
 BEGIN_TEST(test_mode_string_to_flags__all)
     struct ModeStringTestCase *testcase;
 

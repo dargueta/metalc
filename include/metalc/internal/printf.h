@@ -16,7 +16,7 @@
  * The data type of the element in the format string.
  */
 enum MCArgumentType {
-    MCFMT_ARGT__UNKNOWN,
+    MCFMT_ARGT__UNKNOWN = -1,
     MCFMT_ARGT__CHAR,     /**< For `%%c` */
     MCFMT_ARGT__STRING,   /**< For `%%s` */
     MCFMT_ARGT__BYTE,     /**< For `%%hhd`, `%%hhi`, `%%hhu`, `%%hho`, or `%%hhx` */
@@ -185,6 +185,11 @@ enum MCArgumentType int_argtype_from_width(enum MCArgumentWidth width_kind);
 METALC_API_INTERNAL
 enum MCArgumentType float_argtype_from_width(enum MCArgumentWidth width_kind);
 
+
+METALC_API_INTERAL_WITH_ATTR(nonnull)
+int parse_printf_format_type_width_flag(
+    const char *format, struct MCFormatSpecifier *info
+);
 
 METALC_API_INTERAL_WITH_ATTR(nonnull)
 int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info);

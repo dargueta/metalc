@@ -73,7 +73,7 @@ int parse_printf_format_precision(const char *format, struct MCFormatSpecifier *
     if (format[0] != '.') {
         info->fraction_zero_padding = 0;
         info->fraction_precision = 0;
-        return 1;
+        return 0;
     }
 
     if (format[1] == '0') {
@@ -138,91 +138,85 @@ enum MCArgumentType float_argtype_from_width(enum MCArgumentWidth width_kind) {
 }
 
 
-int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info) {
-    enum MCArgumentWidth width;
-    enum MCArgumentType arg_type;
-    int n_read;
-
+int parse_printf_format_type_width_flag(
+    const char *format, struct MCFormatSpecifier *info
+) {
     mclib_errno = 0;
     switch(format[0]) {
-        case '\0':
-            /* Hit the end of the format string early -- fail. */
-            mclib_errno = mclib_EINVAL;
-            return -1;
         case 'h':
             /* Check for `hh` */
             if (format[1] == 'h') {
                 /* Yep, this is %hh (possibly with some flags). */
-                width = MCFMT_ARGW__BYTE;
-                n_read = 2;
+                info->argument_width = MCFMT_ARGW__BYTE;
+                return 2;
             }
-            else {
-                /* Only got %h (possibly with some flags). */
-                width = MCFMT_ARGW__SHORT;
-                n_read = 1;
-            }
-            break;
+
+            /* Only got %h (possibly with some flags). */
+            info->argument_width = MCFMT_ARGW__SHORT;
+            return 1;
         case 'j':
-            width = MCFMT_ARGW__INTMAX;
-            n_read = 1;
-            break;
+            info->argument_width = MCFMT_ARGW__INTMAX;
+            return 1;
         case 'l':
             /* Check for `ll` *if* we have long long support */
-            #if METALC_COMPILE_OPTION_ENABLE_LONGLONG
-                if(format[1] == 'l') {
-                    width = MCFMT_ARGW__LONGLONG;
-                    n_read = 2;
-                }
-                else {
-                    width = MCFMT_ARGW__LONG;
-                    n_read = 1;
-                }
-            #else
-                width = MCFMT_ARGW__LONG;
-                n_read = 1;
-            #endif
-            break;
+#if METALC_COMPILE_OPTION_ENABLE_LONGLONG
+            if(format[1] == 'l') {
+                info->argument_width = MCFMT_ARGW__LONGLONG;
+                return 2;
+            }
+            info->argument_width = MCFMT_ARGW__LONG;
+            return 1;
+#else
+            info->argument_width = MCFMT_ARGW__LONG;
+            return 1;
+#endif
         case 'L':
-            width = MCFMT_ARGW__LONG_DOUBLE;
-            n_read = 1;
-            break;
+            info->argument_width = MCFMT_ARGW__LONG_DOUBLE;
+            return 1;
         case 't':
-            width = MCFMT_ARGW__PTRDIFF;
-            n_read = 1;
-            break;
+            info->argument_width = MCFMT_ARGW__PTRDIFF;
+            return 1;
         case 'z':
-            width = MCFMT_ARGW__SIZE_T;
-            n_read = 1;
-            break;
+            info->argument_width = MCFMT_ARGW__SIZE_T;
+            return 1;
         default:
-            width = MCFMT_ARGW__DEFAULT;
-            n_read = 0;
-            break;
+            info->argument_width = MCFMT_ARGW__DEFAULT;
+            return 0;
     }
+}
 
-    info->argument_width = width;
+
+int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info) {
+    enum MCArgumentType arg_type;
+    int n_read;
+
+    n_read = parse_printf_format_type_width_flag(format, info);
+    if (n_read < 0)
+        return n_read;
+
     info->use_uppercase = 0;
 
     switch(format[n_read]) {
         case 'c':
             info->radix = 0;
+            info->is_unsigned = 0;
             arg_type = MCFMT_ARGT__CHAR;
             break;
         case 'd':
         case 'i':
             info->is_unsigned = 0;
             info->radix = 10;
-            arg_type = int_argtype_from_width(width);
+            arg_type = int_argtype_from_width(info->argument_width);
             break;
         case 'u':
             info->is_unsigned = 1;
             info->radix = 10;
-            arg_type = int_argtype_from_width(width);
+            arg_type = int_argtype_from_width(info->argument_width);
             break;
         case 'o':
             info->is_unsigned = 1;
             info->radix = 8;
-            arg_type = int_argtype_from_width(width);
+            arg_type = int_argtype_from_width(info->argument_width);
             break;
         case 'X':
             info->use_uppercase = 1;
@@ -230,29 +224,29 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
         case 'x':
             info->is_unsigned = 1;
             info->radix = 16;
-            arg_type = int_argtype_from_width(width);
+            arg_type = int_argtype_from_width(info->argument_width);
             break;
         case 'A':
             info->radix = 16;
             info->use_uppercase = 1;
-            arg_type = float_argtype_from_width(width);
+            arg_type = float_argtype_from_width(info->argument_width);
             break;
         case 'E':
         case 'F':
         case 'G':
             info->use_uppercase = 1;
             info->radix = 10;
-            arg_type = float_argtype_from_width(width);
+            arg_type = float_argtype_from_width(info->argument_width);
             break;
         case 'a':
             info->radix = 16;
-            arg_type = float_argtype_from_width(width);
+            arg_type = float_argtype_from_width(info->argument_width);
             break;
         case 'e':
         case 'f':
         case 'g':
             info->radix = 10;
-            arg_type = float_argtype_from_width(width);
+            arg_type = float_argtype_from_width(info->argument_width);
             break;
         case 'n':
             info->radix = 0;
@@ -267,7 +261,7 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
     }
 
     info->argument_type = arg_type;
-    /* The +1 is for the argument type */
+    /* The +1 is for skipping over the argument type specifier. */
     return n_read + 1;
 }
 

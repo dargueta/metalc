@@ -93,7 +93,7 @@ BEGIN_TEST(parse_printf_format_precision__not_defined)
 
     result = parse_printf_format_precision("f", &info);
     CHECK_EQ(mclib_errno, 0);
-    CHECK_EQ(result, 1);
+    CHECK_EQ(result, 0);
     CHECK_EQ(info.fraction_zero_padding, 0);
     CHECK_EQ(info.fraction_precision, 0);
 END_TEST()
@@ -236,8 +236,8 @@ BEGIN_TEST(parse_printf_format_specifier__03hu)
     CHECK_EQ(mclib_errno, 0);
     CHECK_EQ(info.justify, 0);
     CHECK_EQ(info.sign_representation, MCFMT_SIGN__ONLY_NEGATIVE);
-    CHECK_EQ(info.argument_type, MCFMT_ARGT__INT);
-    CHECK_EQ(info.argument_width, MCFMT_ARGW__DEFAULT);
+    CHECK_EQ(info.argument_type, MCFMT_ARGT__SHORT);
+    CHECK_EQ(info.argument_width, MCFMT_ARGW__SHORT);
     CHECK_EQ(info.minimum_field_width, 3);
     CHECK_EQ(info.radix, 10);
     CHECK_EQ(info.is_unsigned, 1);
