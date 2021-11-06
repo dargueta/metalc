@@ -34,33 +34,57 @@ void log_raw_message(
 #define info_message(msg, ...)  log_message("INFO", _test_name, __LINE__, __FILE__, (msg), __VA_ARGS__)
 
 
-#define ASSERT_MSG(expr, msg, ...)                                      \
+#define CHECK_MSG(expr, msg, ...)       \
+    if (!(expr))                        \
+        log_message("FAILED", _test_name, __LINE__, __FILE__, msg, __VA_ARGS__)
+
+
+#define CHECK(expr)                     \
+    if (!(expr))                        \
+        log_raw_message("FAILED", _test_name, __LINE__, __FILE__, #expr)
+
+
+#define REQUIRE_MSG(expr, msg, ...)                                     \
     if (!(expr)) {                                                      \
         log_message("FAILED", _test_name, __LINE__, __FILE__, msg, __VA_ARGS__);   \
         return 1;                                                       \
     }
 
 
-#define ASSERT(expr)                                                        \
+#define REQUIRE(expr)                                                       \
     if (!(expr)) {                                                          \
         log_raw_message("FAILED", _test_name, __LINE__, __FILE__, #expr);   \
         return 1;                                                           \
     }
 
 
-#define CHECK_EQ(x, y)  ASSERT_MSG(((x) == (y)), "Assertion failed: %s == %s -- left=%d, right=%d", #x, #y, x, y)
-#define CHECK_NE(x, y)  ASSERT_MSG(((x) != (y)), "Assertion failed: %s != %s -- left=%d, right=%d", #x, #y, x, y)
-#define CHECK_GT(x, y)  ASSERT_MSG(((x) > (y)), "Assertion failed: %s > %s -- left=%d, right=%d", #x, #y, x, y)
-#define CHECK_GE(x, y)  ASSERT_MSG(((x) >= (y)), "Assertion failed: %s >= %s -- left=%d, right=%d", #x, #y, x, y)
-#define CHECK_LT(x, y)  ASSERT_MSG(((x) < (y)), "Assertion failed: %s < %s -- left=%d, right=%d", #x, #y, x, y)
-#define CHECK_LE(x, y)  ASSERT_MSG(((x) <= (y)), "Assertion failed: %s <= %s -- left=%d, right=%d", #x, #y, x, y)
+#define CHECK_EQ(x, y)  CHECK_MSG(((x) == (y)), "Assertion failed: %s == %s -- left=%d, right=%d", #x, #y, x, y)
+#define CHECK_NE(x, y)  CHECK_MSG(((x) != (y)), "Assertion failed: %s != %s -- left=%d, right=%d", #x, #y, x, y)
+#define CHECK_GT(x, y)  CHECK_MSG(((x) > (y)), "Assertion failed: %s > %s -- left=%d, right=%d", #x, #y, x, y)
+#define CHECK_GE(x, y)  CHECK_MSG(((x) >= (y)), "Assertion failed: %s >= %s -- left=%d, right=%d", #x, #y, x, y)
+#define CHECK_LT(x, y)  CHECK_MSG(((x) < (y)), "Assertion failed: %s < %s -- left=%d, right=%d", #x, #y, x, y)
+#define CHECK_LE(x, y)  CHECK_MSG(((x) <= (y)), "Assertion failed: %s <= %s -- left=%d, right=%d", #x, #y, x, y)
+#define CHECK_EQ_MSG(x, y, msg)  CHECK_MSG(((x) == (y)), "%s", (msg))
+#define CHECK_NE_MSG(x, y, msg)  CHECK_MSG(((x) != (y)), "%s", (msg))
+#define CHECK_GT_MSG(x, y, msg)  CHECK_MSG(((x) > (y)), "%s", (msg))
+#define CHECK_GE_MSG(x, y, msg)  CHECK_MSG(((x) >= (y)), "%s", (msg))
+#define CHECK_LT_MSG(x, y, msg)  CHECK_MSG(((x) < (y)), "%s", (msg))
+#define CHECK_LE_MSG(x, y, msg)  CHECK_MSG(((x) <= (y)), "%s", (msg))
 
-#define CHECK_EQ_MSG(x, y, msg)  ASSERT_MSG(((x) == (y)), "%s", (msg))
-#define CHECK_NE_MSG(x, y, msg)  ASSERT_MSG(((x) != (y)), "%s", (msg))
-#define CHECK_GT_MSG(x, y, msg)  ASSERT_MSG(((x) > (y)), "%s", (msg))
-#define CHECK_GE_MSG(x, y, msg)  ASSERT_MSG(((x) >= (y)), "%s", (msg))
-#define CHECK_LT_MSG(x, y, msg)  ASSERT_MSG(((x) < (y)), "%s", (msg))
-#define CHECK_LE_MSG(x, y, msg)  ASSERT_MSG(((x) <= (y)), "%s", (msg))
+
+#define REQUIRE_EQ(x, y)  REQUIRE_MSG(((x) == (y)), "Assertion failed: %s == %s -- left=%d, right=%d", #x, #y, x, y)
+#define REQUIRE_NE(x, y)  REQUIRE_MSG(((x) != (y)), "Assertion failed: %s != %s -- left=%d, right=%d", #x, #y, x, y)
+#define REQUIRE_GT(x, y)  REQUIRE_MSG(((x) > (y)), "Assertion failed: %s > %s -- left=%d, right=%d", #x, #y, x, y)
+#define REQUIRE_GE(x, y)  REQUIRE_MSG(((x) >= (y)), "Assertion failed: %s >= %s -- left=%d, right=%d", #x, #y, x, y)
+#define REQUIRE_LT(x, y)  REQUIRE_MSG(((x) < (y)), "Assertion failed: %s < %s -- left=%d, right=%d", #x, #y, x, y)
+#define REQUIRE_LE(x, y)  REQUIRE_MSG(((x) <= (y)), "Assertion failed: %s <= %s -- left=%d, right=%d", #x, #y, x, y)
+#define REQUIRE_EQ_MSG(x, y, msg)  REQUIRE_MSG(((x) == (y)), "%s", (msg))
+#define REQUIRE_NE_MSG(x, y, msg)  REQUIRE_MSG(((x) != (y)), "%s", (msg))
+#define REQUIRE_GT_MSG(x, y, msg)  REQUIRE_MSG(((x) > (y)), "%s", (msg))
+#define REQUIRE_GE_MSG(x, y, msg)  REQUIRE_MSG(((x) >= (y)), "%s", (msg))
+#define REQUIRE_LT_MSG(x, y, msg)  REQUIRE_MSG(((x) < (y)), "%s", (msg))
+#define REQUIRE_LE_MSG(x, y, msg)  REQUIRE_MSG(((x) <= (y)), "%s", (msg))
+
 
 #define INFO(msg)   log_message("INFO", _test_name, __LINE__, __FILE__, (msg))
 

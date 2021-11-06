@@ -6,7 +6,7 @@
 
 BEGIN_TEST(test_memchr__basic)
     static const char *str = "Th\nisIsAString";
-    CHECK_NE_MSG(
+    REQUIRE_NE_MSG(
         mclib_memchr,
         memchr,
         "Link error: MetalC memchr is the same as the standard memchr."

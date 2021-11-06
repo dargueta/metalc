@@ -9,14 +9,14 @@ extern int mcinternal_utf8_wctomb(char *str, mclib_wchar_t wchar);
 
 BEGIN_TEST(mblen_utf8__not_stateful)
     /* If the string pointer is null the length shouldn't matter. */
-    ASSERT(!mcinternal_utf8_mblen(NULL, 0));
-    ASSERT(!mcinternal_utf8_mblen(NULL, 123));
+    CHECK(!mcinternal_utf8_mblen(NULL, 0));
+    CHECK(!mcinternal_utf8_mblen(NULL, 123));
 END_TEST()
 
 
 BEGIN_TEST(mblen_utf8__invalid_n)
     CHECK_EQ(mcinternal_utf8_mblen("something", 0), -1);
-    CHECK_EQ(mclib_errno, mclib_EINVAL)
+    CHECK_EQ(mclib_errno, mclib_EINVAL);
 END_TEST()
 
 
@@ -55,7 +55,6 @@ BEGIN_TEST(mblen_utf8__ilseq)
     CHECK_EQ(length, -1);
     CHECK_EQ(mclib_errno, mclib_EILSEQ);
 END_TEST()
-
 
 
 const struct UnitTestEntry kWcharUtf8UnitTests[] = {
