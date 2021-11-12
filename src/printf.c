@@ -9,7 +9,11 @@
 int parse_printf_format_flags(const char *format, struct MCFormatSpecifier *info) {
     int i;
 
+    info->sign_representation = MCFMT_SIGN__ONLY_NEGATIVE;
+    info->justify = MCFMT_JUSTIFY__UNSPECIFIED;
+    info->has_radix_prefix = 0;
     mclib_errno = 0;
+
     for (i = 0; format[i] != '\0'; ++i) {
         switch (format[i]) {
             case '-':
@@ -288,9 +292,7 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
 }
 
 
-int mcinternal_parse_printf_format_specifier(
-    const char *format, struct MCFormatSpecifier *info
-) {
+int parse_printf_format_specifier(const char *format, struct MCFormatSpecifier *info) {
     int total_read;
     int current_read;
 

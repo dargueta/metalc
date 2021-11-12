@@ -47,7 +47,7 @@ BEGIN_TEST(test_mode_string_to_flags__all)
     struct ModeStringTestCase *testcase;
 
     for (testcase = mode_string_to_flags_cases; testcase->mode_string != NULL; ++testcase) {
-        info_message(
+        INFO_MSG(
             "Testing mode string `%s`, expecting output %d and errno %d.",
             testcase->mode_string,
             testcase->expected_flags,

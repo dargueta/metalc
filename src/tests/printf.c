@@ -1,6 +1,7 @@
 #include <metalc/errno.h>
 #include <metalc/internal/printf.h>
 #include <metalc/limits.h>
+#include <metalc/stdio.h>
 #include <metalc/string.h>
 #include "testing.h"
 
@@ -208,7 +209,7 @@ BEGIN_TEST(parse_printf_format_specifier__simple__d)
     struct MCFormatSpecifier info;
     int result;
 
-    result = mcinternal_parse_printf_format_specifier("d", &info);
+    result = parse_printf_format_specifier("d", &info);
     CHECK_EQ(result, 1);
     CHECK_EQ(mclib_errno, 0);
     CHECK_EQ(info.justify, MCFMT_JUSTIFY__UNSPECIFIED);
@@ -231,7 +232,7 @@ BEGIN_TEST(parse_printf_format_specifier__03hu)
     struct MCFormatSpecifier info;
     int result;
 
-    result = mcinternal_parse_printf_format_specifier("03hu", &info);
+    result = parse_printf_format_specifier("03hu", &info);
     CHECK_EQ(result, 4);
     CHECK_EQ(mclib_errno, 0);
     CHECK_EQ(info.justify, 0);
@@ -249,12 +250,24 @@ BEGIN_TEST(parse_printf_format_specifier__03hu)
     CHECK_EQ(info.use_uppercase, 0);
 END_TEST()
 
+
+BEGIN_TEST(sprintf_basic)
+    char buffer[16];
+    int result;
+
+    result = mclib_sprintf(buffer, "%d", 15903);
+    CHECK_EQ(result, 6);
+    CHECK_EQ(mclib_errno, 0);
+    CHECK_EQ(mclib_memcmp(buffer, "15903", result), 0);
+END_TEST()
+
+
 #if METALC_COMPILE_OPTION_ENABLE_LONGLONG
 BEGIN_TEST(parse_printf_format_specifier__304Le)
     struct MCFormatSpecifier info;
     int result;
 
-    result = mcinternal_parse_printf_format_specifier("-+3.04Le", &info);
+    result = parse_printf_format_specifier("-+3.04Le", &info);
     CHECK_EQ(result, 8);
     CHECK_EQ(mclib_errno, 0);
     CHECK_EQ(info.justify, MCFMT_JUSTIFY__LEFT);
@@ -295,5 +308,6 @@ const struct UnitTestEntry kPrintfUnitTests[] = {
 #if METALC_COMPILE_OPTION_ENABLE_LONGLONG
     {parse_printf_format_specifier__304Le, "printf: Analyze `%-+3.04Le`"},
 #endif
+    {sprintf_basic, "sprintf: basic"},
     {NULL, NULL}
 };

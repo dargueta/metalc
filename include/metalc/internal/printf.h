@@ -165,7 +165,7 @@ int parse_printf_format_width(const char *format, struct MCFormatSpecifier *info
  *          value will be negative and @ref errno will be set accordingly.
  */
 METALC_API_INTERAL_WITH_ATTR(nonnull)
-int mcinternal_parse_printf_format_specifier(const char *format, struct MCFormatSpecifier *info);
+int parse_printf_format_specifier(const char *format, struct MCFormatSpecifier *info);
 
 
 /**
@@ -205,8 +205,8 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
  * @todo Add support for left- and right-justifying values.
  */
 METALC_API_INTERNAL
-int mcinternal_evaluate_format_specifier(
-    const char **format, va_list arg_list, char **output, int n_chars_written,
+int evaluate_format_specifier(
+    const char **format, va_list arg_list, char **output, size_t n_chars_written,
     size_t limit
 );
 

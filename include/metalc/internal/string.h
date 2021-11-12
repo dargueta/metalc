@@ -28,14 +28,14 @@
  * @return The number of bytes copied, not including the terminating null.
  */
 METALC_API_INTERAL_WITH_ATTR(nonnull)
-size_t strcpy_and_update_buffer(const char *source, void **buffer);
+size_t strcpy_and_update_buffer(const char *source, char **buffer);
 
 
 /**
  * Same as @ref strcpy_and_update_buffer except copies at most @a n chars.
  */
 METALC_API_INTERAL_WITH_ATTR(nonnull)
-size_t strncpy_and_update_buffer(const char *source, void **buffer, size_t n);
+size_t strncpy_and_update_buffer(const char *source, char **buffer, size_t n);
 
 
 typedef int (*fptr_strcoll)(const char *str1, const char *str2);

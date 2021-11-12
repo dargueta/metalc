@@ -460,22 +460,22 @@ size_t strxfrm(char *destination, const char *source, size_t num) {
 cstdlib_implement(strxfrm);
 
 
-size_t strcpy_and_update_buffer(const char *source, void **buffer) {
+size_t strcpy_and_update_buffer(const char *source, char **buffer) {
     size_t buffer_size = strlen(source);
 
-    strcpy(*(char **)buffer, source);
-    *(char **)buffer += buffer_size;
+    strcpy(*buffer, source);
+    *buffer += buffer_size;
     return buffer_size;
 }
 
 
-size_t strncpy_and_update_buffer(const char *source, void **buffer, size_t n) {
+size_t strncpy_and_update_buffer(const char *source, char **buffer, size_t n) {
     size_t source_size, buffer_size;
 
     source_size = strlen(source);
     buffer_size = (source_size < n) ? source_size : n;
 
-    strncpy(*(char **)buffer, source, n);
-    *(char **)buffer += buffer_size;
+    strncpy(*buffer, source, n);
+    *buffer += buffer_size;
     return buffer_size;
 }

@@ -31,7 +31,7 @@ void log_raw_message(
 );
 
 
-#define info_message(msg, ...)  log_message("INFO", _test_name, __LINE__, __FILE__, (msg), __VA_ARGS__)
+#define INFO_MSG(msg, ...)  log_message("INFO", _test_name, __LINE__, __FILE__, (msg), __VA_ARGS__)
 
 
 #define CHECK_MSG(expr, msg, ...)       \
@@ -86,7 +86,7 @@ void log_raw_message(
 #define REQUIRE_LE_MSG(x, y, msg)  REQUIRE_MSG(((x) <= (y)), "%s", (msg))
 
 
-#define INFO(msg)   log_message("INFO", _test_name, __LINE__, __FILE__, (msg))
+#define INFO(msg)   log_raw_message("INFO", _test_name, __LINE__, __FILE__, (msg))
 
 
 #define BEGIN_TEST(name)    \
@@ -94,7 +94,9 @@ void log_raw_message(
         (void)argc, (void)argv, (void)env;          \
         static const char *_test_name = #name;
 
-#define END_TEST()      return 0; }
+#define END_TEST()  \
+    log_raw_message("PASSED", _test_name, __LINE__, __FILE__, "");  \
+    return 0; }
 
 
 #endif  /* INCLUDE_METALC_TESTING_H_ */

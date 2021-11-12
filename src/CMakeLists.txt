@@ -179,8 +179,8 @@ include_directories("${MetalC_SOURCE_DIR}/include")
 # Unit testing
 if (METALC_COMPILE_FOR_TESTING)
     add_executable(test_executable ${TEST_SOURCE_FILES} ${HEADER_FILES})
-    add_dependencies(test_executable metalc)
-    target_link_libraries(test_executable metalc)
+    add_dependencies(test_executable metalcstatic)
+    target_link_libraries(test_executable metalcstatic)
 
     # Disable linking the executable with the OS's C standard library and use our
     # implementation instead.

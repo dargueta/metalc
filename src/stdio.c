@@ -34,8 +34,8 @@ static int saturated_cast_to_int(size_t value) {
 }
 
 
-int mcinternal_evaluate_format_specifier(
-    const char **format, va_list arg_list, char **output, int n_chars_written,
+int evaluate_format_specifier(
+    const char **format, va_list arg_list, char **output, size_t n_chars_written,
     size_t limit
 ) {
     char temp[256];
@@ -44,13 +44,13 @@ int mcinternal_evaluate_format_specifier(
     struct MCFormatSpecifier info;
     const char *string_pointer;
 
-    if ((limit == 0) || ((size_t)n_chars_written >= (limit - 1)))
+    if ((limit == 0) || (n_chars_written >= (limit - 1)))
         remaining_chars = 0;
     else
-        remaining_chars = limit - 1 - (size_t)n_chars_written;
+        remaining_chars = limit - 1 - n_chars_written;
 
     if (**format == '%') {
-        if (output && (remaining_chars > 0)) {
+        if ((*output != NULL) && (remaining_chars > 0)) {
             **output = '%';
             ++*output;
         }
@@ -58,20 +58,17 @@ int mcinternal_evaluate_format_specifier(
         return 1;
     }
 
-    format_length = mcinternal_parse_printf_format_specifier(*format, &info);
+    format_length = parse_printf_format_specifier(*format, &info);
     if (format_length < 0)
         return -1;
 
     *format += (size_t)format_length;
 
-    /* `**format` points to the first character in the format string *after* the
-     * introductory '%'. Look at that character and increment `*format` so we
-     * don't have to do that later. */
     switch (info.argument_type) {
         case MCFMT_ARGT__CHAR:
             /* n.b. `char` is promoted to `int` when passed as an argument */
             temp[0] = (char)va_arg(arg_list, int);
-            if (output && (remaining_chars > 0)) {
+            if ((*output != NULL) && (remaining_chars > 0)) {
                 **output = temp[0];
                 ++*output;
             }
@@ -94,7 +91,7 @@ int mcinternal_evaluate_format_specifier(
                 itoa(va_arg(arg_list, int), temp, info.radix);
 
             string_length = strncpy_and_update_buffer(
-                temp, (void **)output, remaining_chars
+                temp, output, remaining_chars
             );
             return saturated_cast_to_int(string_length);
 
@@ -104,7 +101,7 @@ int mcinternal_evaluate_format_specifier(
             else
                 itoa(va_arg(arg_list, long), temp, info.radix);
 
-            string_length = strcpy_and_update_buffer(temp, (void **)output);
+            string_length = strncpy_and_update_buffer(temp, output, remaining_chars);
             return saturated_cast_to_int(string_length);
 
         #if METALC_HAVE_LONG_LONG
@@ -115,13 +112,13 @@ int mcinternal_evaluate_format_specifier(
                     itoa(va_arg(arg_list, long long), temp, info.radix);
 
                 string_length = strncpy_and_update_buffer(
-                    temp, (void **)output, remaining_chars
+                    temp, output, remaining_chars
                 );
                 return saturated_cast_to_int(string_length);
         #endif
 
         case MCFMT_ARGT__N_WRITTEN_POINTER:
-            *va_arg(arg_list, int *) = n_chars_written;
+            *va_arg(arg_list, int *) = saturated_cast_to_int(n_chars_written);
             return 0;
 
         case MCFMT_ARGT__STRING:
@@ -144,7 +141,9 @@ int mcinternal_evaluate_format_specifier(
                 return -1;
             }
 
-            if (!output)
+            /* If we're not writing to an actual buffer, return early and just
+             * say how many characters we *would've* written. */
+            if (*output == NULL)
                 return saturated_cast_to_int(string_length);
 
             /* Don't bother with padding crap, just output the string. */
@@ -169,27 +168,35 @@ int mcinternal_evaluate_format_specifier(
 
 
 int vsnprintf(char *buffer, size_t size, const char *format, va_list arg_list) {
-    int n_chars_written, i;
+    size_t total_written;
+    int n_written;
 
-    n_chars_written = 0;
-
-    while (*format != '\0') {
+    total_written = 0;
+    while (total_written < size) {
+        if (*format == '\0') {
+            if (buffer)
+                *buffer = '\0';
+            return saturated_cast_to_int(total_written + 1);
+        }
         if (*format != '%') {
-            if (buffer && ((size_t)n_chars_written < size))
-                *buffer++ = *format;
-            ++n_chars_written;
+            if (buffer) {
+                *buffer = *format;
+                ++buffer;
+            }
+            ++total_written;
+            ++format;
         }
         else {
-            i = mcinternal_evaluate_format_specifier(
-                &format, arg_list, &buffer, n_chars_written, size
+            n_written = evaluate_format_specifier(
+                &format, arg_list, &buffer, total_written, size
             );
-            if (i < 0)
-                return -n_chars_written;
-            n_chars_written += i;
+            if (n_written < 0)
+                return -(int)total_written;
+            total_written += n_written;
         }
-    }
+    };
 
-    return n_chars_written;
+    return saturated_cast_to_int(total_written);
 }
 
 
@@ -268,6 +275,8 @@ int printf(const char *format, ...) {
 
 cstdlib_implement(vsprintf);
 cstdlib_implement(sprintf);
+cstdlib_implement(vsnprintf);
+cstdlib_implement(snprintf);
 cstdlib_implement(vprintf);
 cstdlib_implement(printf);
 cstdlib_implement(vfprintf);
