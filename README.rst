@@ -3,9 +3,9 @@ Bare Metal/UEFI Standard C Library
 
 This is an implementation of the C standard library designed for use by:
 
-* UEFI-aware OS kernels,
-* UEFI applications, or
-* Programs that run with absolutely no underlying system (not even EFI).
+* Programs that run with absolutely no underlying system (not even EFI),
+* UEFI-aware OS kernels, or
+* UEFI applications.
 
 This library requires your C compiler to provide a few headers of its own, namely:
 
@@ -16,7 +16,7 @@ This library requires your C compiler to provide a few headers of its own, namel
 * stdint.h (a partial shim is provided that'll work for some systems without it)
 
 GCC's freestanding mode provides all of these headers; MinGW probably does as
-well. I haven't tested clang yet.
+well. I haven't tested LLVM or Clang yet.
 
 Caveat
 ------
@@ -35,7 +35,7 @@ Compilation Modes
 This library can be compiled in one of several modes, depending on the needs of
 the program linking to it.
 
-* **Bare:** Assumes no underlying system system support. Many features such as I/O
+* **Bare:** Assumes no underlying system support. Many features such as I/O
   require hooks to be implemented by the code using the library.
 * **UEFI Application:** Uses the UEFI boot services to provide I/O, memory
   allocation, etc. Useful for writing OS bootloaders and UEFI applications, but
@@ -50,7 +50,7 @@ To build this library you'll need:
 
 * Python 3.3 or higher. (Python 2 may work but I make no guarantees and you
   really should reconsider the life choices that led you to still use it.)
-* CMake 3.8 or higher
+* CMake 3.13 or higher
 * A compiler supporting ANSI C99 or later, such as GCC or MinGW. Visual Studio
   cannot cross-compile and so is not supported.
 * (UEFI modes only) A UEFI cross-compiler, such as `GNU_EFI`_ or `TianoCore`_.
