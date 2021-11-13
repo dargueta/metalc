@@ -35,13 +35,16 @@ void log_raw_message(
 
 
 #define CHECK_MSG(expr, msg, ...)       \
-    if (!(expr))                        \
-        log_message("FAILED", _test_name, __LINE__, __FILE__, msg, __VA_ARGS__)
-
+    if (!(expr)) {                      \
+        log_message("FAILED", _test_name, __LINE__, __FILE__, msg, __VA_ARGS__); \
+        failed_flag = 1;                                    \
+    }
 
 #define CHECK(expr)                     \
-    if (!(expr))                        \
-        log_raw_message("FAILED", _test_name, __LINE__, __FILE__, #expr)
+    if (!(expr)) {                      \
+        log_raw_message("FAILED", _test_name, __LINE__, __FILE__, #expr); \
+        failed_flag = 1;                                    \
+    }
 
 
 #define REQUIRE_MSG(expr, msg, ...)                                     \
@@ -92,11 +95,12 @@ void log_raw_message(
 #define BEGIN_TEST(name)    \
     static int (name)(int argc, char **argv, char **env) {  \
         (void)argc, (void)argv, (void)env;          \
-        static const char *_test_name = #name;
+        static const char *_test_name = #name;              \
+        int failed_flag = 0;
 
 #define END_TEST()  \
     log_raw_message("PASSED", _test_name, __LINE__, __FILE__, "");  \
-    return 0; }
+    return failed_flag; }
 
 
 #endif  /* INCLUDE_METALC_TESTING_H_ */

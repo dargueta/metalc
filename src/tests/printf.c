@@ -255,9 +255,10 @@ BEGIN_TEST(sprintf_basic)
     char buffer[16];
     int result;
 
-    result = mclib_sprintf(buffer, "%d", 15903);
+    result = mclib_snprintf(buffer, 16, "%d", 15903);
     CHECK_EQ(result, 6);
     CHECK_EQ(mclib_errno, 0);
+    INFO_MSG("Buffer contents: `%s`", buffer);
     CHECK_EQ(mclib_memcmp(buffer, "15903", result), 0);
 END_TEST()
 
