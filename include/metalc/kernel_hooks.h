@@ -9,8 +9,7 @@
 
 #include "metalc.h"
 #include "stddef.h"
-#include "stdint.h"
-#include "stdio.h"
+#include "bits/stdio.h"
 
 
 /**

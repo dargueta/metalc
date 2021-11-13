@@ -2,6 +2,9 @@
 #include <string.h>
 
 #include <metalc/crtinit.h>
+#include <metalc/errno.h>
+#include <metalc/kernel_hooks.h>
+#include <metalc/sys/mman.h>
 
 #include "testing.h"
 
@@ -24,6 +27,46 @@ const struct UnitTestEntry *kAllUnitTestGroups[] = {
 
 
 FILE *test_output_fd;
+
+#define PAGE_SIZE   4096
+#define HEAP_SIZE   (16 * PAGE_SIZE)
+
+static char g_heap[HEAP_SIZE];
+
+/** Pointer to the first invalid address. */
+static char *g_heap_top = g_heap;
+
+
+void *krnlhook_mmap(
+    void *addr, size_t length, int prot, int flags, int fd, mclib_off_t offset
+) {
+    void *old_top;
+
+    /* For the purposes of testing we don't care about permissions nor flags. We
+     * can't enforce them, anyway. */
+    (void)prot, (void)flags, (void)fd, (void)offset;
+
+    if (addr != NULL) {
+        mclib_errno = mclib_ENOSYS;
+        return mclib_MAP_FAILED;
+    }
+
+    /* Round up to the nearest page size */
+    if (length % PAGE_SIZE != 0)
+        length += PAGE_SIZE - (length % PAGE_SIZE);
+
+    /* Can't do anything if we're at the top of the heap. */
+    if ((g_heap_top + length) >= (g_heap + HEAP_SIZE)) {
+        mclib_errno = mclib_ENOMEM;
+        return mclib_MAP_FAILED;
+    }
+
+    old_top = g_heap_top;
+    g_heap_top += length;
+
+    mclib_errno = 0;
+    return old_top;
+}
 
 
 int main(int argc, char **argv) {
