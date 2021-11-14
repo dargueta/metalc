@@ -43,8 +43,11 @@ the program linking to it.
 * **UEFI Kernel:** Uses the UEFI runtime API. Useful for OS kernels that rely on
   UEFI for certain hardware access.
 
-Build Requirements
-------------------
+Building
+--------
+
+Requirements
+~~~~~~~~~~~~
 
 To build this library you'll need:
 
@@ -55,6 +58,25 @@ To build this library you'll need:
   cannot cross-compile and so is not supported.
 * (UEFI modes only) A UEFI cross-compiler, such as `GNU_EFI`_ or `TianoCore`_.
   Clang/LLVM has this built in.
+
+Steps
+~~~~~
+
+1. Run ``configure`` with whatever options you need.
+2. ``cmake -S . -B build``
+3. ``make -C build``
+
+If everything compiled correctly, the following files will be generated:
+
+* ``include/metalc/``: The header files you'll need when using the library
+* ``build/lib``:
+
+  * ``libmetalc.so`` (extension could be .dll or .dylib depending on your OS):
+    the shared library for dynamic linking.
+  * ``libmetalcstatic.a`` (extension could also be ".lib" depending on your OS):
+    the object file library for static linking.
+
+You can ignore the other files.
 
 License
 -------
