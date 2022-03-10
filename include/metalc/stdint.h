@@ -226,14 +226,14 @@ typedef unsigned char uint_least8_t;
 
 /* This won't be accurate for systems that support integers greater than 64
  * bits, but it's good enough... right? */
-#if defined(INT_LEAST64_MAX)
+#if (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS == 64) || defined(INT_LEAST64_MAX)
     typedef int_least64_t intmax_t;
     typedef uint_least64_t uintmax_t;
 
     #define INTMAX_MIN  INT_LEAST64_MIN
     #define INTMAX_MAX  INT_LEAST64_MAX
     #define UINTMAX_MAX UINT_LEAST64_MAX
-#elif defined(INT_LEAST32_MAX)
+#elif (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS == 32) || defined(INT_LEAST32_MAX)
     typedef int_least32_t intmax_t;
     typedef uint_least32_t uintmax_t;
 
@@ -251,8 +251,40 @@ typedef unsigned char uint_least8_t;
     #define UINTMAX_MAX UINT_LEAST16_MAX
 #endif
 
+/* GCC and some compatible compilers define macros that expand to the C types
+ * with the attributes we need. Since we have no idea of the underlying hardware,
+ * we need to rely on these to be able to define the int_fast*_t types. */
 
-/* We're not going to define int_fast*_t because we don't know enough about
- * the hardware. */
+#if defined(__INT_FAST8_TYPE__)
+    typedef __INT_FAST8_TYPE__ int_fast8_t;
+    typedef __UINT_FAST8_TYPE__ uint_fast8_t;
+    #define INT_FAST8_MAX __UINT_FAST8_MAX__
+    #define INT_FAST8_MIN __UINT_FAST8_MIN__
+    #define UINT_FAST8_MAX __UINT_FAST8_MAX__
+#endif
+
+#if defined(__INT_FAST16_TYPE__)
+    typedef __INT_FAST16_TYPE__ int_fast16_t;
+    typedef __UINT_FAST16_TYPE__ uint_fast16_t;
+    #define INT_FAST16_MAX __UINT_FAST16_MAX__
+    #define INT_FAST16_MIN __UINT_FAST16_MIN__
+    #define UINT_FAST16_MAX __UINT_FAST16_MAX__
+#endif
+
+#if defined(__INT_FAST32_TYPE__)
+    typedef __INT_FAST32_TYPE__ int_fast32_t;
+    typedef __UINT_FAST32_TYPE__ uint_fast32_t;
+    #define INT_FAST32_MAX __UINT_FAST32_MAX__
+    #define INT_FAST32_MIN __UINT_FAST32_MIN__
+    #define UINT_FAST32_MAX __UINT_FAST32_MAX__
+#endif
+
+#if defined(__INT_FAST64_TYPE__)
+    typedef __INT_FAST64_TYPE__ int_fast64_t;
+    typedef __UINT_FAST64_TYPE__ uint_fast64_t;
+    #define INT_FAST64_MAX __UINT_FAST64_MAX__
+    #define INT_FAST64_MIN __UINT_FAST64_MIN__
+    #define UINT_FAST64_MAX __UINT_FAST64_MAX__
+#endif
 
 #endif  /* INCLUDE_METALC_STDINT_H_ */
