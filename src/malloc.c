@@ -151,3 +151,7 @@ void free(void *pointer) {
 #undef MINIMUM_ALLOCATION_SIZE
 #undef MINIMUM_MMAP_REQUEST_SIZE
 #undef MAX
+
+cstdlib_implement(malloc);
+cstdlib_implement(realloc);
+cstdlib_implement(free);

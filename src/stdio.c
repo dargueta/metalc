@@ -232,7 +232,7 @@ int vfprintf(mclib_FILE *stream, const char *format, va_list arg_list) {
     int n_chars_written;
 
     n_chars_written = vsprintf(NULL, format, arg_list);
-    if (n_chars_written < 0)
+    if (n_chars_written <= 0)
         return n_chars_written;
 
     buffer = malloc(n_chars_written);
