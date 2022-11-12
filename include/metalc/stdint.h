@@ -17,7 +17,25 @@ typedef unsigned char uint_least8_t;
 #define INT_LEAST8_MAX      SCHAR_MAX
 #define UINT_LEAST8_MAX     UCHAR_MAX
 
-#if SCHAR_MAX >= 32767
+/* For convenience, we define the exact-size integer constants ahead of time
+ * even though we don't know yet if we have types with these exact sizes. Later
+ * in the file we'll undefine the constants for any type that doesn't have an
+ * exact size on this platform. */
+#define UINT8_MAX   (255U)
+#define INT8_MIN    (-128)
+#define INT8_MAX    (127)
+#define UINT16_MAX  (65535U)
+#define INT16_MIN   (-32768)
+#define INT16_MAX   (32767)
+#define UINT32_MAX  (4294967295U)
+#define INT32_MIN   (-2147483648)
+#define INT32_MAX   2147483647
+#define UINT64_MAX  (18446744073709551615ULL)
+#define INT64_MIN   (-9223372036854775808LL)
+#define INT64_MAX   (9223372036854775807LL)
+
+
+#if SCHAR_MAX >= INT16_MAX
     /* Unlikely, but theoretically a char could be >= 16 bits. */
     typedef signed char int_least16_t;
     typedef unsigned char uint_least16_t;
@@ -35,7 +53,7 @@ typedef unsigned char uint_least8_t;
     #define UINT_LEAST16_MAX    USHRT_MAX
 #endif
 
-#if SHRT_MAX >= 0x7FFFFFFF
+#if SHRT_MAX >= INT32_MAX
     /* A short is at least 32 bits here. This is rare but it does happen in some
      * specialized systems. */
     typedef signed short int_least32_t;
@@ -44,7 +62,7 @@ typedef unsigned char uint_least8_t;
     #define INT_LEAST32_MIN     SHRT_MIN
     #define INT_LEAST32_MAX     SHRT_MAX
     #define UINT_LEAST32_MAX    USHRT_MAX
-#elif INT_MAX >= 0x7FFFFFFF
+#elif INT_MAX >= INT32_MAX
     /* Int is at least 32 bits */
     typedef signed int int_least32_t;
     typedef unsigned int uint_least32_t;
@@ -63,7 +81,7 @@ typedef unsigned char uint_least8_t;
     #define UINT_LEAST32_MAX    ULONG_MAX
 #endif
 
-#if SHRT_MAX >= 0x7FFFFFFFFFFFFFFFLL
+#if SHRT_MAX >= INT64_MAX
     /* According to Wikipedia some systems actually do have 64-bit shorts. I'm
      * not doing this for fun. */
     typedef signed short int_least64_t;
@@ -72,7 +90,7 @@ typedef unsigned char uint_least8_t;
     #define INT_LEAST64_MIN     SHRT_MIN
     #define INT_LEAST64_MAX     SHRT_MAX
     #define UINT_LEAST64_MAX    USHRT_MAX
-#elif INT_MAX >= 0x7FFFFFFFFFFFFFFFLL
+#elif INT_MAX >= INT64_MAX
     /* An int is at least 64 bits. Rare, but again, it does happen. */
     typedef signed int int_least64_t;
     typedef unsigned int uint_least64_t;
@@ -80,7 +98,7 @@ typedef unsigned char uint_least8_t;
     #define INT_LEAST64_MIN     INT_MIN
     #define INT_LEAST64_MAX     INT_MAX
     #define UINT_LEAST64_MAX    UINT_MAX
-#elif LONG_MAX >= 0x7FFFFFFFFFFFFFFFLL
+#elif LONG_MAX >= INT64_MAX
     /* `long` is at least 64 bits. */
     typedef signed long int_least64_t;
     typedef unsigned long uint_least64_t;
@@ -100,8 +118,7 @@ typedef unsigned char uint_least8_t;
 /* else: No way to define a 64-bit integer. Weird nowadays, but possible. */
 #endif
 
-
-#if INT_LEAST8_MAX == 127
+#if INT_LEAST8_MAX == INT8_MAX
     typedef uint_least8_t uint8_t;
     typedef int_least8_t int8_t;
     #define HAVE_INT8
@@ -117,15 +134,7 @@ typedef unsigned char uint_least8_t;
     #define HAVE_INT8
 #endif
 
-#ifdef HAVE_INT8
-    #define UINT8_MAX   (255U)
-    #define INT8_MIN    (-127)
-    #define INT8_MAX    (127)
-    #undef HAVE_INT8
-#endif
-
-
-#if INT_LEAST16_MAX == 32767
+#if INT_LEAST16_MAX == INT16_MAX
     typedef uint_least16_t uint16_t;
     typedef int_least16_t int16_t;
     #define HAVE_INT16
@@ -141,15 +150,7 @@ typedef unsigned char uint_least8_t;
     #define HAVE_INT16
 #endif
 
-#ifdef HAVE_INT16
-    #define UINT16_MAX  (65535U)
-    #define INT16_MIN   (-32767)
-    #define INT16_MAX   (32767)
-    #undef HAVE_INT16
-#endif
-
-
-#if defined(INT_LEAST32_MAX) && (INT_LEAST32_MAX == 0x7FFFFFFFL)
+#if defined(INT_LEAST32_MAX) && (INT_LEAST32_MAX == INT32_MAX)
     typedef uint_least32_t uint32_t;
     typedef int_least32_t int32_t;
     #define HAVE_INT32
@@ -165,15 +166,7 @@ typedef unsigned char uint_least8_t;
     #define HAVE_INT32
 #endif
 
-#ifdef HAVE_INT32
-    #define UINT32_MAX  (0xFFFFFFFFU)
-    #define INT32_MIN   (-0x7FFFFFFF)
-    #define INT32_MAX   (0x7FFFFFFF)
-    #undef HAVE_INT32
-#endif
-
-
-#if defined(INT_LEAST64_MAX) && (INT_LEAST64_MAX == 0x7FFFFFFFFFFFFFFFLL)
+#if defined(INT_LEAST64_MAX) && (INT_LEAST64_MAX == INT64_MAX)
     typedef uint_least64_t uint64_t;
     typedef int_least64_t int64_t;
     #define HAVE_INT64
@@ -187,13 +180,6 @@ typedef unsigned char uint_least8_t;
     typedef __UINT64_TYPE__  uint64_t;
     typedef __INT64_TYPE__ int64_t;
     #define HAVE_INT64
-#endif
-
-#ifdef HAVE_INT64
-    #define UINT64_MAX  (0xFFFFFFFFFFFFFFFFULL)
-    #define INT64_MIN   (-0x7FFFFFFFFFFFFFFFLL)
-    #define INT64_MAX   (0x7FFFFFFFFFFFFFFFLL)
-    #undef HAVE_INT64
 #endif
 
 
@@ -285,6 +271,40 @@ typedef unsigned char uint_least8_t;
     #define INT_FAST64_MAX __UINT_FAST64_MAX__
     #define INT_FAST64_MIN __UINT_FAST64_MIN__
     #define UINT_FAST64_MAX __UINT_FAST64_MAX__
+#endif
+
+
+/* If we don't have exact integer sizes we need to undefine those constants. */
+#ifdef HAVE_INT8
+#   undef HAVE_INT8
+#else
+#   undef INT8_MIN
+#   undef INT8_MAX
+#   undef UINT8_MAX
+#endif
+
+#ifdef HAVE_INT16
+#   undef HAVE_INT16
+#else
+#   undef INT16_MIN
+#   undef INT16_MAX
+#   undef UINT16_MAX
+#endif
+
+#ifdef HAVE_INT32
+#   undef HAVE_INT32
+#else
+#   undef INT32_MIN
+#   undef INT32_MAX
+#   undef UINT32_MAX
+#endif
+
+#ifdef HAVE_INT64
+#   undef HAVE_INT64
+#else
+#   undef INT64_MIN
+#   undef INT64_MAX
+#   undef UINT64_MAX
 #endif
 
 #endif  /* INCLUDE_METALC_STDINT_H_ */
