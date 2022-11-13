@@ -70,7 +70,7 @@ typedef unsigned char uint_least8_t;
     #define INT_LEAST32_MIN     INT_MIN
     #define INT_LEAST32_MAX     INT_MAX
     #define UINT_LEAST32_MAX    UINT_MAX
-#else
+#elif defined(LONG_MAX)
     /* Int is the same size as a short (probably 16 bits), which means we must
      * use a long for 32 bits. */
     typedef signed long int_least32_t;
@@ -79,6 +79,12 @@ typedef unsigned char uint_least8_t;
     #define INT_LEAST32_MIN     LONG_MIN
     #define INT_LEAST32_MAX     LONG_MAX
     #define UINT_LEAST32_MAX    ULONG_MAX
+/* else:
+ * This compiler doesn't have the `long` type. This only happens in compilers
+ * implementing a pre-K&R subset of the language. Those will certainly blow up
+ * with other language features this library relies on (such as structs), BUT we
+ * do want to be able to work with someone who's writing their own C compiler
+ * and doesn't want to build the entire standard library themselves. */
 #endif
 
 #if SHRT_MAX >= INT64_MAX
@@ -98,7 +104,7 @@ typedef unsigned char uint_least8_t;
     #define INT_LEAST64_MIN     INT_MIN
     #define INT_LEAST64_MAX     INT_MAX
     #define UINT_LEAST64_MAX    UINT_MAX
-#elif LONG_MAX >= INT64_MAX
+#elif defined(LONG_MAX) && (LONG_MAX >= INT64_MAX)
     /* `long` is at least 64 bits. */
     typedef signed long int_least64_t;
     typedef unsigned long uint_least64_t;
@@ -138,7 +144,7 @@ typedef unsigned char uint_least8_t;
     typedef uint_least16_t uint16_t;
     typedef int_least16_t int16_t;
     #define HAVE_INT16
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) && defined(_INTEGRAL_MAX_BITS) && (_INTEGRAL_MAX_BITS >= 16)
     /* Microsoft */
     typedef unsigned __int16 uint16_t;
     typedef signed __int16 int16_t;
@@ -154,7 +160,7 @@ typedef unsigned char uint_least8_t;
     typedef uint_least32_t uint32_t;
     typedef int_least32_t int32_t;
     #define HAVE_INT32
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) && defined(_INTEGRAL_MAX_BITS) && (_INTEGRAL_MAX_BITS >= 32)
     /* Microsoft */
     typedef unsigned __int32 uint32_t;
     typedef signed __int32 int32_t;
@@ -170,7 +176,7 @@ typedef unsigned char uint_least8_t;
     typedef uint_least64_t uint64_t;
     typedef int_least64_t int64_t;
     #define HAVE_INT64
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) && defined(_INTEGRAL_MAX_BITS) && (_INTEGRAL_MAX_BITS >= 64)
     /* Microsoft */
     typedef unsigned __int64 uint64_t;
     typedef signed __int64 int64_t;
@@ -181,7 +187,6 @@ typedef unsigned char uint_least8_t;
     typedef __INT64_TYPE__ int64_t;
     #define HAVE_INT64
 #endif
-
 
 #if METALC_ARCH_BITS == 16
     typedef int_least16_t intptr_t;
@@ -209,17 +214,17 @@ typedef unsigned char uint_least8_t;
     #define UINTPTR_MAX UINT_LEAST64_MAX
 #endif
 
-
 /* This won't be accurate for systems that support integers greater than 64
- * bits, but it's good enough... right? */
-#if (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS == 64) || defined(INT_LEAST64_MAX)
+ * bits, but it's good enough... right?
+ * (_INTEGRAL_MAX_BITS is defined on Visual Studio compilers.) */
+#if (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 64) || defined(INT_LEAST64_MAX)
     typedef int_least64_t intmax_t;
     typedef uint_least64_t uintmax_t;
 
     #define INTMAX_MIN  INT_LEAST64_MIN
     #define INTMAX_MAX  INT_LEAST64_MAX
     #define UINTMAX_MAX UINT_LEAST64_MAX
-#elif (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS == 32) || defined(INT_LEAST32_MAX)
+#elif (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 32) || defined(INT_LEAST32_MAX)
     typedef int_least32_t intmax_t;
     typedef uint_least32_t uintmax_t;
 
@@ -227,8 +232,15 @@ typedef unsigned char uint_least8_t;
     #define INTMAX_MAX  INT_LEAST32_MAX
     #define UINTMAX_MAX UINT_LEAST32_MAX
 #else
-    /* Super unlikely but theoretically possible, e.g. if you're compiling for a
-     * z80 or something (which we don't have support for yet). */
+    /* If we get here then either:
+     *
+     * - We're on Visual Studio and _INTEGRAL_MAX_BITS is less than 32, or
+     * - We're on a different compiler and we don't have int_least32_t.
+     *
+     * If this is the case then we're probably compiling for a 16-bit system.
+     * We can't assume it's exactly 16 bits, as there are some 18- and 24-bit
+     * architectures (such as the PDP-11) that a retro computing enthusiast may
+     * want to build for. */
     typedef int_least16_t intmax_t;
     typedef uint_least16_t uintmax_t;
 
