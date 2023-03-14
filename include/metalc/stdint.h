@@ -221,15 +221,22 @@ typedef unsigned char uint_least8_t;
 #endif
 
 /* These macros are defined by various compilers to indicate the architecture
- * that the compiler is building for. This will work for
+ * that the compiler is building for. This will work for:
  *
  * - GCC 4.1+ and compatible compilers like Clang and MinGW
  * - Visual Studio
  * - OpenWatcom
- * */
+ * - Intel's C compiler (though possibly not IA-64)
+ */
 #if defined(__LP64__) ||    \
     defined(_M_AMD64) ||    \
     defined(_M_ARM64) ||    \
+    defined(__AVX__)  ||    \
+    defined(__AVX2__) ||    \
+    defined(_M_X64)   ||    \
+    defined(__x86_64__) ||  \
+    defined(__x86_64) ||    \
+    defined(__w64)    ||    \
     (defined(_M_IX86) && (_M_IX86 >= 600)) ||    \
     (defined(__MINGW64__) && !defined(__MINGW32__)) || \
     (defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__ == 8))
@@ -241,13 +248,14 @@ typedef unsigned char uint_least8_t;
 #   define INTPTR_MAX INT_LEAST64_MAX
 #   define UINTPTR_MAX UINT_LEAST64_MAX
 #elif defined(__386__) ||                                           \
+    defined(__pentium4__) ||                                        \
     (defined(_M_IX86) && (_M_IX86 < 600) && (_M_IX86 >= 300)) ||    \
     (defined(__MINGW32__) && !defined(__MINGW64__)) ||              \
     (defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__ == 4))
 
     typedef int_least32_t intptr_t;
     typedef uint_least32_t uintptr_t;
-    typedef long long ptrdiff_t;
+    typedef int_least32_t ptrdiff_t;
 #   define INTPTR_MIN INT_LEAST32_MIN
 #   define INTPTR_MAX INT_LEAST32_MAX
 #   define UINTPTR_MAX UINT_LEAST32_MAX
@@ -264,7 +272,8 @@ typedef unsigned char uint_least8_t;
 
 /* This won't be accurate for systems that support integers greater than 64
  * bits, but it's good enough... right?
- * (_INTEGRAL_MAX_BITS is defined on Visual Studio compilers.) */
+ * (_INTEGRAL_MAX_BITS is defined on Visual Studio compilers and the Intel C
+ * compiler when built for Windows.) */
 #if (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 64) || defined(INT_LEAST64_MAX)
     typedef int_least64_t intmax_t;
     typedef uint_least64_t uintmax_t;
