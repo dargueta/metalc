@@ -15,8 +15,9 @@ This library requires your C compiler to provide a few headers of its own, namel
 * stddef.h
 * stdint.h (a partial shim is provided that'll work for some systems without it)
 
-GCC's freestanding mode provides all of these headers; MinGW probably does as
-well. I haven't tested LLVM or Clang yet.
+GCC and compatible compilers' freestanding mode provides all of these headers.
+Some versions of Visual Studio don't have stdint.h when building for the C99
+standard, even though that header is part of the standard.
 
 Caveat
 ------
@@ -54,10 +55,10 @@ To build this library you'll need:
 * Python 3.3 or higher. (Python 2 may work but I make no guarantees and you
   really should reconsider the life choices that led you to still use it.)
 * CMake 3.13 or higher
-* A compiler supporting ANSI C99 or later, such as GCC or MinGW. Visual Studio
-  cannot cross-compile and so is not supported.
-* (UEFI modes only) A UEFI cross-compiler, such as `GNU_EFI`_ or `TianoCore`_.
-  Clang/LLVM has this built in.
+* A compiler supporting ANSI C99 or later, such as GCC, MinGW, OpenWatcom, etc.
+  Visual Studio may or may not work.
+* (UEFI modes only) If you're not building with an LLVM-based compiler like Clang,
+  you'll also need a UEFI cross-compiler, such as `GNU_EFI`_ or `TianoCore`_.
 
 Steps
 ~~~~~
