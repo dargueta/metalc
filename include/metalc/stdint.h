@@ -220,30 +220,46 @@ typedef unsigned char uint_least8_t;
 #   define HAVE_EXACT_INT64
 #endif
 
-#if METALC_ARCH_BITS == 16
-    typedef int_least16_t intptr_t;
-    typedef uint_least16_t uintptr_t;
-    typedef int_least16_t ptrdiff_t;
+/* These macros are defined by various compilers to indicate the architecture
+ * that the compiler is building for. This will work for
+ *
+ * - GCC 4.1+ and compatible compilers like Clang and MinGW
+ * - Visual Studio
+ * - OpenWatcom
+ * */
+#if defined(__LP64__) ||    \
+    defined(_M_AMD64) ||    \
+    defined(_M_ARM64) ||    \
+    (defined(_M_IX86) && (_M_IX86 >= 600)) ||    \
+    (defined(__MINGW64__) && !defined(__MINGW32__)) || \
+    (defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__ == 8))
 
-#   define INTPTR_MIN  INT_LEAST16_MIN
-#   define INTPTR_MAX  INT_LEAST16_MAX
-#   define UINTPTR_MAX UINT_LEAST16_MAX
-#elif METALC_ARCH_BITS == 32
-    typedef int_least32_t intptr_t;
-    typedef uint_least32_t uintptr_t;
-    typedef int_least32_t ptrdiff_t;
-
-#   define INTPTR_MIN  INT_LEAST32_MIN
-#   define INTPTR_MAX  INT_LEAST32_MAX
-#   define UINTPTR_MAX UINT_LEAST32_MAX
-#elif METALC_ARCH_BITS == 64
     typedef int_least64_t intptr_t;
     typedef uint_least64_t uintptr_t;
     typedef int_least64_t ptrdiff_t;
-
-#   define INTPTR_MIN  INT_LEAST64_MIN
-#   define INTPTR_MAX  INT_LEAST64_MAX
+#   define INTPTR_MIN INT_LEAST64_MIN
+#   define INTPTR_MAX INT_LEAST64_MAX
 #   define UINTPTR_MAX UINT_LEAST64_MAX
+#elif defined(__386__) ||                                           \
+    (defined(_M_IX86) && (_M_IX86 < 600) && (_M_IX86 >= 300)) ||    \
+    (defined(__MINGW32__) && !defined(__MINGW64__)) ||              \
+    (defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__ == 4))
+
+    typedef int_least32_t intptr_t;
+    typedef uint_least32_t uintptr_t;
+    typedef long long ptrdiff_t;
+#   define INTPTR_MIN INT_LEAST32_MIN
+#   define INTPTR_MAX INT_LEAST32_MAX
+#   define UINTPTR_MAX UINT_LEAST32_MAX
+#elif (defined(_M_IX86) && (_M_IX86 < 300))
+    typedef int_least16_t intptr_t;
+    typedef uint_least16_t uintptr_t;
+    typedef int_least16_t ptrdiff_t;
+#   define INTPTR_MIN INT_LEAST16_MIN
+#   define INTPTR_MAX INT_LEAST16_MAX
+#   define UINTPTR_MAX UINT_LEAST16_MAX
+#else
+#   error Cannot determine the architecture size.
 #endif
 
 /* This won't be accurate for systems that support integers greater than 64
