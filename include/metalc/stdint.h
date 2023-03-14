@@ -249,6 +249,7 @@ typedef unsigned char uint_least8_t;
 #   define UINTPTR_MAX UINT_LEAST64_MAX
 #elif defined(__386__) ||                                           \
     defined(__pentium4__) ||                                        \
+    defined(__AS386_32__) ||                                        \
     (defined(_M_IX86) && (_M_IX86 < 600) && (_M_IX86 >= 300)) ||    \
     (defined(__MINGW32__) && !defined(__MINGW64__)) ||              \
     (defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__ == 4))
@@ -259,7 +260,7 @@ typedef unsigned char uint_least8_t;
 #   define INTPTR_MIN INT_LEAST32_MIN
 #   define INTPTR_MAX INT_LEAST32_MAX
 #   define UINTPTR_MAX UINT_LEAST32_MAX
-#elif (defined(_M_IX86) && (_M_IX86 < 300))
+#elif (defined(_M_IX86) && (_M_IX86 < 300)) || defined(__AS386_16__)
     typedef int_least16_t intptr_t;
     typedef uint_least16_t uintptr_t;
     typedef int_least16_t ptrdiff_t;

@@ -52,13 +52,22 @@ Requirements
 
 To build this library you'll need:
 
-* Python 3.3 or higher. (Python 2 may work but I make no guarantees and you
-  really should reconsider the life choices that led you to still use it.)
-* CMake 3.13 or higher
+* CMake 3.13 or higher.
 * A compiler supporting ANSI C99 or later, such as GCC, MinGW, OpenWatcom, etc.
   Visual Studio may or may not work.
 * (UEFI modes only) If you're not building with an LLVM-based compiler like Clang,
   you'll also need a UEFI cross-compiler, such as `GNU_EFI`_ or `TianoCore`_.
+
+Compilers I'm trying to get this to work for:
+
+* `BCC <https://linux.die.net/man/1/bcc>`_
+* GCC and GCC-compatible compilers like MinGW and Clang
+* `FAUCC <https://manpages.ubuntu.com/manpages/jammy/man1/faucc.1.html>`_
+* Intel C compiler (ICC)
+* `OpenWatcom <http://openwatcom.org/>`_
+* `TCC <https://bellard.org/tcc/>`_
+* Visual Studio (low priority)
+
 
 Steps
 ~~~~~
