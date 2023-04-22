@@ -9,14 +9,6 @@
 
 #include <limits.h>     /* Provided by the compiler */
 
-
-typedef signed char int_least8_t;
-typedef unsigned char uint_least8_t;
-
-#define INT_LEAST8_MIN      SCHAR_MIN
-#define INT_LEAST8_MAX      SCHAR_MAX
-#define UINT_LEAST8_MAX     UCHAR_MAX
-
 /* For convenience, we define the exact-size integer constants ahead of time
  * even though we don't know yet if we have types with these exact sizes. Later
  * in the file we'll undefine the constants for any type that doesn't have an
@@ -58,6 +50,17 @@ typedef unsigned char uint_least8_t;
 #define INT64_MIN   INT64_C(-9223372036854775808)
 #define INT64_MAX   INT64_C(9223372036854775807)
 
+/******************************************************************************\
+ *                            INT_LEAST##_T                                    *
+\******************************************************************************/
+
+/* `char` is the smallest unit and must be at least 8 bits. */
+typedef signed char int_least8_t;
+typedef unsigned char uint_least8_t;
+
+#define INT_LEAST8_MIN      SCHAR_MIN
+#define INT_LEAST8_MAX      SCHAR_MAX
+#define UINT_LEAST8_MAX     UCHAR_MAX
 
 #if SCHAR_MAX >= INT16_MAX
     /* Unlikely, but theoretically a char could be >= 16 bits. */
@@ -117,8 +120,8 @@ typedef unsigned char uint_least8_t;
 #endif
 
 #if SHRT_MAX >= INT64_MAX
-    /* According to Wikipedia some systems actually do have 64-bit shorts. I'm
-     * not doing this for fun. */
+    /* According to Wikipedia some systems actually do have 64-bit shorts. This
+     * is known as the SILP64 data model. */
     typedef signed short int_least64_t;
     typedef unsigned short uint_least64_t;
 
@@ -156,69 +159,101 @@ typedef unsigned char uint_least8_t;
 #   undef UINT64_C
 #endif
 
-#if INT_LEAST8_MAX == INT8_MAX
-    typedef uint_least8_t uint8_t;
-    typedef int_least8_t int8_t;
-#   define HAVE_EXACT_INT8
-#elif defined(_MSC_VER)
-    /* Microsoft */
-    typedef unsigned __int8 uint8_t;
-    typedef signed __int8 int8_t;
-#   define HAVE_EXACT_INT8
-#elif defined(__INT8_TYPE__)
-    /* GCC */
-    typedef __UINT8_TYPE__  uint8_t;
+/******************************************************************************\
+ *                          EXACT INTEGER SIZES                                *
+\******************************************************************************/
+
+/* To reduce code duplication we'll define these ahead of time and undefine them
+ * as needed if we don't have the exact integer size. */
+#define HAVE_EXACT_INT8
+#define HAVE_EXACT_INT16
+#define HAVE_EXACT_INT32
+#define HAVE_EXACT_INT64
+
+#if defined(__INT8_TYPE__)
     typedef __INT8_TYPE__ int8_t;
-#   define HAVE_EXACT_INT8
+    typedef __UINT8_TYPE__ uint8_t;
+#elif defined(_MSC_VER)
+    typedef signed __int8 int8_t;
+    typedef unsigned __int8 uint8_t;
+#elif defined(__WATCOMC__)
+    typedef signed char int8_t;
+    typedef unsigned char uint8_t;
+#elif UINT_LEAST8_MAX == UINT8_MAX
+    typedef int_least8_t int8_t;
+    typedef uint_least8_t uint8_t;
+#else
+    /* No integer with exactly 8 bits */
+#   undef INT8_MIN
+#   undef INT8_MAX
+#   undef UINT8_MAX
+#   undef HAVE_EXACT_INT8
 #endif
 
-#if INT_LEAST16_MAX == INT16_MAX
-    typedef uint_least16_t uint16_t;
-    typedef int_least16_t int16_t;
-#   define HAVE_EXACT_INT16
-#elif defined(_MSC_VER) && defined(_INTEGRAL_MAX_BITS) && (_INTEGRAL_MAX_BITS >= 16)
-    /* Microsoft */
-    typedef unsigned __int16 uint16_t;
-    typedef signed __int16 int16_t;
-#   define HAVE_EXACT_INT16
-#elif defined(__INT16_TYPE__)
-    /* GCC */
-    typedef __UINT16_TYPE__  uint16_t;
+#if defined(__INT16_TYPE__)
     typedef __INT16_TYPE__ int16_t;
-#   define HAVE_EXACT_INT16
+    typedef __UINT16_TYPE__  uint16_t;
+#elif defined(_MSC_VER) && defined(_INTEGRAL_MAX_BITS) && (_INTEGRAL_MAX_BITS >= 16)
+    typedef signed __int16 int16_t;
+    typedef unsigned __int16 uint16_t;
+#elif defined(__WATCOMC__)
+    typedef signed short int16_t;
+    typedef unsigned short uint16_t;
+#elif INT_LEAST16_MAX == INT16_MAX
+    typedef int_least16_t int16_t;
+    typedef uint_least16_t uint16_t;
+#else
+    /* No integer with exactly 16 bits */
+#   undef INT16_MIN
+#   undef INT16_MAX
+#   undef UINT16_MAX
+#   undef HAVE_EXACT_INT16
 #endif
 
-#if defined(INT_LEAST32_MAX) && (INT_LEAST32_MAX == INT32_MAX)
-    typedef uint_least32_t uint32_t;
-    typedef int_least32_t int32_t;
-#   define HAVE_EXACT_INT32
-#elif defined(_MSC_VER) && defined(_INTEGRAL_MAX_BITS) && (_INTEGRAL_MAX_BITS >= 32)
-    /* Microsoft */
-    typedef unsigned __int32 uint32_t;
-    typedef signed __int32 int32_t;
-#   define HAVE_EXACT_INT32
-#elif defined(__INT32_TYPE__)
-    /* GCC */
-    typedef __UINT32_TYPE__  uint32_t;
+#if defined(__INT32_TYPE__)
     typedef __INT32_TYPE__ int32_t;
-#   define HAVE_EXACT_INT32
+    typedef __UINT32_TYPE__  uint32_t;
+#elif defined(_MSC_VER) && defined(_INTEGRAL_MAX_BITS) && (_INTEGRAL_MAX_BITS >= 32)
+    typedef signed __int32 int32_t;
+    typedef unsigned __int32 uint32_t;
+#elif defined(__WATCOMC__)
+    typedef signed long int32_t;
+    typedef unsigned long uint32_t;
+#elif defined(INT_LEAST32_MAX) && (INT_LEAST32_MAX == INT32_MAX)
+    typedef int_least32_t int32_t;
+    typedef uint_least32_t uint32_t;
+#else
+    /* No integer with exactly 32 bits */
+#   undef INT32_MIN
+#   undef INT32_MAX
+#   undef UINT32_MAX
+#   undef HAVE_EXACT_INT32
 #endif
 
-#if defined(INT_LEAST64_MAX) && (INT_LEAST64_MAX == INT64_MAX)
-    typedef uint_least64_t uint64_t;
-    typedef int_least64_t int64_t;
-#   define HAVE_EXACT_INT64
+#if defined(__INT64_TYPE__)
+    typedef __INT64_TYPE__ int64_t;
+    typedef __UINT64_TYPE__  uint64_t;
 #elif defined(_MSC_VER) && defined(_INTEGRAL_MAX_BITS) && (_INTEGRAL_MAX_BITS >= 64)
     /* Microsoft */
-    typedef unsigned __int64 uint64_t;
     typedef signed __int64 int64_t;
-#   define HAVE_EXACT_INT64
-#elif defined(__INT64_TYPE__)
-    /* GCC */
-    typedef __UINT64_TYPE__  uint64_t;
-    typedef __INT64_TYPE__ int64_t;
-#   define HAVE_EXACT_INT64
+    typedef unsigned __int64 uint64_t;
+#elif defined(__WATCOMC__) && defined(LLONG_MAX)
+    typedef signed long long int64_t;
+    typedef unsigned long long uint64_t;
+#elif defined(INT_LEAST64_MAX) && (INT_LEAST64_MAX == INT64_MAX)
+    typedef int_least64_t int64_t;
+    typedef uint_least64_t uint64_t;
+#else
+    /* No integer with exactly 64 bits */
+#   undef INT64_MIN
+#   undef INT64_MAX
+#   undef UINT64_MAX
+#   undef HAVE_EXACT_INT64
 #endif
+
+/******************************************************************************\
+ *                          GUESSING POINTER SIZE                              *
+\******************************************************************************/
 
 /* These macros are defined by various compilers to indicate the architecture
  * that the compiler is building for. This will work for:
@@ -240,42 +275,83 @@ typedef unsigned char uint_least8_t;
     (defined(_M_IX86) && (_M_IX86 >= 600)) ||    \
     (defined(__MINGW64__) && !defined(__MINGW32__)) || \
     (defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__ == 8))
-
-    typedef int_least64_t intptr_t;
-    typedef uint_least64_t uintptr_t;
-    typedef int_least64_t ptrdiff_t;
-#   define INTPTR_MIN INT_LEAST64_MIN
-#   define INTPTR_MAX INT_LEAST64_MAX
-#   define UINTPTR_MAX UINT_LEAST64_MAX
+#   define POINTER_IS_64BIT
 #elif defined(__386__) ||                                           \
     defined(__pentium4__) ||                                        \
     defined(__AS386_32__) ||                                        \
     (defined(_M_IX86) && (_M_IX86 < 600) && (_M_IX86 >= 300)) ||    \
     (defined(__MINGW32__) && !defined(__MINGW64__)) ||              \
     (defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__ == 4))
-
-    typedef int_least32_t intptr_t;
-    typedef uint_least32_t uintptr_t;
-    typedef int_least32_t ptrdiff_t;
-#   define INTPTR_MIN INT_LEAST32_MIN
-#   define INTPTR_MAX INT_LEAST32_MAX
-#   define UINTPTR_MAX UINT_LEAST32_MAX
+#   define POINTER_IS_32BIT
 #elif (defined(_M_IX86) && (_M_IX86 < 300)) || defined(__AS386_16__)
-    typedef int_least16_t intptr_t;
-    typedef uint_least16_t uintptr_t;
-    typedef int_least16_t ptrdiff_t;
-#   define INTPTR_MIN INT_LEAST16_MIN
-#   define INTPTR_MAX INT_LEAST16_MAX
-#   define UINTPTR_MAX UINT_LEAST16_MAX
+#   define POINTER_IS_16BIT
 #else
 #   error Cannot determine the architecture size.
 #endif
 
-/* This won't be accurate for systems that support integers greater than 64
- * bits, but it's good enough... right?
- * (_INTEGRAL_MAX_BITS is defined on Visual Studio compilers and the Intel C
- * compiler when built for Windows.) */
-#if (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 64) || defined(INT_LEAST64_MAX)
+/******************************************************************************\
+*                              INTPTR_T                                       *
+\******************************************************************************/
+
+#if defined(__INTPTR_TYPE__)
+    typedef __INTPTR_TYPE__ intptr_t;
+    typedef __UINTPTR_TYPE__ uintptr_t;
+#   define INTPTR_MIN __INTPTR_MIN__
+#   define INTPTR_MAX __INTPTR_MAX__
+#   define UINTPTR_MAX __UINTPTR_MAX__
+#elif defined(POINTER_IS_64BIT)
+    typedef int_least64_t intptr_t;
+    typedef uint_least64_t uintptr_t;
+#   define INTPTR_MIN INT_LEAST64_MIN
+#   define INTPTR_MAX INT_LEAST64_MAX
+#   define UINTPTR_MAX UINT_LEAST64_MAX
+#elif defined(POINTER_IS_32BIT)
+    typedef int_least32_t intptr_t;
+    typedef uint_least32_t uintptr_t;
+#   define INTPTR_MIN INT_LEAST32_MIN
+#   define INTPTR_MAX INT_LEAST32_MAX
+#   define UINTPTR_MAX UINT_LEAST32_MAX
+#elif defined(POINTER_IS_16BIT)
+    typedef int_least16_t intptr_t;
+    typedef uint_least16_t uintptr_t;
+#   define INTPTR_MIN INT_LEAST16_MIN
+#   define INTPTR_MAX INT_LEAST16_MAX
+#   define UINTPTR_MAX UINT_LEAST16_MAX
+#else
+#   error Unable to determine the target architecture pointer size.
+#endif
+
+/******************************************************************************\
+*                             PTRDIFF_T                                       *
+\******************************************************************************/
+
+#ifdef __PTRDIFF_TYPE__
+    typedef __PTRDIFF_TYPE__ ptrdiff_t;
+#elif defined(POINTER_IS_64BIT)
+    typedef int_least64_t ptrdiff_t;
+#elif defined(POINTER_IS_32BIT)
+    typedef int_least32_t ptrdiff_t;
+#elif defined(POINTER_IS_16BIT)
+    typedef int_least16_t ptrdiff_t;
+#else
+#   error Unable to determine the target architecture pointer size.
+#endif
+
+/******************************************************************************\
+*                              INTMAX_T                                       *
+\******************************************************************************/
+
+#if defined(__INTMAX_TYPE__)
+    typedef __INTMAX_TYPE__ intmax_t;
+    typedef __UINTMAX_TYPE__ uintmax_t;
+#   define INTMAX_MIN __INTMAX_MIN__
+#   define INTMAX_MAX __INTMAX_MAX__
+#   define UINTMAX_MAX __UINTMAX_MAX__
+#elif (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 64) || defined(INT_LEAST64_MAX)
+    /* This won't be accurate for systems that support integers greater than 64
+     * bits, but it's good enough... right?
+     * (_INTEGRAL_MAX_BITS is defined on Visual Studio compilers and the Intel C
+     * compiler when built for Windows.) */
     typedef int_least64_t intmax_t;
     typedef uint_least64_t uintmax_t;
 
@@ -306,6 +382,10 @@ typedef unsigned char uint_least8_t;
 #   define INTMAX_MAX  INT_LEAST16_MAX
 #   define UINTMAX_MAX UINT_LEAST16_MAX
 #endif
+
+/******************************************************************************\
+*                             INT_FAST##_T                                    *
+\******************************************************************************/
 
 /* GCC and some compatible compilers define macros that expand to the C types
  * with the attributes we need. Since we have no idea of the underlying hardware,
@@ -343,38 +423,18 @@ typedef unsigned char uint_least8_t;
 #   define UINT_FAST64_MAX __UINT_FAST64_MAX__
 #endif
 
+/******************************************************************************\
+*                              CLEANUP                                        *
+\******************************************************************************/
 
-/* If we don't have exact integer sizes we need to undefine those constants. */
-#ifdef HAVE_EXACT_INT8
-#   undef HAVE_EXACT_INT8
-#else
-#   undef INT8_MIN
-#   undef INT8_MAX
-#   undef UINT8_MAX
+#ifdef POINTER_IS_64BIT
+#   undef POINTER_IS_64BIT
 #endif
-
-#ifdef HAVE_EXACT_INT16
-#   undef HAVE_EXACT_INT16
-#else
-#   undef INT16_MIN
-#   undef INT16_MAX
-#   undef UINT16_MAX
+#ifdef POINTER_IS_32BIT
+#   undef POINTER_IS_64BIT
 #endif
-
-#ifdef HAVE_EXACT_INT32
-#   undef HAVE_EXACT_INT32
-#else
-#   undef INT32_MIN
-#   undef INT32_MAX
-#   undef UINT32_MAX
-#endif
-
-#ifdef HAVE_EXACT_INT64
-#   undef HAVE_EXACT_INT64
-#else
-#   undef INT64_MIN
-#   undef INT64_MAX
-#   undef UINT64_MAX
+#ifdef POINTER_IS_16BIT
+#   undef POINTER_IS_16BIT
 #endif
 
 #endif  /* INCLUDE_METALC_STDINT_H_ */
