@@ -103,12 +103,12 @@ int mcinternal_mode_string_to_flags(const char *mode) {
         }
     }
 
-    if (can_read && !can_write)
-        result = O_RDONLY;
-    else if (can_write && !can_read)
-        result = O_WRONLY;
-    else
+    if (can_read && can_write)
         result = O_RDWR;
+    else if (can_read)
+        result = O_RDONLY;
+    else
+        result = O_WRONLY;
 
     if (append)
         result |= O_APPEND;
