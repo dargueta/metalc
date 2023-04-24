@@ -117,6 +117,7 @@ typedef unsigned char uint_least8_t;
      * the entire standard library themselves. */
 #   undef INT32_C
 #   undef UINT32_C
+#   warning This compiler does not support 32-bit integers.
 #endif
 
 #if SHRT_MAX >= INT64_MAX
@@ -157,6 +158,7 @@ typedef unsigned char uint_least8_t;
     /* No way to define a 64-bit integer. */
 #   undef INT64_C
 #   undef UINT64_C
+#   warning This compiler does not support 64-bit integers.
 #endif
 
 /******************************************************************************\
@@ -318,7 +320,7 @@ typedef unsigned char uint_least8_t;
 #   define INTPTR_MAX INT_LEAST16_MAX
 #   define UINTPTR_MAX UINT_LEAST16_MAX
 #else
-#   error Unable to determine the target architecture pointer size.
+#   error BUG: Architecture detected successfully but identifier not set. Please file a bug ticket.
 #endif
 
 /******************************************************************************\
