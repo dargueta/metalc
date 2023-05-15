@@ -31,6 +31,7 @@
     defined(__x86_64__) ||  \
     defined(__x86_64) ||    \
     defined(__w64)    ||    \
+    defined(_WIN64)   ||    \
     (defined(_M_IX86) && (_M_IX86 >= 600)) ||    \
     (defined(__MINGW64__) && !defined(__MINGW32__)) || \
     (defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__ == 8))
@@ -38,11 +39,15 @@
 #elif defined(__386__) ||                                           \
     defined(__pentium4__) ||                                        \
     defined(__AS386_32__) ||                                        \
+    (defined(_WIN32) && !defined(_WIN64))                           \
     (defined(_M_IX86) && (_M_IX86 < 600) && (_M_IX86 >= 300)) ||    \
     (defined(__MINGW32__) && !defined(__MINGW64__)) ||              \
+    defined(__ILP32__) ||                                           \
     (defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__ == 4))
 #   define POINTER_IS_32BIT
-#elif (defined(_M_IX86) && (_M_IX86 < 300)) || defined(__AS386_16__)
+#elif defined(_WIN16) ||                       \
+      (defined(_M_IX86) && (_M_IX86 < 300)) || \
+      defined(__AS386_16__)
 #   define POINTER_IS_16BIT
 #else
 #   error Cannot determine the architecture size.
@@ -52,7 +57,7 @@
 #    if defined(__LP64__)
 #        define CONSTANT_SUFFIX_32(x)  x
 #        define CONSTANT_SUFFIX_64(x)  x ## L
-#    elif defined(__LLP64__) || defined(_MSC_VER)
+#    elif defined(__LLP64__) || defined(__LLP64_IFC__) || defined(_MSC_VER)
 #        define CONSTANT_SUFFIX_32(x)  x ## L
 #        define CONSTANT_SUFFIX_64(x)  x ## LL
 #    endif

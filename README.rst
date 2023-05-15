@@ -47,6 +47,11 @@ the program linking to it.
 Building
 --------
 
+Target Restrictions
+~~~~~~~~~~~~~~~~~~~
+
+Pointers must be exactly 16, 32, or 64 bits.
+
 Requirements
 ~~~~~~~~~~~~
 
@@ -72,7 +77,7 @@ Compilers I'm trying to get this to work for:
 Steps
 ~~~~~
 
-1. Run ``configure`` with whatever options you need.
+1. Run ``./configure`` with whatever options you need.
 2. ``cmake -S . -B build``
 3. ``make -C build``
 
