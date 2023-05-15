@@ -9,21 +9,72 @@
 
 #include <limits.h>     /* Provided by the compiler */
 
-/* For convenience, we define the exact-size integer constants ahead of time
- * even though we don't know yet if we have types with these exact sizes. Later
- * in the file we'll undefine the constants for any type that doesn't have an
- * exact size on this platform. */
 
-/* FIXME: we need to add the L suffixes where needed */
+/******************************************************************************\
+ *                          GUESSING POINTER SIZE                              *
+\******************************************************************************/
+
+/* These macros are defined by various compilers to indicate the architecture
+ * that the compiler is building for. This will work for:
+ *
+ * - GCC 4.1+ and compatible compilers like Clang and MinGW
+ * - Visual Studio
+ * - OpenWatcom
+ * - Intel's C compiler (though possibly not IA-64)
+ */
+#if defined(__LP64__) ||    \
+    defined(_M_AMD64) ||    \
+    defined(_M_ARM64) ||    \
+    defined(__AVX__)  ||    \
+    defined(__AVX2__) ||    \
+    defined(_M_X64)   ||    \
+    defined(__x86_64__) ||  \
+    defined(__x86_64) ||    \
+    defined(__w64)    ||    \
+    (defined(_M_IX86) && (_M_IX86 >= 600)) ||    \
+    (defined(__MINGW64__) && !defined(__MINGW32__)) || \
+    (defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__ == 8))
+#   define POINTER_IS_64BIT
+#elif defined(__386__) ||                                           \
+    defined(__pentium4__) ||                                        \
+    defined(__AS386_32__) ||                                        \
+    (defined(_M_IX86) && (_M_IX86 < 600) && (_M_IX86 >= 300)) ||    \
+    (defined(__MINGW32__) && !defined(__MINGW64__)) ||              \
+    (defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__ == 4))
+#   define POINTER_IS_32BIT
+#elif (defined(_M_IX86) && (_M_IX86 < 300)) || defined(__AS386_16__)
+#   define POINTER_IS_16BIT
+#else
+#   error Cannot determine the architecture size.
+#endif
+
+#if defined(POINTER_IS_64BIT)
+#    if defined(__LP64__)
+#        define CONSTANT_SUFFIX_32(x)  x
+#        define CONSTANT_SUFFIX_64(x)  x ## L
+#    elif defined(__LLP64__) || defined(_MSC_VER)
+#        define CONSTANT_SUFFIX_32(x)  x ## L
+#        define CONSTANT_SUFFIX_64(x)  x ## LL
+#    endif
+#elif defined(POINTER_IS_32BIT)
+#    define CONSTANT_SUFFIX_32(x)  x ## L
+#    define CONSTANT_SUFFIX_64(x)  x ## LL
+#else
+    /* Architecture must be be 16 bits. Unclear what to do here. */
+#    define CONSTANT_SUFFIX_32(x)  x ## L
+#    define CONSTANT_SUFFIX_64(x)  x ## LL
+#endif
+
+
 #ifdef __STDC__
 #   define INT8_C(n)   (n)
 #   define UINT8_C(n)  (n ## U)
 #   define INT16_C(n)  (n)
 #   define UINT16_C(n) (n ## U)
-#   define INT32_C(n)  (n)
-#   define UINT32_C(n) (n ## U)
-#   define INT64_C(n)  (n)
-#   define UINT64_C(n) (n ## U)
+#   define INT32_C(n)  (CONSTANT_SUFFIX_32(n))
+#   define UINT32_C(n) (CONSTANT_SUFFIX_32(n ## U))
+#   define INT64_C(n)  (CONSTANT_SUFFIX_64(n))
+#   define UINT64_C(n) (CONSTANT_SUFFIX_64(n ## U))
 #else
     /* Nonstandard (probably K&R) C. Older compilers don't support the U suffix
      * so we leave that off here. */
@@ -36,6 +87,11 @@
 #   define INT64_C(n)  (n)
 #   define UINT64_C(n) (n)
 #endif
+
+/* For convenience, we define the exact-size integer constants ahead of time
+ * even though we don't know yet if we have types with these exact sizes. Later
+ * in the file we'll undefine the constants for any type that doesn't have an
+ * exact size on this platform. */
 
 #define UINT8_MAX   UINT8_C(255)
 #define INT8_MIN    INT8_C(-128)
@@ -178,7 +234,7 @@ typedef unsigned char uint_least8_t;
 #elif defined(_MSC_VER)
     typedef signed __int8 int8_t;
     typedef unsigned __int8 uint8_t;
-#elif defined(__WATCOMC__)
+#elif defined(__WATCOMC__) || (CHAR_BIT == 8)
     typedef signed char int8_t;
     typedef unsigned char uint8_t;
 #elif UINT_LEAST8_MAX == UINT8_MAX
@@ -251,44 +307,6 @@ typedef unsigned char uint_least8_t;
 #   undef INT64_MAX
 #   undef UINT64_MAX
 #   undef HAVE_EXACT_INT64
-#endif
-
-/******************************************************************************\
- *                          GUESSING POINTER SIZE                              *
-\******************************************************************************/
-
-/* These macros are defined by various compilers to indicate the architecture
- * that the compiler is building for. This will work for:
- *
- * - GCC 4.1+ and compatible compilers like Clang and MinGW
- * - Visual Studio
- * - OpenWatcom
- * - Intel's C compiler (though possibly not IA-64)
- */
-#if defined(__LP64__) ||    \
-    defined(_M_AMD64) ||    \
-    defined(_M_ARM64) ||    \
-    defined(__AVX__)  ||    \
-    defined(__AVX2__) ||    \
-    defined(_M_X64)   ||    \
-    defined(__x86_64__) ||  \
-    defined(__x86_64) ||    \
-    defined(__w64)    ||    \
-    (defined(_M_IX86) && (_M_IX86 >= 600)) ||    \
-    (defined(__MINGW64__) && !defined(__MINGW32__)) || \
-    (defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__ == 8))
-#   define POINTER_IS_64BIT
-#elif defined(__386__) ||                                           \
-    defined(__pentium4__) ||                                        \
-    defined(__AS386_32__) ||                                        \
-    (defined(_M_IX86) && (_M_IX86 < 600) && (_M_IX86 >= 300)) ||    \
-    (defined(__MINGW32__) && !defined(__MINGW64__)) ||              \
-    (defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__ == 4))
-#   define POINTER_IS_32BIT
-#elif (defined(_M_IX86) && (_M_IX86 < 300)) || defined(__AS386_16__)
-#   define POINTER_IS_16BIT
-#else
-#   error Cannot determine the architecture size.
 #endif
 
 /******************************************************************************\
