@@ -36,7 +36,7 @@ int longjmp(mclib_jmp_buf buf, int code);
 
 
 /** @cond DECL */
-cstdlib_export(setjmp);
+cstdlib_export_with_attr(setjmp, returns_twice);
 cstdlib_export_with_attr(longjmp, noreturn);
 /** @endcond */
 

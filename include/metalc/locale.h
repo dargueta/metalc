@@ -49,7 +49,7 @@ struct mclib_lconv* localeconv(void);
 
 
 cstdlib_export_with_attr(setlocale, nonnull(2));
-cstdlib_export(localeconv);
+cstdlib_export_with_attr(localeconv, returns_nonnull);
 
 
 #endif  /* INCLUDE_METALC_LOCALE_H_ */
