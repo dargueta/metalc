@@ -7,7 +7,6 @@
 #include "metalc/stdio.h"
 
 #include "metalc/sys/mman.h"
-#include "metalc/bits/sys/mman.h"
 
 
 extern mclib_jmp_buf mcinternal_abort_target;

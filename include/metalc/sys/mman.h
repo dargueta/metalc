@@ -5,6 +5,8 @@
 #ifndef INCLUDE_METALC_SYS_MMAN_H_
 #define INCLUDE_METALC_SYS_MMAN_H_
 
+#include "../stdint.h"
+
 /** Pages cannot be accessed at all. */
 #define mclib_PROT_NONE   0
 
@@ -20,7 +22,7 @@
 /**
  * The value returned by memory-mapping functions to indicate an error occurred.
  */
-#define mclib_MAP_FAILED  ((void *)-1)
+#define mclib_MAP_FAILED  ((void *)(~((uintptr_t)0)))
 
 
 #define mclib_MAP_PRIVATE     1   /**< Changes are private. */
@@ -52,5 +54,20 @@
 
 /** Remap a mapping to a new address but don't unmap the old block. */
 #define mclib_MREMAP_DONTUNMAP  5
+
+#ifndef METALC_DISABLE_STDLIB_DEFS
+    #define PROT_NONE       mclib_PROT_NONE
+    #define PROT_READ       mclib_PROT_READ
+    #define PROT_WRITE      mclib_PROT_WRITE
+    #define PROT_EXEC       mclib_PROT_EXEC
+    #define MAP_FAILED      mclib_MAP_FAILED
+    #define MAP_PRIVATE     mclib_MAP_PRIVATE
+    #define MAP_SHARED      mclib_MAP_SHARED
+    #define MAP_ANONYMOUS   mclib_MAP_ANONYMOUS
+    #define MAP_FIXED       mclib_MAP_FIXED
+    #define MREMAP_MAYMOVE      mclib_MREMAP_MAYMOVE
+    #define MREMAP_FIXED        mclib_MREMAP_FIXED
+    #define MREMAP_DONTUNMAP    mclib_MREMAP_DONTUNMAP
+#endif  /* METALC_DISABLE_STDLIB_DEFS */
 
 #endif  /* INCLUDE_METALC_SYS_MMAN_H_ */
