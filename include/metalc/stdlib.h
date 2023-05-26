@@ -6,7 +6,7 @@
 #include "wchar.h"
 
 
-#define RAND_MAX    INT_MAX
+#define mclib_RAND_MAX    INT_MAX
 
 #ifndef NULL
     #define NULL ((void *)0)
@@ -15,42 +15,78 @@
 
 typedef struct {
     int quot, rem;
-} div_t;
+} mclib_div_t;
 
 
 typedef struct {
     long quot, rem;
-} ldiv_t;
+} mclib_ldiv_t;
 
 
-METALC_EXPORT_WITH_ATTR(nonnull, pure) double atof(const char *str);
-METALC_EXPORT_WITH_ATTR(nonnull, pure) int atoi(const char *str);
-METALC_EXPORT_WITH_ATTR(nonnull, pure) long atol(const char *str);
-METALC_EXPORT_WITH_ATTR(nonnull(1)) long strtol(const char *str, const char **endptr, int base);
-METALC_EXPORT_WITH_ATTR(nonnull(1)) unsigned long strtoul(const char *str, const char **endptr, int base);
-METALC_EXPORT_WITH_ATTR(nonnull(1)) double strtod(const char *str, const char **endptr);
-METALC_EXPORT_WITH_ATTR(noreturn) void abort(void);  /* done */
-METALC_EXPORT_WITH_ATTR(nonnull) void atexit(void (*func)(void));
-METALC_EXPORT_WITH_ATTR(noreturn) void exit(int status);
-METALC_EXPORT_WITH_ATTR(nonnull, error("Function requires OS support.")) char *getenv(const char *name);
-METALC_EXPORT_WITH_ATTR(nonnull, error("Function requires OS support.")) int system(const char *string);
-METALC_EXPORT_WITH_ATTR(nonnull) void *bsearch(const void *key, const void *base, size_t nitems, size_t size, int (*cmp)(const void *, const void *));
-METALC_EXPORT_WITH_ATTR(nonnull) void qsort(void *base, size_t nitems, size_t size, int (*cmp)(const void *, const void *));
-METALC_EXPORT_WITH_ATTR(const) int abs(int x);                        /* done */
-METALC_EXPORT_WITH_ATTR(const) long labs(long x);                     /* done */
-METALC_EXPORT_WITH_ATTR(const) div_t div(int numer, int denom);       /* done */
-METALC_EXPORT_WITH_ATTR(const) ldiv_t ldiv(long numer, long denom);   /* done */
-METALC_EXPORT int rand(void);
-METALC_EXPORT void srand(unsigned seed);             /* done */
-METALC_EXPORT_WITH_ATTR(pure) int mblen(const char *str, size_t n);
-METALC_EXPORT size_t mbstowcs(wchar_t *pwcs, const char *str, size_t n);
-METALC_EXPORT int mbtowc(wchar_t *pwc, const char *str, size_t n);
-METALC_EXPORT size_t wcstombs(char *str, const wchar_t *pwcs, size_t n);
-METALC_EXPORT int wctomb(char *str, wchar_t wchar);
-METALC_EXPORT_WITH_ATTR(malloc, warn_unused_result) void *malloc(size_t size);
-METALC_EXPORT_WITH_ATTR(malloc, warn_unused_result) void *calloc(size_t n_elements, size_t element_size);
-METALC_EXPORT_WITH_ATTR(warn_unused_result) void *realloc(void *ptr, size_t size);
-METALC_EXPORT void free(void *ptr);
+#ifndef METALC_DISABLE_STDLIB_DEFS
+    #define RAND_MAX mclib_RAND_MAX
+    #define div_t mclib_div_t
+    #define ldiv_t mclib_ldiv_t
+#endif
+
+
+#define atoi(str)   ((int)strtol((str), NULL, 10))
+#define atol(str)   strtol((str), NULL, 10)
+
+double atof(const char *str);
+long strtol(const char *str, const char **endptr, int base);
+unsigned long strtoul(const char *str, const char **endptr, int base);
+double strtod(const char *str, const char **endptr);
+void abort(void);
+void atexit(void (*func)(void));
+void exit(int status);
+char *getenv(const char *name);
+int system(const char *string);
+void *bsearch(const void *key, const void *base, size_t nitems, size_t size, int (*cmp)(const void *, const void *));
+void qsort(void *base, size_t nitems, size_t size, int (*cmp)(const void *, const void *));
+int abs(int x);
+long labs(long x);
+mclib_div_t div(int numer, int denom);
+mclib_ldiv_t ldiv(long numer, long denom);
+int rand(void);
+void srand(unsigned seed);
+int mblen(const char *str, size_t n);
+size_t mbstowcs(mclib_wchar_t *pwcs, const char *str, size_t n);
+int mbtowc(mclib_wchar_t *pwc, const char *str, size_t n);
+size_t wcstombs(char *str, const mclib_wchar_t *pwcs, size_t n);
+int wctomb(char *str, mclib_wchar_t wchar);
+void *malloc(size_t size);
+void *calloc(size_t n_elements, size_t element_size);
+void *realloc(void *ptr, size_t size);
+void free(void *ptr);
+
+
+cstdlib_export_with_attr(atof, nonnull, pure);
+cstdlib_export_with_attr(strtol, nonnull(1));
+cstdlib_export_with_attr(strtoul, nonnull(1));
+cstdlib_export_with_attr(strtod, nonnull(1));
+cstdlib_export_with_attr(abort, noreturn);
+cstdlib_export_with_attr(atexit, nonnull);
+cstdlib_export_with_attr(exit, noreturn);
+cstdlib_export_with_attr(getenv, nonnull, error("Function requires OS support."));
+cstdlib_export_with_attr(system, nonnull, error("Function requires OS support."));
+cstdlib_export(bsearch);
+cstdlib_export(qsort);
+cstdlib_export_with_attr(abs, const);
+cstdlib_export_with_attr(labs, const);
+cstdlib_export_with_attr(div, const);
+cstdlib_export_with_attr(ldiv, const);
+cstdlib_export(rand);
+cstdlib_export(srand);
+cstdlib_export_with_attr(mblen, pure);
+cstdlib_export(mbstowcs);
+cstdlib_export(mbtowc);
+cstdlib_export(wcstombs);
+cstdlib_export(wctomb);
+cstdlib_export_with_attr(malloc, malloc, warn_unused_result);
+cstdlib_export_with_attr(calloc, malloc, warn_unused_result);
+cstdlib_export_with_attr(realloc, warn_unused_result);
+cstdlib_export(free);
 
 
 #if METALC_HAVE_LONG_LONG

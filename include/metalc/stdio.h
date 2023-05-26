@@ -1,3 +1,9 @@
+/**
+ * Standard I/O utilities.
+ *
+ * @file stdio.h
+ */
+
 #ifndef INCLUDE_METALC_STDIO_H_
 #define INCLUDE_METALC_STDIO_H_
 
@@ -7,31 +13,42 @@
 #include "stddef.h"
 
 
-struct __mcint_FILE;
-typedef struct __mcint_FILE FILE;
+struct mcinternal_FILE;
+typedef struct mcinternal_FILE mclib_FILE;
 
-extern FILE * const stdin;
-extern FILE * const stdout;
-extern FILE * const stderr;
+extern mclib_FILE * const mclib_stdin;      /**< Standard input file handle */
+extern mclib_FILE * const mclib_stdout;     /**< Standard output file handle */
+extern mclib_FILE * const mclib_stderr;     /**< Standard error output file handle */
 
 
-METALC_EXPORT_WITH_ATTR(nonnull(2)) int vsprintf(char *buffer, const char *format, va_list arg_list);
-METALC_EXPORT_WITH_ATTR(nonnull(3)) int vsnprintf(char *buffer, size_t size, const char *format, va_list arg_list);  /* Nonstandard */
-METALC_EXPORT_WITH_ATTR(nonnull(3)) int snprintf(char *buffer, size_t length, const char *format, ...);
-METALC_EXPORT_WITH_ATTR(nonnull(1, 2)) int sprintf(char *buffer, const char *format, ...);
-METALC_EXPORT_WITH_ATTR(nonnull(1)) int vprintf(const char *format, va_list arg_list);
-METALC_EXPORT_WITH_ATTR(nonnull(1)) int printf(const char *format, ...);
-METALC_EXPORT_WITH_ATTR(nonnull(1, 2)) int vfprintf(FILE *stream, const char *format, va_list arg_list);
-METALC_EXPORT_WITH_ATTR(nonnull(1, 2)) int fprintf(FILE *stream, const char *format, ...);
-METALC_EXPORT_WITH_ATTR(nonnull) void clearerr(FILE *stream);
-METALC_EXPORT_WITH_ATTR(nonnull) void fclose(FILE *stream);
-METALC_EXPORT_WITH_ATTR(nonnull) int feof(FILE *stream);
-METALC_EXPORT_WITH_ATTR(nonnull) int ferror(FILE *stream);
-METALC_EXPORT_WITH_ATTR(nonnull, warn_unused_result) FILE *fopen(const char *path, const char *mode);
-METALC_EXPORT_WITH_ATTR(nonnull) size_t fwrite(const void *ptr, size_t size, size_t count, FILE *stream);
-METALC_EXPORT_WITH_ATTR(nonnull) size_t fread(void *ptr, size_t size, size_t count, FILE *stream);
-METALC_EXPORT_WITH_ATTR(nonnull) fpos_t fseek(FILE *stream, long offset, int whence);
+int vsprintf(char *buffer, const char *format, va_list arg_list);
+int vsnprintf(char *buffer, size_t size, const char *format, va_list arg_list);
+int snprintf(char *buffer, size_t length, const char *format, ...);
+int sprintf(char *buffer, const char *format, ...);
+int vprintf(const char *format, va_list arg_list);
+int printf(const char *format, ...);
 
-int __mcint_mode_string_to_flags(const char *mode) __attribute__((nonnull));
+
+/**
+ * Write formatted output to a file using a variadic argument list.
+ *
+ * The current implementation is inefficient in that it defers to @ref vsprintf
+ * to write the entirety of the output to a buffer, then @ref fwrite s it to
+ * @a stream. A more efficient way to do this would be to write directly into
+ * @a stream without holding the entire result in memory.
+ */
+int vfprintf(mclib_FILE *stream, const char *format, va_list arg_list);
+int fprintf(mclib_FILE *stream, const char *format, ...);
+void clearerr(mclib_FILE *stream);
+void fclose(mclib_FILE *stream);
+int feof(mclib_FILE *stream);
+int ferror(mclib_FILE *stream);
+mclib_FILE *fopen(const char *path, const char *mode);
+size_t fwrite(const void *ptr, size_t size, size_t count, mclib_FILE *stream);
+size_t fread(void *ptr, size_t size, size_t count, mclib_FILE *stream);
+mclib_fpos_t fseek(mclib_FILE *stream, long offset, int whence);
+
+METALC_API_INTERAL_WITH_ATTR(nonnull)
+int mcinternal_mode_string_to_flags(const char *mode);
 
 #endif  /* INCLUDE_METALC_STDIO_H_ */

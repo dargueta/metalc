@@ -1,10 +1,15 @@
+/**
+ * Declarations for hook functions the kernel needs to implement.
+ *
+ * @file kernel_hooks.h
+ */
+
 #ifndef INCLUDE_METALC_KERNEL_HOOKS_H_
 #define INCLUDE_METALC_KERNEL_HOOKS_H_
 
 #include "metalc.h"
 #include "stddef.h"
-#include "stdint.h"
-#include "stdio.h"
+#include "bits/stdio.h"
 
 
 /**
@@ -14,7 +19,8 @@
  * @ref SIGTTIN, and @ref SIGTTOU. If this hook is not implemented, any of the
  * above signals will trigger @ref SIGSYS instead and terminate the process.
  */
-void krnlhook_suspend(int sig, void *udata) __attribute__((weak));
+METALC_API_EXPORT_WITH_ATTR(weak)
+void krnlhook_suspend(int sig);
 
 
 /**
@@ -24,7 +30,8 @@ void krnlhook_suspend(int sig, void *udata) __attribute__((weak));
  * implemented, the process cannot be resumed, and @ref SIGSYS will be raised
  * instead.
  */
-void krnlhook_resume(int sig, void *udata) __attribute__((weak));
+METALC_API_EXPORT_WITH_ATTR(weak)
+void krnlhook_resume(int sig);
 
 
 /**
@@ -34,7 +41,8 @@ void krnlhook_resume(int sig, void *udata) __attribute__((weak));
  * dump will behave like @ref SIGHUP. The original signal number is still
  * preserved in the runtime data structure passed back to the kernel.
  */
-void krnlhook_core_dump(int sig, void *udata) __attribute__((noreturn, weak));
+METALC_API_EXPORT_WITH_ATTR(noreturn, weak)
+void krnlhook_core_dump(int sig);
 
 
 /**
@@ -68,33 +76,62 @@ void krnlhook_core_dump(int sig, void *udata) __attribute__((noreturn, weak));
  * @param flags     Flags controlling how the memory should be allocated.
  * @param fd        (Ignored, always -1)
  * @param offset    (Ignored, always 0)
- * @param udata     The value of `udata` the C runtime was initialized with.
  *
  * @return The page-aligned address to the allocated memory block. On error,
  *         returns @ref MAP_FAILED and @ref errno is set to indicate the cause.
  */
+METALC_API_EXPORT_WITH_ATTR(weak)
 void *krnlhook_mmap(
-    void *addr, size_t length, int prot, int flags, int fd, off_t offset,
-    void *udata
-) __attribute__((weak));
+    void *addr, size_t length, int prot, int flags, int fd, mclib_off_t offset
+);
 
 
 /**
- * Provided for symmetry with @ref krnlhook_mmap but may never be used.
+ * A hook function that implements at least part of the POSIX `mremap()` function.
+ *
+ * @param old_address
+ * @param old_size
+ * @param new_size
+ * @param flags
+ * @param new_address
+ * @return
+ */
+METALC_API_EXPORT_WITH_ATTR(weak, nonnull(1))
+void *krnlhook_mremap(
+    void *old_address, size_t old_size, size_t new_size, int flags, ... /* void *new_address */
+);
+
+
+/**
+ * Provided for symmetry with @ref krnlhook_mmap but might never be used.
  *
  * For the time being, kernels need not implement this. The default stub will
  * always succeed, regardless of its arguments.
  */
-int krnlhook_munmap(void *addr, size_t length, void *udata) __attribute__((weak, nonnull(1)));
+METALC_API_EXPORT_WITH_ATTR(weak, nonnull(1))
+int krnlhook_munmap(void *addr, size_t length);
 
 
-int krnlhook_open(const char *file, int mode, int perms, void *udata) __attribute__((weak, nonnull(1)));
-int krnlhook_close(int fdesc, void *udata) __attribute__((weak));
-ssize_t krnlhook_write(int fdesc, const void *data, size_t size, void *udata) __attribute__((weak, nonnull(2)));
-ssize_t krnlhook_read(int fdesc, void *buffer, size_t size, void *udata) __attribute__((weak, nonnull(2)));
-off_t krnlhook_seek(int fdesc, off_t offset, int whence, void *udata) __attribute__((weak));
-off_t krnlhook_tell(int fdesc, void *udata) __attribute__((weak));
-int krnlhook_fsync(int fdesc, void *udata) __attribute__((weak));
+METALC_API_EXPORT_WITH_ATTR(weak, nonnull(1))
+int krnlhook_open(const char *file, int mode, int perms);
+
+METALC_API_EXPORT_WITH_ATTR(weak)
+int krnlhook_close(int fdesc);
+
+METALC_API_EXPORT_WITH_ATTR(weak, nonnull(2))
+ssize_t krnlhook_write(int fdesc, const void *data, size_t size);
+
+METALC_API_EXPORT_WITH_ATTR(weak, nonnull(2))
+ssize_t krnlhook_read(int fdesc, void *buffer, size_t size);
+
+METALC_API_EXPORT_WITH_ATTR(weak)
+mclib_off_t krnlhook_seek(int fdesc, mclib_off_t offset, int whence);
+
+METALC_API_EXPORT_WITH_ATTR(weak)
+mclib_off_t krnlhook_tell(int fdesc);
+
+METALC_API_EXPORT_WITH_ATTR(weak)
+int krnlhook_fsync(int fdesc);
 
 
 #endif  /* INCLUDE_METALC_KERNEL_HOOKS_H_ */

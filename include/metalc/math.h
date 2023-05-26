@@ -4,29 +4,29 @@
 #include "metalc.h"
 
 
-METALC_EXPORT_ASM double cos(double x);
-METALC_EXPORT_ASM float cosf(float x);
-METALC_EXPORT_ASM double sin(double x);
-METALC_EXPORT_ASM float sinf(float x);
-METALC_EXPORT_ASM double tan(double x);
-METALC_EXPORT_ASM float tanf(float x);
-METALC_EXPORT_ASM double pow(double base, double exponent);
-METALC_EXPORT_ASM float powf(float base, float exponent);
-METALC_EXPORT_ASM double fabs(double x);
-METALC_EXPORT_ASM float fabsf(float x);
-METALC_EXPORT_ASM double asin(double x);
-METALC_EXPORT_ASM float asinf(float x);
-METALC_EXPORT_ASM double acos(double x);
-METALC_EXPORT_ASM float acosf(float x);
+METALC_API_EXPORT_ASM double mclib_cos(double x);
+METALC_API_EXPORT_ASM float mclib_cosf(float x);
+METALC_API_EXPORT_ASM double mclib_sin(double x);
+METALC_API_EXPORT_ASM float mclib_sinf(float x);
+METALC_API_EXPORT_ASM double mclib_tan(double x);
+METALC_API_EXPORT_ASM float mclib_tanf(float x);
+METALC_API_EXPORT_ASM double mclib_pow(double base, double exponent);
+METALC_API_EXPORT_ASM float mclib_powf(float base, float exponent);
+METALC_API_EXPORT_ASM double mclib_fabs(double x);
+METALC_API_EXPORT_ASM float mclib_fabsf(float x);
+METALC_API_EXPORT_ASM double mclib_asin(double x);
+METALC_API_EXPORT_ASM float mclib_asinf(float x);
+METALC_API_EXPORT_ASM double mclib_acos(double x);
+METALC_API_EXPORT_ASM float mclib_acosf(float x);
 
 #if METALC_HAVE_LONG_DOUBLE
-    METALC_EXPORT_ASM long double cosl(long double x);
-    METALC_EXPORT_ASM long double sinl(long double x);
-    METALC_EXPORT_ASM long double tanl(long double x);
-    METALC_EXPORT_ASM long double powl(long double base, long double exponent);
-    METALC_EXPORT_ASM long double fabsl(long double x);
-    METALC_EXPORT_ASM long double asinl(long double x);
-    METALC_EXPORT_ASM long double acosl(long double x);
+    METALC_API_EXPORT_ASM long double mclib_cosl(long double x);
+    METALC_API_EXPORT_ASM long double mclib_sinl(long double x);
+    METALC_API_EXPORT_ASM long double mclib_tanl(long double x);
+    METALC_API_EXPORT_ASM long double mclib_powl(long double base, long double exponent);
+    METALC_API_EXPORT_ASM long double mclib_fabsl(long double x);
+    METALC_API_EXPORT_ASM long double mclib_asinl(long double x);
+    METALC_API_EXPORT_ASM long double mclib_acosl(long double x);
 #endif
 
 #endif  /* INCLUDE_METALC_MATH_H_ */

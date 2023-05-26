@@ -3,10 +3,11 @@
 #include "metalc/stdio.h"
 #include "metalc/stdlib.h"
 #include "metalc/string.h"
+#include "metalc/locale.h"
 
 
 /* These are copied and pasted from the Linux headers on Ubuntu 19.10. */
-static const char *ERROR_STRINGS[_MAX_ERRNO] = {
+static const char *ERROR_STRINGS[mclib__MAX_ERRNO] = {
     "Success",
     "Operation not permitted",
     "No such file or directory",
@@ -251,9 +252,7 @@ int strcmp(const char *str1, const char *str2) {
 
 
 int strcoll(const char *str1, const char *str2) {
-    /* Pretty sure this only works if the current locale is "C"; anything else
-     * is a coincidence. */
-    return strcmp(str1, str2);
+    return mcinternal_ptr_current_coll->f_strcoll(str1, str2);
 }
 
 
@@ -285,7 +284,7 @@ size_t strcspn(const char *str1, const char *str2) {
 char *strerror(int errnum) {
     static char buffer[128];
 
-    if ((errnum >= 0) && (errnum < _MAX_ERRNO))
+    if ((errnum >= 0) && (errnum < mclib__MAX_ERRNO))
         return strcpy(buffer, ERROR_STRINGS[errnum]);
 
     sprintf(buffer, "Unknown error %d", errnum);
@@ -334,7 +333,7 @@ int strncmp(const char *str1, const char *str2, size_t num) {
     }
 
     /* When we get out here either 1) num is 0 and all characters matched so far,
-     * or 2) num > 0 and we hit the end of one or both strings. In case 1 we
+     * or 2) num > 0, and we hit the end of one or both strings. In case 1 we
      * want to return 0, otherwise compare the last characters. */
 
     if (num == 0)
@@ -435,28 +434,26 @@ char *strtok(char *str, const char *delimiters) {
 
 
 size_t strxfrm(char *destination, const char *source, size_t num) {
-    if ((destination != NULL) && (num != 0))
-        strncpy(destination, source, num);
-    return strlen(source);
+    return mcinternal_ptr_current_coll->f_strxfrm(destination, source, num);
 }
 
 
-size_t strcpy_and_update_buffer(const char *source, void **buffer) {
+size_t strcpy_and_update_buffer(const char *source, char **buffer) {
     size_t buffer_size = strlen(source);
 
-    strcpy(*(char **)buffer, source);
-    *(char **)buffer += buffer_size;
+    strcpy(*buffer, source);
+    *buffer += buffer_size;
     return buffer_size;
 }
 
 
-size_t strncpy_and_update_buffer(const char *source, void **buffer, size_t n) {
+size_t strncpy_and_update_buffer(const char *source, char **buffer, size_t n) {
     size_t source_size, buffer_size;
 
     source_size = strlen(source);
     buffer_size = (source_size < n) ? source_size : n;
 
-    strncpy(*(char **)buffer, source, n);
-    *(char **)buffer += buffer_size;
+    strncpy(*buffer, source, n);
+    *buffer += buffer_size;
     return buffer_size;
 }

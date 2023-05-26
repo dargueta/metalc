@@ -16,39 +16,40 @@
  * The data type of the element in the format string.
  */
 enum MCArgumentType {
-    MC_AT_CHAR,     /**< For `%%c` */
-    MC_AT_STRING,   /**< For `%%s` */
-    MC_AT_BYTE,     /**< For `%%hhd`, `%%hhi`, `%%hhu`, `%%hho`, or `%%hhx` */
-    MC_AT_SHORT,    /**< For `%%hd`, `%%hi`, `%%hu`, `%%ho`, or `%%hx` */
-    MC_AT_INT,      /**< For `%%d`, `%%i`, `%%u`, or `%%x` */
-    MC_AT_LONG,     /**< For `%%ld`, `%%li`, `%%lu`, or `%%lx` */
+    MCFMT_ARGT__UNKNOWN = -1,
+    MCFMT_ARGT__CHAR,     /**< For `%%c` */
+    MCFMT_ARGT__STRING,   /**< For `%%s` */
+    MCFMT_ARGT__BYTE,     /**< For `%%hhd`, `%%hhi`, `%%hhu`, `%%hho`, or `%%hhx` */
+    MCFMT_ARGT__SHORT,    /**< For `%%hd`, `%%hi`, `%%hu`, `%%ho`, or `%%hx` */
+    MCFMT_ARGT__INT,      /**< For `%%d`, `%%i`, `%%u`, or `%%x` */
+    MCFMT_ARGT__LONG,     /**< For `%%ld`, `%%li`, `%%lu`, or `%%lx` */
     /** For `%%lld`, `%%lli`, `%%llu`, or `%%llx`. Not supported on all platforms. */
-    MC_AT_LONGLONG,
-    MC_AT_FLOAT,    /**< For `%%hf` */
-    MC_AT_DOUBLE,   /**< For `%%f`, `%%e`, or `%%g` */
+    MCFMT_ARGT__LONGLONG,
+    MCFMT_ARGT__FLOAT,    /**< For `%%hf` */
+    MCFMT_ARGT__DOUBLE,   /**< For `%%f`, `%%e`, or `%%g` */
 
     /** For `%%lf`, `%%le`, or `%%lg`. Not supported on all platforms. */
-    MC_AT_LONGDOUBLE,
-    MC_AT_POINTER,  /**< `p` */
-    MC_AT_N_WRITTEN_POINTER,    /**< `%%n` */
+    MCFMT_ARGT__LONGDOUBLE,
+    MCFMT_ARGT__POINTER,  /**< `p` */
+    MCFMT_ARGT__N_WRITTEN_POINTER,    /**< `%%n` */
 };
 
 
 enum MCArgumentWidth {
-    MCAW_DEFAULT,
-    MCAW_BYTE,
-    MCAW_SHORT,
-    MCAW_INT,
-    MCAW_LONG,
-    MCAW_LONGLONG,
-    MCAW_INTPTR,
-    MCAW_SIZE_T,
-    MCAW_PTRDIFF,
-    MCAW_LONG_DOUBLE
+    MCFMT_ARGW__DEFAULT,
+    MCFMT_ARGW__BYTE,
+    MCFMT_ARGW__SHORT,
+    MCFMT_ARGW__INT,
+    MCFMT_ARGW__LONG,
+    MCFMT_ARGW__LONGLONG,
+    MCFMT_ARGW__INTPTR,
+    MCFMT_ARGW__SIZE_T,
+    MCFMT_ARGW__PTRDIFF,
+    MCFMT_ARGW__LONG_DOUBLE
 };
 
 
-#define MCAW_INTMAX MCAW_INTPTR
+#define MCFMT_ARGW__INTMAX MCFMT_ARGW__INTPTR
 
 
 enum MCSignRepr {
@@ -58,35 +59,94 @@ enum MCSignRepr {
 };
 
 
+enum MCFieldJustify {
+    MCFMT_JUSTIFY__UNSPECIFIED,
+    MCFMT_JUSTIFY__LEFT,
+    MCFMT_JUSTIFY__RIGHT
+};
+
+enum MCSciNotation {
+    MCFMT_SCINOT__UNSPECIFIED,
+    MCFMT_SCINOT__NEVER = MCFMT_SCINOT__UNSPECIFIED,
+    MCFMT_SCINOT__IF_NEEDED,
+    MCFMT_SCINOT__ALWAYS
+};
+
 
 /**
  * Information about a format specifier in a printf format string.
  */
 struct MCFormatSpecifier {
-    /**
-     * How to align the field.
-     *
-     * There are three possible values:
-     *
-     * * -1: Left-justify the field.
-     * * 0: The alignment of the field wasn't defined in the format specifier.
-     * * 1: Right-justify the field.
-     */
-    int justify;
+    /** How to align the text in the rendered field. */
+    enum MCFieldJustify justify;
+
+    /** How to represent the sign of numeric arguments. */
     enum MCSignRepr sign_representation;
+
+    /** The datatype of the argument. */
     enum MCArgumentType argument_type;
+
+    /** The width modifier for the argument, if any. */
     enum MCArgumentWidth argument_width;
-    /** The minimum width of the field, or 0 if not defined. */
-    unsigned minimum_field_width;
-    unsigned radix;
+
+    /** The minimum width of the fully rendered field, or 0 if not defined. */
+    int minimum_field_width;
+
+    /** The radix of the representation of a numeric argument, 0 if not applicable. */
+    int radix;
+
+    /** Nonzero if the argument is an unsigned integer, 0 otherwise. */
     int is_unsigned;
     int is_zero_padded;
+
+    /** For numeric arguments, nonzero if the output requires a prefix indicating the
+     * radix, i.e. "0", "0x", or "0X". */
     int has_radix_prefix;
-    int use_scientific_notation;    /**< -1 maybe (%g), 1 force (%e) */
-    unsigned padding;
-    unsigned fraction_zero_padding;
-    unsigned fraction_precision;
+
+    /** If/when to use scientific notation when rendering this field. */
+    enum MCSciNotation use_scientific_notation;
+
+    /** The number of trailing zeros to append to the end of a floating-point number.*/
+    int fraction_zero_padding;
+
+    /** The number of digits in the fraction portion of the */
+    int fraction_precision;
+
+    /** Use uppercase letters for numeric arguments using a radix >10. */
+    int use_uppercase;
 };
+
+
+/**
+ * Examine a format specifier and read the flags, but not the width or type indicators.
+ *
+ * For example, for a format specifier "%-04d", @a format is expected to point
+ * to the '-' and only "-0" will be read. "4d" are the width and type indicators
+ * so they're ignored.
+ *
+ * @a format is expected to point to the first character past a `%` sign.
+ *
+ * On success, the function returns the number of characters it read. On failure,
+ * the number will be negative and errno will be set. The absolute value of the
+ * return value is still the number of characters read.
+ */
+METALC_API_INTERAL_WITH_ATTR(nonnull)
+int parse_printf_format_flags(const char *format, struct MCFormatSpecifier *info);
+
+
+/**
+ * Examine a format string and read the field width.
+ *
+ * This function must be called after all flags are read. Thus, the width (if
+ * present) will be a positive integer @e not starting with `0`. For example,
+ * for a format string "%-04d", @a format will point to the '4', and only '4'
+ * will be read.
+ *
+ * The function returns the number of characters read. If the width isn't present,
+ * the return value will be 0 and `info->width` will also be 0.
+ */
+METALC_API_INTERAL_WITH_ATTR(nonnull)
+int parse_printf_format_width(const char *format, struct MCFormatSpecifier *info);
 
 
 /**
@@ -104,8 +164,37 @@ struct MCFormatSpecifier {
  *          processing the format specifier. If an error occurred, the return
  *          value will be negative and @ref errno will be set accordingly.
  */
-METALC_INTERNAL
-int __mcint_parse_printf_format_specifier(const char *format, struct MCFormatSpecifier *info);
+METALC_API_INTERAL_WITH_ATTR(nonnull)
+int parse_printf_format_specifier(const char *format, struct MCFormatSpecifier *info);
+
+
+/**
+ * Examine a format string and determine the floating-point precision.
+ *
+ * This must be called immediately after @ref parse_printf_format_width. It
+ * expects `.` to be the first character. If not, it assumes there's no precision
+ * specifier and returns immediately.
+ */
+METALC_API_INTERAL_WITH_ATTR(nonnull)
+int parse_printf_format_precision(const char *format, struct MCFormatSpecifier *info);
+
+
+METALC_API_INTERNAL
+enum MCArgumentType int_argtype_from_width(enum MCArgumentWidth width_kind);
+
+
+METALC_API_INTERNAL
+enum MCArgumentType float_argtype_from_width(enum MCArgumentWidth width_kind);
+
+
+METALC_API_INTERAL_WITH_ATTR(nonnull)
+int parse_printf_format_type_width_flag(
+    const char *format, struct MCFormatSpecifier *info
+);
+
+METALC_API_INTERAL_WITH_ATTR(nonnull)
+int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info);
+
 
 /**
  * Given a format string, write a single value to the buffer.
@@ -115,9 +204,9 @@ int __mcint_parse_printf_format_specifier(const char *format, struct MCFormatSpe
  * @todo Add support for floating-point numbers.
  * @todo Add support for left- and right-justifying values.
  */
-METALC_INTERNAL
-int __mcint_evaluate_format_specifier(
-    const char **format, va_list arg_list, char **output, int n_chars_written,
+METALC_API_INTERNAL
+int evaluate_format_specifier(
+    const char **format, va_list arg_list, char **output, size_t n_chars_written,
     size_t limit
 );
 

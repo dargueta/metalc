@@ -3,96 +3,100 @@
 #include "metalc/setjmp.h"
 #include "metalc/signal.h"
 #include "metalc/stddef.h"
-#include "metalc/stdint.h"
 #include "metalc/stdio.h"
 
 #include "metalc/sys/mman.h"
-#include "metalc/bits/sys/mman.h"
 
 
-extern jmp_buf __mcint_abort_target;
+extern mclib_jmp_buf mcinternal_abort_target;
 
 
-void krnlhook_suspend(int sig, void *udata) {
-    (void)sig, (void)udata;
-    raise(SIGSYS);
+void krnlhook_suspend(int sig) {
+    (void)sig;
+    raise(mclib_SIGSYS);
 }
 
-void krnlhook_resume(int sig, void *udata) {
-    (void)sig, (void)udata;
-    raise(SIGSYS);
+void krnlhook_resume(int sig) {
+    (void)sig;
+    raise(mclib_SIGSYS);
 }
 
 
-void krnlhook_core_dump(int sig, void *udata) {
-    (void)udata;
-    longjmp(__mcint_abort_target, sig);
+void krnlhook_core_dump(int sig) {
+    longjmp(mcinternal_abort_target, sig);
 }
 
 
 void *krnlhook_mmap(
-    void *addr, size_t length, int prot, int flags, int fd, off_t offset,
-    void *udata
+    void *addr, size_t length, int prot, int flags, int fd, mclib_off_t offset
 ) {
-    (void)addr, (void)length, (void)prot, (void)flags, (void)fd, (void)offset,
-    (void)udata;
-    errno = ENOMEM;
-    return MAP_FAILED;
+    (void)addr, (void)length, (void)prot, (void)flags, (void)fd, (void)offset;
+    mclib_errno = mclib_ENOMEM;
+    return mclib_MAP_FAILED;
 }
 
 
-int krnlhook_munmap(void *addr, size_t length, void *udata) {
-    (void)addr, (void)length, (void)udata;
+void *krnlhook_mremap(
+    void *old_address, size_t old_size, size_t new_size, int flags, ... /* void *new_address */
+) {
+    (void)old_address, (void)old_size, (void)new_size, (void)flags;
+    mclib_errno = mclib_ENOSYS;
+    return mclib_MAP_FAILED;
+}
+
+
+int krnlhook_munmap(void *addr, size_t length) {
+    (void)addr, (void)length;
     /* Succeed unconditionally. This probably won't ever be called anyway. */
-    errno = 0;
+    mclib_errno = 0;
     return 0;
 }
 
 
-int krnlhook_open(const char *file, int mode, int perms, void *udata) {
-    (void)file, (void)mode, (void)perms, (void)udata;
-    errno = ENOSYS;
+int krnlhook_open(const char *file, int mode, int perms) {
+    (void)file, (void)mode, (void)perms;
+    mclib_errno = mclib_ENOSYS;
     return -1;
 }
 
 
-int krnlhook_close(int fdesc, void *udata) {
-    (void)fdesc, (void)udata;
-    errno = ENOSYS;
+int krnlhook_close(int fdesc) {
+    (void)fdesc;
+    mclib_errno = mclib_ENOSYS;
     return -1;
 }
 
 
-ssize_t krnlhook_write(int fdesc, const void *data, size_t size, void *udata) {
-    (void)fdesc, (void)data, (void)size, (void)udata;
-    errno = ENOSYS;
+ssize_t krnlhook_write(int fdesc, const void *data, size_t size) {
+    (void)fdesc, (void)data, (void)size;
+    mclib_errno = mclib_ENOSYS;
     return -1;
 }
 
 
-ssize_t krnlhook_read(int fdesc, void *buffer, size_t size, void *udata) {
-    (void)fdesc, (void)buffer, (void)size, (void)udata;
-    errno = ENOSYS;
+ssize_t krnlhook_read(int fdesc, void *buffer, size_t size) {
+    (void)fdesc, (void)buffer, (void)size;
+    mclib_errno = mclib_ENOSYS;
     return -1;
 }
 
 
-off_t krnlhook_seek(int fdesc, off_t offset, int whence, void *udata) {
-    (void)fdesc, (void)offset, (void)whence, (void)udata;
-    errno = ENOSYS;
+mclib_off_t krnlhook_seek(int fdesc, mclib_off_t offset, int whence) {
+    (void)fdesc, (void)offset, (void)whence;
+    mclib_errno = mclib_ENOSYS;
     return 0;
 }
 
 
-off_t krnlhook_tell(int fdesc, void *udata) {
-    (void)fdesc, (void)udata;
-    errno = ENOSYS;
+mclib_off_t krnlhook_tell(int fdesc) {
+    (void)fdesc;
+    mclib_errno = mclib_ENOSYS;
     return -1;
 }
 
 
-int krnlhook_fsync(int fdesc, void *udata) {
-    (void)fdesc, (void)udata;
-    errno = ENOSYS;
+int krnlhook_fsync(int fdesc) {
+    (void)fdesc;
+    mclib_errno = mclib_ENOSYS;
     return -1;
 }

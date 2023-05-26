@@ -12,17 +12,29 @@
 
 typedef struct {
     long long quot, rem;
-} lldiv_t;
+} mclib_lldiv_t;
 
 
-METALC_EXPORT_WITH_ATTR(const) long long llabs(long long x);      /* done */
-METALC_EXPORT_WITH_ATTR(pure) long long atoll(const char *str);
-METALC_EXPORT_WITH_ATTR(pure) long long strtoll(const char *str, const char **endptr, int base);
-METALC_EXPORT_WITH_ATTR(pure) unsigned long long strtoull(const char *str, const char **endptr, int base);
-METALC_EXPORT_WITH_ATTR(const) lldiv_t lldiv(long long numer, long long denom);
+#define atoll(str)  strtoll((str), NULL, 10)
+
+long long llabs(long long x);      /* done */
+long long strtoll(const char *str, const char **endptr, int base);
+unsigned long long strtoull(const char *str, const char **endptr, int base);
+mclib_lldiv_t lldiv(long long numer, long long denom);
 
 /* Nonstandard */
-METALC_EXPORT char *lltoa(long long value, char *buf, int base);
-METALC_EXPORT char *ulltoa(unsigned long long value, char *str, int base);
+char *lltoa(long long value, char *buf, int base);
+char *ulltoa(unsigned long long value, char *str, int base);
+
+#ifndef METALC_DISABLE_STDLIB_DEFS
+    #define lldiv_t mclib_lldiv_t
+#endif
+
+cstdlib_export_with_attr(llabs, const);
+cstdlib_export_with_attr(strtoll, pure);
+cstdlib_export_with_attr(strtoull, pure);
+cstdlib_export_with_attr(lldiv, const);
+cstdlib_export(lltoa);
+cstdlib_export(ulltoa);
 
 #endif  /* METALC_BITS_STDLIB_LONGLONG_H_ */

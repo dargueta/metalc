@@ -1,7 +1,6 @@
 #include "metalc/crtinit.h"
 #include "metalc/errno.h"
 #include "metalc/internal/efi_shim.h"
-#include "metalc/limits.h"
 #include "metalc/locale.h"
 #include "metalc/metalc.h"
 #include "metalc/setjmp.h"
@@ -17,19 +16,20 @@ extern int locale_init(void);
 extern int locale_teardown(void);
 
 
-MetalCRuntimeInfo *__mcint_runtime_info __attribute__((visibility("hidden"))) = NULL;
+MetalCRuntimeInfo *mcinternal_runtime_info __attribute__((visibility("hidden"))) = NULL;
 
-jmp_buf __mcint_abort_target;
+
+mclib_jmp_buf mcinternal_abort_target;
 
 
 int cstdlib_init(MetalCRuntimeInfo *rti) {
-    __mcint_runtime_info = rti;
-    errno = 0;
+    mcinternal_runtime_info = rti;
+    mclib_errno = 0;
 
     malloc_init();
     stdio_init();
     locale_init();
-    setlocale(LC_ALL, "C");
+    setlocale(mclib_LC_ALL, "C");
 
     /* TODO (dargueta): Initialize atexit here. */
 
@@ -50,9 +50,9 @@ static int cstdlib_teardown(void) {
 
 int cstdlib_run(int argc, char **argv, char **env) {
     int result;
-    MetalCRuntimeInfo *rti = __mcint_runtime_info;
+    MetalCRuntimeInfo *rti = mcinternal_runtime_info;
 
-    result = setjmp(__mcint_abort_target);
+    result = setjmp(mcinternal_abort_target);
     if (result == 0) {
         /* Call main() using the three-argument form. It's up to the kernel to
          * provide a shim for main() implementations that take zero or two
@@ -64,7 +64,7 @@ int cstdlib_run(int argc, char **argv, char **env) {
          * signal as the return value. */
         rti->signal_code = 0;
     }
-    else if (result == INT_MIN)
+    else if (result == CRTINIT_EXIT_SENTINEL)
         /* exit() was called, rti->main_return_value is already set. */
         rti->signal_code = 0;
     else {

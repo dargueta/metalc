@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
 # TODO (dargueta): Maybe modify this to support NASM-compatible assemblers like YASM?
 project(MetalC VERSION 0.1.0 LANGUAGES C ASM_NASM)
@@ -24,6 +24,7 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 else()
     message(FATAL_ERROR "Unsupported compiler: ${CMAKE_C_COMPILER_ID}")
 endif()
+
 
 # Enable all warnings, make warnings errors. This applies to *all* targets.
 add_compile_options(-Wall -Wextra -Werror -pedantic -pedantic-errors)

@@ -12,7 +12,7 @@
 #include "metalc/sys/mman.h"
 
 
-extern MetalCRuntimeInfo *__mcint_runtime_info;
+extern MetalCRuntimeInfo *mcinternal_runtime_info;
 
 
 #if METALC_ARCH_BITS == 16
@@ -48,34 +48,28 @@ static struct _MemoryBlock *g_next_allocation = NULL;
 
 
 static struct _MemoryBlock *_allocate_pages(size_t n_pages, void *suggested_address) {
-    return krnlhook_mmap(
+    return (struct _MemoryBlock *) krnlhook_mmap(
         suggested_address,
-        n_pages * __mcint_runtime_info->page_size,
-        PROT_READ | PROT_WRITE,
-        MAP_ANONYMOUS,
+        n_pages * mcinternal_runtime_info->page_size,
+        mclib_PROT_READ | mclib_PROT_WRITE,
+        mclib_MAP_ANONYMOUS,
         -1,
-        0,
-        __mcint_runtime_info->udata
+        0
     );
 }
 
 
-static size_t _size_of_allocation(const void *pointer) {
-    return (((const struct _MemoryBlock *)pointer) - 1)->block_size;
-}
-
-
-METALC_INTERNAL int malloc_init(void) {
+METALC_API_INTERNAL int malloc_init(void) {
     size_t request_size;
 
     /* The minimum allocation size depends on the architecture. For 16-bit builds,
      * it's 1 KiB. Otherwise, 4 MiB. */
-    request_size = MAX(MINIMUM_MMAP_REQUEST_SIZE, __mcint_runtime_info->page_size);
+    request_size = MAX(MINIMUM_MMAP_REQUEST_SIZE, mcinternal_runtime_info->page_size);
     g_ptr_first_page = _allocate_pages(request_size, NULL);
 
-    if (g_ptr_first_page == MAP_FAILED)
+    if (g_ptr_first_page == mclib_MAP_FAILED)
         /* If mmap failed, then errno is already set for us. */
-        return errno;
+        return mclib_errno;
 
     g_ptr_first_page->p_previous = NULL;
     g_ptr_first_page->block_size = request_size;
@@ -85,7 +79,7 @@ METALC_INTERNAL int malloc_init(void) {
 }
 
 
-METALC_INTERNAL int malloc_teardown(void) {
+METALC_API_INTERNAL int malloc_teardown(void) {
     return 0;
 }
 
@@ -94,7 +88,7 @@ void *malloc(size_t size) {
     if (size == 0)
         return NULL;
 
-    errno = ENOSYS;
+    mclib_errno = mclib_ENOSYS;
     return NULL;
 }
 
@@ -110,7 +104,7 @@ void *calloc(size_t n_elements, size_t element_size) {
 
     /* Bail out if n_elements * element_size overflows. */
     if (total_size / element_size != n_elements) {
-        errno = ERANGE;
+        mclib_errno = mclib_ERANGE;
         return NULL;
     }
 
@@ -162,3 +156,7 @@ void free(void *pointer) {
 #undef MINIMUM_ALLOCATION_SIZE
 #undef MINIMUM_MMAP_REQUEST_SIZE
 #undef MAX
+
+cstdlib_implement(malloc);
+cstdlib_implement(realloc);
+cstdlib_implement(free);

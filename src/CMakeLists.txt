@@ -53,7 +53,6 @@ set(HEADER_FILES
     "${INCLUDE_CLIB_DIR}/string.h"
     "${INCLUDE_CLIB_DIR}/bits/stdio.h"
     "${INCLUDE_CLIB_DIR}/bits/stdlib_longlong.h"
-    "${INCLUDE_CLIB_DIR}/bits/sys/mman.h"
     "${INCLUDE_CLIB_DIR}/charsets/common.h"
     "${INCLUDE_CLIB_DIR}/charsets/utf8.h"
     "${INCLUDE_CLIB_DIR}/sys/mman.h"
@@ -82,14 +81,13 @@ set(LIBRARY_C_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/wchar/utf8.c"
 )
 
-set(LIBRARY_X86_ASM_SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_PROCESSOR}/atomic.asm"
-    "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_PROCESSOR}/setjmp.asm"
-)
 
 set(TEST_SOURCE_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/main.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/ctype.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/string.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/testing.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/testing.h"
 )
 
 include_directories("${CMAKE_BINARY_DIR}/include")
@@ -125,6 +123,13 @@ target_compile_definitions(
     -DMETALC_DISABLE_STDLIB_DEFS=${METALC_DISABLE_STDLIB_DEFS}
 )
 
+# Flags used by all targets, including the test executable.
+set(COMMON_C_FLAGS -Wall -Werror -Wextra -Wpedantic -fno-builtin)
+
+# Flags only used by our implementation of the library.
+set(UNHOSTED_C_FLAGS
+    -ffreestanding -nostdlib -nostartfiles -nolibc -Wformat=2
+)
 
 # MetalC, compiled as a dynamic library for linking with other programs. Given
 # that the major selling point of this library is that you'll used on bare metal
@@ -132,7 +137,7 @@ target_compile_definitions(
 # other programs. Your kernel won't be using this.
 add_library(metalc SHARED ${LIBRARY_C_SOURCES} ${HEADER_FILES})
 add_dependencies(metalc metalc_asm)
-target_compile_options(metalc PRIVATE -ffreestanding -Wextra -Wpedantic)
+target_compile_options(metalc PRIVATE ${COMMON_C_FLAGS} ${UNHOSTED_C_FLAGS})
 target_compile_definitions(
     metalc PRIVATE
     -DMETALC_BUILDING_LIBC=1
@@ -148,7 +153,7 @@ target_link_libraries(metalc metalc_asm)
 # able to use the shared one.
 add_library(metalcstatic STATIC ${LIBRARY_C_SOURCES} ${HEADER_FILES})
 add_dependencies(metalcstatic metalc_asm)
-target_compile_options(metalcstatic PRIVATE -ffreestanding -Wextra -Wpedantic)
+target_compile_options(metalcstatic PRIVATE ${COMMON_C_FLAGS} ${UNHOSTED_C_FLAGS})
 target_compile_definitions(
     metalcstatic PRIVATE
     -DMETALC_BUILDING_LIBC=1
@@ -168,14 +173,7 @@ if (METALC_COMPILE_FOR_TESTING)
 
     # Disable linking the executable with the OS's C standard library and use our
     # implementation instead.
-    target_compile_options(
-        test_executable PRIVATE
-        -Wextra
-        -pedantic
-        -pedantic-errors
-        -Wno-declaration-after-statement    # TODO: This should not be necessary
-        -Wno-unused-variable                # Triggered by some macros we use
-    )
+    target_compile_options(test_executable PRIVATE ${COMMON_C_FLAGS})
     target_compile_definitions(
         test_executable PRIVATE
         -DMETALC_COMPILE_FOR_TESTING=${METALC_COMPILE_FOR_TESTING}

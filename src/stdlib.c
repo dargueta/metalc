@@ -1,4 +1,5 @@
 #include "metalc/charsets/common.h"
+#include "metalc/crtinit.h"
 #include "metalc/ctype.h"
 #include "metalc/errno.h"
 #include "metalc/limits.h"
@@ -14,15 +15,15 @@
 static unsigned g_rand_seed = 0;
 static const char *kIntAlphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-extern MetalCRuntimeInfo *__mcint_runtime_info;
-extern jmp_buf __mcint_abort_target;
+extern MetalCRuntimeInfo *mcinternal_runtime_info;
+extern mclib_jmp_buf mcinternal_abort_target;
 
-extern const struct lconv _current_lconv;
-extern const struct __mcint_charset_info *_ptr_current_charset;
+extern const struct mclib_lconv mcinternal_current_lconv;
+extern const struct mcinternal_charset_info *mcinternal_ptr_current_charset;
 
 
 void abort(void) {
-    raise(SIGABRT);
+    raise(mclib_SIGABRT);
 
     /* Theoretically we should never get here; the program should exit once the
      * abort signal has been raised. On the off chance that doesn't happen... */
@@ -37,8 +38,8 @@ void srand(unsigned seed) {
 
 void exit(int code) {
     /* TODO: execute atexit handlers here */
-    __mcint_runtime_info->main_return_value = code;
-    longjmp(__mcint_abort_target, INT_MIN);
+    mcinternal_runtime_info->main_return_value = code;
+    longjmp(mcinternal_abort_target, CRTINIT_EXIT_SENTINEL);
 }
 
 
@@ -53,7 +54,11 @@ double atof(const char *str) {
 
     /* If we hit the end of the string, bail. */
     if (*str == '\0') {
+<<<<<<< HEAD
         errno = EINVAL;
+=======
+        mclib_errno = mclib_EINVAL;
+>>>>>>> master
         return 0.0;
     }
 
@@ -105,7 +110,7 @@ char *utoa(unsigned value, char *str, int base) {
 
 char *ltoa(long value, char *str, int base) {
     if ((base < 2) || (base > 36)) {
-        errno = EINVAL;
+        mclib_errno = mclib_EINVAL;
         return NULL;
     }
 
@@ -125,7 +130,7 @@ char *ultoa(unsigned long value, char *str, int base) {
     char *write_pointer = str;
 
     if ((base < 2) || (base > 36)) {
-        errno = EINVAL;
+        mclib_errno = mclib_EINVAL;
         return NULL;
     }
 
@@ -152,7 +157,7 @@ char *ultoa(unsigned long value, char *str, int base) {
 
 
 unsigned long strtoul(const char *str, const char **endptr, int base) {
-    unsigned long value;
+    unsigned long value, current_digit;
     char next_char;
     int n_digits_processed;
     char *p_digit;
@@ -170,7 +175,7 @@ unsigned long strtoul(const char *str, const char **endptr, int base) {
          * a '0' then it's either a radix or the entire value is 0. */
         if (*str == '0') {
             /* Starts with a 0; if it's followed by x then it's hexadecimal, if
-             * folowed by a digit then it's octal */
+             * followed by a digit then it's octal. */
             next_char = str[1];
 
             if ((next_char == 'x') || (next_char == 'X'))
@@ -191,32 +196,36 @@ unsigned long strtoul(const char *str, const char **endptr, int base) {
     }
     else if ((base < 2) || (base > 36)) {
         /* If a radix is passed in, it must be between 2 and 36, inclusive. */
-        errno = EINVAL;
+        mclib_errno = mclib_EINVAL;
         if (endptr)
             *endptr = str;
         return 0;
     }
 
     value = 0;
-
     for (n_digits_processed = 0; *str != '\0'; ++n_digits_processed, ++str) {
         p_digit = strchr(kIntAlphabet, tolower(*str));
         if (p_digit == NULL)
-            /* Hit something that's not a valid digit in the base we're operating in. */
             break;
 
-        value += (unsigned long)((intptr_t)p_digit - (intptr_t)kIntAlphabet);
+        current_digit = (unsigned long)((intptr_t)p_digit - (intptr_t)kIntAlphabet);
+        if (current_digit >= (unsigned long)base)
+            /* This is a valid digit in one of the bases we support, but not in
+             * the one we're operating in. Treat it as the end of the number. */
+            break;
+
         value *= base;
+        value += current_digit;
     }
 
     if (n_digits_processed == 0) {
         /* If we haven't processed any digits then this isn't a valid string.
          * Indicate this in @ref errno and return 0. */
-        errno = EINVAL;
+        mclib_errno = mclib_EINVAL;
         value = 0;
     }
     else
-        errno = 0;
+        mclib_errno = 0;
 
     if (endptr)
         *endptr = str;
@@ -243,10 +252,10 @@ long strtol(const char *str, const char **endptr, int base) {
         sign = 1;
 
     magnitude = strtoul(str, endptr, base);
-    if (errno != 0)
+    if (mclib_errno != 0)
         return 0;
     if (magnitude > LONG_MAX) {
-        errno = EOVERFLOW;
+        mclib_errno = mclib_EOVERFLOW;
         return 0;
     }
 
@@ -254,8 +263,8 @@ long strtol(const char *str, const char **endptr, int base) {
 }
 
 
-div_t div(int numer, int denom) {
-    div_t result;
+mclib_div_t div(int numer, int denom) {
+    mclib_div_t result;
 
     result.quot = numer / denom;
     result.rem = numer % denom;
@@ -263,8 +272,8 @@ div_t div(int numer, int denom) {
 }
 
 
-ldiv_t ldiv(long numer, long denom) {
-    ldiv_t result;
+mclib_ldiv_t ldiv(long numer, long denom) {
+    mclib_ldiv_t result;
 
     result.quot = numer / denom;
     result.rem = numer % denom;
@@ -273,21 +282,21 @@ ldiv_t ldiv(long numer, long denom) {
 
 
 int mblen(const char *str, size_t n) {
-    return _ptr_current_charset->f_mblen(str, n);
+    return mcinternal_ptr_current_charset->f_mblen(str, n);
 }
 
 
-int wctomb(char *str, wchar_t wchar) {
-    return _ptr_current_charset->f_wctomb(str, wchar);
+int wctomb(char *str, mclib_wchar_t wchar) {
+    return mcinternal_ptr_current_charset->f_wctomb(str, wchar);
 }
 
 
-int mbtowc(wchar_t *pwc, const char *str, size_t n) {
-    return _ptr_current_charset->f_mbtowc(pwc, str, n);
+int mbtowc(mclib_wchar_t *pwc, const char *str, size_t n) {
+    return mcinternal_ptr_current_charset->f_mbtowc(pwc, str, n);
 }
 
 
-size_t mbstowcs(wchar_t *pwcs, const char *str, size_t n) {
+size_t mbstowcs(mclib_wchar_t *pwcs, const char *str, size_t n) {
     size_t out_position;
     ptrdiff_t current_char_len;
 
@@ -295,7 +304,7 @@ size_t mbstowcs(wchar_t *pwcs, const char *str, size_t n) {
         current_char_len = mbtowc(pwcs + out_position, str, current_char_len);
 
         if (current_char_len < 0) {
-            errno = EILSEQ;
+            mclib_errno = mclib_EILSEQ;
             return out_position;
         }
         else if (current_char_len == 0)
@@ -310,7 +319,7 @@ size_t mbstowcs(wchar_t *pwcs, const char *str, size_t n) {
 }
 
 
-size_t wcstombs(char *str, const wchar_t *pwcs, size_t n) {
+size_t wcstombs(char *str, const mclib_wchar_t *pwcs, size_t n) {
     size_t out_position;
     char buffer[4];
     int wchar_length;
@@ -324,7 +333,7 @@ size_t wcstombs(char *str, const wchar_t *pwcs, size_t n) {
 
         wchar_length = wctomb(buffer, *pwcs);
         if (wchar_length < 0) {
-            errno = EILSEQ;
+            mclib_errno = mclib_EILSEQ;
             return (size_t)-1;
         }
 
@@ -344,9 +353,39 @@ size_t wcstombs(char *str, const wchar_t *pwcs, size_t n) {
 }
 
 
+void *bsearch(
+    const void *key, const void *base, size_t nitems, size_t size,
+    int (*cmp)(const void *, const void *)
+) {
+    const void *partition;
+    size_t partition_index;
+    int compare_result;
+
+    if (nitems == 0)
+        return NULL;
+    if (nitems == 1) {
+        if (cmp(key, base) == 0)
+            return (void *)base;
+        return NULL;
+    }
+
+    partition_index = nitems / 2;
+    partition = (const void *)((const char *)base + (size * partition_index));
+
+    compare_result = cmp(key, partition);
+    if (compare_result == 0)
+        return (void *)partition;
+    if (compare_result > 0)
+        /* Item we're looking for is larger than the partition. Readjust the base
+         * of our search to be one element past the partition. */
+        base = (const void *)((const char *)partition + size);
+
+    return bsearch(key, base, nitems - partition_index, size, cmp);
+}
+
 #if METALC_HAVE_LONG_LONG
-    lldiv_t lldiv(long long numer, long long denom) {
-        lldiv_t result;
+    mclib_lldiv_t lldiv(long long numer, long long denom) {
+        mclib_lldiv_t result;
 
         result.quot = numer / denom;
         result.rem = numer % denom;
@@ -363,7 +402,7 @@ size_t wcstombs(char *str, const wchar_t *pwcs, size_t n) {
 
     char *lltoa(long long value, char *str, int base) {
         if ((base < 2) || (base > 36)) {
-            errno = EINVAL;
+            mclib_errno = mclib_EINVAL;
             return NULL;
         }
 
@@ -383,7 +422,7 @@ size_t wcstombs(char *str, const wchar_t *pwcs, size_t n) {
         char *write_pointer = str;
 
         if ((base < 2) || (base > 36)) {
-            errno = EINVAL;
+            mclib_errno = mclib_EINVAL;
             return NULL;
         }
 
@@ -408,3 +447,22 @@ size_t wcstombs(char *str, const wchar_t *pwcs, size_t n) {
         return str;
     }
 #endif
+
+
+cstdlib_implement(abort);
+cstdlib_implement(abs);
+cstdlib_implement(bsearch);
+cstdlib_implement(div);
+cstdlib_implement(exit);
+cstdlib_implement(itoa);
+cstdlib_implement(labs);
+cstdlib_implement(ldiv);
+cstdlib_implement(ltoa);
+cstdlib_implement(mblen);
+cstdlib_implement(mbstowcs);
+cstdlib_implement(mbtowc);
+cstdlib_implement(srand);
+cstdlib_implement(ultoa);
+cstdlib_implement(utoa);
+cstdlib_implement(wcstombs);
+cstdlib_implement(wctomb);

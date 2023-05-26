@@ -8,9 +8,11 @@
 #define INCLUDE_METALC_CRTINIT_H_
 
 #include "internal/efi_shim.h"
+#include "metalc/limits.h"
 #include "metalc.h"
-#include "stddef.h"
-#include "stdint.h"
+
+
+#define CRTINIT_EXIT_SENTINEL INT_MIN
 
 
 /**
@@ -65,9 +67,9 @@ typedef struct {
      */
     cmetal_main_fn main;
 
-    intptr_t stdin_handle;
-    intptr_t stdout_handle;
-    intptr_t stderr_handle;
+    int stdin_handle;
+    int stdout_handle;
+    int stderr_handle;
 
     /**
      * On UEFI-aware builds, the EFI image handle.

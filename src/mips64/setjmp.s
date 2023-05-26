@@ -1,11 +1,11 @@
 .include "metalc/mips/metalc.s"
 
-.globl setjmp
-.globl longjmp
+.globl mclib_setjmp
+.globl mclib_longjmp
 
 .section .text
 
-setjmp:
+mclib_setjmp:
     # $a0 contains the jump buffer
     sd  $s0, 0($a0)
     sd  $s1, 8($a0)
@@ -30,7 +30,7 @@ setjmp:
     jr  $ra
 
 
-longjmp:
+mclib_longjmp:
     # $a0 contains the jump buffer, $a1 is the return value.
     ld  $s0, 0($a0)
     ld  $s1, 8($a0)

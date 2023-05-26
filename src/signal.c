@@ -6,8 +6,8 @@
 #include "metalc/stddef.h"
 
 
-extern MetalCRuntimeInfo *__mcint_runtime_info;
-extern jmp_buf __mcint_abort_target;
+extern MetalCRuntimeInfo *mcinternal_runtime_info;
+extern mclib_jmp_buf mcinternal_abort_target;
 
 
 #if METALC_COMPILE_FOR_TESTING
@@ -18,17 +18,17 @@ extern jmp_buf __mcint_abort_target;
 
 METALC_INTERNAL_WITH_ATTR(noreturn) static void _sighandler_term(int sig) {
     switch (sig) {
-        case SIGQUIT:
-        case SIGILL:
-        case SIGTRAP:
-        case SIGABRT:
-        case SIGBUS:
-        case SIGFPE:
-        case SIGSEGV:
-        case SIGSTKFLT:
-        case SIGXCPU:
-        case SIGXFSZ:
-        case SIGSYS:
+        case mclib_SIGQUIT:
+        case mclib_SIGILL:
+        case mclib_SIGTRAP:
+        case mclib_SIGABRT:
+        case mclib_SIGBUS:
+        case mclib_SIGFPE:
+        case mclib_SIGSEGV:
+        case mclib_SIGSTKFLT:
+        case mclib_SIGXCPU:
+        case mclib_SIGXFSZ:
+        case mclib_SIGSYS:
             /* All of these signals require a core dump and immediate termination.
              * crt_teardown() will *not* be called and no resources are released.
              * It's up to the operating system to release memory, file handles,
@@ -46,6 +46,10 @@ METALC_INTERNAL_WITH_ATTR(noreturn) static void _sighandler_term(int sig) {
             #else
                 longjmp(__mcint_abort_target, sig);
             #endif
+            break;
+
+        default:
+            longjmp(mcinternal_abort_target, sig);
             break;
     };
 }
@@ -90,7 +94,7 @@ static signal_handler_t kHandlersByMaskValue[] = {
 */
 
 
-static const signal_handler_t _default_signal_handlers[] = {
+static const mclib_signal_handler_t _default_signal_handlers[] = {
     /* Signal numbers begin at 1. Don't bother storing a handler for signal 0. */
     _sighandler_term,       /* SIGHUP */
     _sighandler_ignore,     /* SIGINT */
@@ -132,7 +136,7 @@ static void _sighandler_default(int sig) {
 }
 
 
-static signal_handler_t _current_signal_handlers[] = {
+static mclib_signal_handler_t _current_signal_handlers[] = {
     /* Signal numbers begin at 1. Don't bother storing a handler for signal 0. */
     _sighandler_default,
     _sighandler_default,
@@ -171,34 +175,34 @@ static signal_handler_t _current_signal_handlers[] = {
 
 int raise(int sig) {
     if ((sig < 1) || (sig > 32))
-        return EINVAL;
+        return mclib_EINVAL;
 
     _current_signal_handlers[sig - 1](sig);
     return 0;
 }
 
 
-signal_handler_t signal(int sig, signal_handler_t handler) {
-    signal_handler_t original_handler;
+mclib_signal_handler_t signal(int sig, mclib_signal_handler_t handler) {
+    mclib_signal_handler_t original_handler;
 
     /* Ignore attempts to set signal handlers for signals that can't be overridden. */
-    if ((sig == SIGTSTP) || (sig == SIGKILL)) {
-        errno = EPERM;
+    if ((sig == mclib_SIGTSTP) || (sig == mclib_SIGKILL)) {
+        mclib_errno = mclib_EPERM;
         return _sighandler_default;
     }
     /* Barf if the caller tries overriding a signal we don't support */
     else if ((sig < 1) || (sig > 32)) {
-        errno = EINVAL;
+        mclib_errno = mclib_EINVAL;
         return _sighandler_term;
     }
 
     original_handler = _current_signal_handlers[sig - 1];
 
-    if (handler == (signal_handler_t)SIG_DFL)
+    if (handler == (mclib_signal_handler_t)mclib_SIG_DFL)
         _current_signal_handlers[sig - 1] = _sighandler_default;
-    else if (handler == (signal_handler_t)SIG_IGN)
+    else if (handler == (mclib_signal_handler_t)mclib_SIG_IGN)
         _current_signal_handlers[sig - 1] = _sighandler_ignore;
-    else if (handler == (signal_handler_t)SIG_ERR)
+    else if (handler == (mclib_signal_handler_t)mclib_SIG_ERR)
         _current_signal_handlers[sig - 1] = _sighandler_term;
     else
         _current_signal_handlers[sig - 1] = handler;

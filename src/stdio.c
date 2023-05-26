@@ -12,7 +12,7 @@
 #include "metalc/string.h"
 
 
-extern MetalCRuntimeInfo *__mcint_runtime_info;
+extern MetalCRuntimeInfo *mcinternal_runtime_info;
 extern int fileio_init(void);
 extern int fileio_teardown(void);
 
@@ -27,8 +27,15 @@ METALC_INTERNAL int stdio_teardown(void) {
 }
 
 
-int __mcint_evaluate_format_specifier(
-    const char **format, va_list arg_list, char **output, int n_chars_written,
+static int saturated_cast_to_int(size_t value) {
+    if (value > INT_MAX)
+        return INT_MAX;
+    return (int)value;
+}
+
+
+int evaluate_format_specifier(
+    const char **format, va_list arg_list, char **output, size_t n_chars_written,
     size_t limit
 ) {
     char temp[256];
@@ -37,13 +44,13 @@ int __mcint_evaluate_format_specifier(
     struct MCFormatSpecifier info;
     const char *string_pointer;
 
-    if ((limit == 0) || ((size_t)n_chars_written >= (limit - 1)))
+    if ((limit == 0) || (n_chars_written >= (limit - 1)))
         remaining_chars = 0;
     else
-        remaining_chars = limit - 1 - (size_t)n_chars_written;
+        remaining_chars = limit - 1 - n_chars_written;
 
     if (**format == '%') {
-        if (output && (remaining_chars > 0)) {
+        if ((*output != NULL) && (remaining_chars > 0)) {
             **output = '%';
             ++*output;
         }
@@ -51,33 +58,30 @@ int __mcint_evaluate_format_specifier(
         return 1;
     }
 
-    format_length = __mcint_parse_printf_format_specifier(*format, &info);
+    format_length = parse_printf_format_specifier(*format, &info);
     if (format_length < 0)
         return -1;
 
     *format += (size_t)format_length;
 
-    /* `**format` points to the first character in the format string *after* the
-     * introductory '%'. Look at that character and increment `*format` so we
-     * don't have to do that later. */
     switch (info.argument_type) {
-        case MC_AT_CHAR:
+        case MCFMT_ARGT__CHAR:
             /* n.b. `char` is promoted to `int` when passed as an argument */
             temp[0] = (char)va_arg(arg_list, int);
-            if (output && (remaining_chars > 0)) {
+            if ((*output != NULL) && (remaining_chars > 0)) {
                 **output = temp[0];
                 ++*output;
             }
             return 1;
 
-        case MC_AT_BYTE:
-        case MC_AT_SHORT:
-        case MC_AT_INT:
+        case MCFMT_ARGT__BYTE:
+        case MCFMT_ARGT__SHORT:
+        case MCFMT_ARGT__INT:
             /* This can be d, i, u, x, X, o, and their h or hh variants.
              * We don't care if the argument is a short or byte, since they get
              * promoted to integers when passed as arguments.
              *
-             * FIXME: We need to output the radix first.
+             * FIXME: We need to output the radix first if # is present.
              */
             if (info.is_unsigned)
                 /* `x`, `X`, `u`, or `o` */
@@ -86,31 +90,38 @@ int __mcint_evaluate_format_specifier(
                 /* d or i */
                 itoa(va_arg(arg_list, int), temp, info.radix);
 
-            return strncpy_and_update_buffer(temp, (void **)output, remaining_chars);
+            string_length = strncpy_and_update_buffer(
+                temp, output, remaining_chars
+            );
+            return saturated_cast_to_int(string_length);
 
-        case MC_AT_LONG:
+        case MCFMT_ARGT__LONG:
             if (info.is_unsigned)
                 itoa(va_arg(arg_list, unsigned long), temp, info.radix);
             else
                 itoa(va_arg(arg_list, long), temp, info.radix);
 
-            return strcpy_and_update_buffer(temp, (void **)output);
+            string_length = strncpy_and_update_buffer(temp, output, remaining_chars);
+            return saturated_cast_to_int(string_length);
 
         #if METALC_HAVE_LONG_LONG
-            case MC_AT_LONGLONG:
+            case MCFMT_ARGT__LONGLONG:
                 if (info.is_unsigned)
                     itoa(va_arg(arg_list, unsigned long long), temp, info.radix);
                 else
                     itoa(va_arg(arg_list, long long), temp, info.radix);
 
-                return strncpy_and_update_buffer(temp, (void **)output, remaining_chars);
+                string_length = strncpy_and_update_buffer(
+                    temp, output, remaining_chars
+                );
+                return saturated_cast_to_int(string_length);
         #endif
 
-        case MC_AT_N_WRITTEN_POINTER:
-            *va_arg(arg_list, int *) = n_chars_written;
+        case MCFMT_ARGT__N_WRITTEN_POINTER:
+            *va_arg(arg_list, int *) = saturated_cast_to_int(n_chars_written);
             return 0;
 
-        case MC_AT_STRING:
+        case MCFMT_ARGT__STRING:
             string_pointer = va_arg(arg_list, char *);
 
             /* Determine the length of the string we need to copy, and fail if
@@ -126,12 +137,14 @@ int __mcint_evaluate_format_specifier(
             string_length = strlen(string_pointer);
 
             if (string_length > (size_t)INT_MAX) {
-                errno = EOVERFLOW;
+                mclib_errno = mclib_EOVERFLOW;
                 return -1;
             }
 
-            if (!output)
-                return string_length;
+            /* If we're not writing to an actual buffer, return early and just
+             * say how many characters we *would've* written. */
+            if (*output == NULL)
+                return saturated_cast_to_int(string_length);
 
             /* Don't bother with padding crap, just output the string. */
             strncpy(
@@ -139,43 +152,51 @@ int __mcint_evaluate_format_specifier(
                 string_pointer,
                 (string_length < remaining_chars) ? string_length : remaining_chars
             );
-            return (int)string_length;
+            return saturated_cast_to_int(string_length);
 
-        case MC_AT_FLOAT:
-        case MC_AT_DOUBLE:
-        case MC_AT_LONGDOUBLE:
-            errno = ENOSYS;
+        case MCFMT_ARGT__FLOAT:
+        case MCFMT_ARGT__DOUBLE:
+        case MCFMT_ARGT__LONGDOUBLE:
+            mclib_errno = mclib_ENOSYS;
             return -1;
 
         default:
-            errno = EINVAL;
+            mclib_errno = mclib_EINVAL;
             return -1;
     }
 }
 
 
 int vsnprintf(char *buffer, size_t size, const char *format, va_list arg_list) {
-    int n_chars_written, i;
+    size_t total_written;
+    int n_written;
 
-    n_chars_written = 0;
-
-    while (*format != '\0') {
+    total_written = 0;
+    while (total_written < size) {
+        if (*format == '\0') {
+            if (buffer)
+                *buffer = '\0';
+            return saturated_cast_to_int(total_written + 1);
+        }
         if (*format != '%') {
-            if (buffer && ((size_t)n_chars_written < size))
-                *buffer++ = *format;
-            ++n_chars_written;
+            if (buffer) {
+                *buffer = *format;
+                ++buffer;
+            }
+            ++total_written;
+            ++format;
         }
         else {
-            i = __mcint_evaluate_format_specifier(
-                &format, arg_list, &buffer, n_chars_written, size
+            n_written = evaluate_format_specifier(
+                &format, arg_list, &buffer, total_written, size
             );
-            if (i < 0)
-                return -n_chars_written;
-            n_chars_written += i;
+            if (n_written < 0)
+                return -(int)total_written;
+            total_written += n_written;
         }
-    }
+    };
 
-    return n_chars_written;
+    return saturated_cast_to_int(total_written);
 }
 
 
@@ -206,12 +227,12 @@ int snprintf(char *buffer, size_t n, const char *format, ...) {
 }
 
 
-int vfprintf(FILE *stream, const char *format, va_list arg_list) {
+int vfprintf(mclib_FILE *stream, const char *format, va_list arg_list) {
     char *buffer;
     int n_chars_written;
 
     n_chars_written = vsprintf(NULL, format, arg_list);
-    if (n_chars_written < 0)
+    if (n_chars_written <= 0)
         return n_chars_written;
 
     buffer = malloc(n_chars_written);
@@ -225,7 +246,7 @@ int vfprintf(FILE *stream, const char *format, va_list arg_list) {
 }
 
 
-int fprintf(FILE *stream, const char *format, ...) {
+int fprintf(mclib_FILE *stream, const char *format, ...) {
     va_list arg_list;
     int result;
 
@@ -237,7 +258,7 @@ int fprintf(FILE *stream, const char *format, ...) {
 
 
 int vprintf(const char *format, va_list arg_list) {
-    return vfprintf(stdout, format, arg_list);
+    return vfprintf(mclib_stdout, format, arg_list);
 }
 
 
@@ -250,3 +271,13 @@ int printf(const char *format, ...) {
     va_end(arg_list);
     return result;
 }
+
+
+cstdlib_implement(vsprintf);
+cstdlib_implement(sprintf);
+cstdlib_implement(vsnprintf);
+cstdlib_implement(snprintf);
+cstdlib_implement(vprintf);
+cstdlib_implement(printf);
+cstdlib_implement(vfprintf);
+cstdlib_implement(fprintf);

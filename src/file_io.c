@@ -9,51 +9,51 @@
 #include "metalc/string.h"
 
 
-extern MetalCRuntimeInfo *__mcint_runtime_info;
+extern MetalCRuntimeInfo *mcinternal_runtime_info;
 
-struct __mcint_FILE {
-    intptr_t descriptor;
+struct mcinternal_FILE {
+    int descriptor;
     int eof;
     int last_error;
     int io_flags;
 };
 
 
-static struct __mcint_FILE _internal_stdin;
-static struct __mcint_FILE _internal_stdout;
-static struct __mcint_FILE _internal_stderr;
+static struct mcinternal_FILE mcinternal_stdin;
+static struct mcinternal_FILE mcinternal_stdout;
+static struct mcinternal_FILE mcinternal_stderr;
 
-FILE * const stdin = &_internal_stdin;
-FILE * const stdout = &_internal_stdout;
-FILE * const stderr = &_internal_stderr;
+mclib_FILE * const mclib_stdin = &mcinternal_stdin;
+mclib_FILE * const mclib_stdout = &mcinternal_stdout;
+mclib_FILE * const mclib_stderr = &mcinternal_stderr;
 
 
-METALC_INTERNAL int fileio_init(void) {
-    memset(&_internal_stdin, 0, sizeof(_internal_stdin));
-    memset(&_internal_stdout, 0, sizeof(_internal_stdout));
-    memset(&_internal_stderr, 0, sizeof(_internal_stderr));
+METALC_API_INTERNAL int fileio_init(void) {
+    memset(&mcinternal_stdin, 0, sizeof(mcinternal_stdin));
+    memset(&mcinternal_stdout, 0, sizeof(mcinternal_stdout));
+    memset(&mcinternal_stderr, 0, sizeof(mcinternal_stderr));
 
-    _internal_stdin.descriptor = __mcint_runtime_info->stdin_handle;
-    _internal_stdin.io_flags = O_RDONLY;
+    mcinternal_stdin.descriptor = mcinternal_runtime_info->stdin_handle;
+    mcinternal_stdin.io_flags = O_RDONLY;
 
-    _internal_stdout.descriptor = __mcint_runtime_info->stdout_handle;
-    _internal_stdout.io_flags = O_WRONLY;
+    mcinternal_stdout.descriptor = mcinternal_runtime_info->stdout_handle;
+    mcinternal_stdout.io_flags = O_WRONLY;
 
-    _internal_stderr.descriptor = __mcint_runtime_info->stderr_handle;
-    _internal_stderr.io_flags = O_WRONLY;
+    mcinternal_stderr.descriptor = mcinternal_runtime_info->stderr_handle;
+    mcinternal_stderr.io_flags = O_WRONLY;
     return 0;
 }
 
 
-METALC_INTERNAL int fileio_teardown(void) {
-    fclose(stdin);
-    fclose(stdout);
-    fclose(stderr);
+METALC_API_INTERNAL int fileio_teardown(void) {
+    fclose(mclib_stdin);
+    fclose(mclib_stdout);
+    fclose(mclib_stderr);
     return 0;
 }
 
 
-int __mcint_mode_string_to_flags(const char *mode) {
+int mcinternal_mode_string_to_flags(const char *mode) {
     int can_read, can_write, append, binary, truncate, create, excl, i, result;
 
     can_read = can_write = append = binary = truncate = create = excl = 0;
@@ -74,7 +74,7 @@ int __mcint_mode_string_to_flags(const char *mode) {
             append = 1;
             break;
         default:
-            errno = EINVAL;
+            mclib_errno = mclib_EINVAL;
             return -1;
     }
 
@@ -92,23 +92,23 @@ int __mcint_mode_string_to_flags(const char *mode) {
             case 'x':
                 /* `x` is only valid with `w` */
                 if (mode[0] != 'w') {
-                    errno = EINVAL;
+                    mclib_errno = mclib_EINVAL;
                     return -1;
                 }
                 excl = 1;
                 break;
             default:
-                errno = EINVAL;
+                mclib_errno = mclib_EINVAL;
                 return -1;
         }
     }
 
-    if (can_read && !can_write)
-        result = O_RDONLY;
-    else if (can_write && !can_read)
-        result = O_WRONLY;
-    else
+    if (can_read && can_write)
         result = O_RDWR;
+    else if (can_read)
+        result = O_RDONLY;
+    else
+        result = O_WRONLY;
 
     if (append)
         result |= O_APPEND;
@@ -125,46 +125,46 @@ int __mcint_mode_string_to_flags(const char *mode) {
 }
 
 
-void clearerr(FILE *stream) {
+void clearerr(mclib_FILE *stream) {
     stream->last_error = 0;
     stream->eof = 0;
 }
 
 
-void fclose(FILE *stream) {
-    krnlhook_fsync(stream->descriptor, __mcint_runtime_info->udata);
-    krnlhook_close(stream->descriptor, __mcint_runtime_info->udata);
+void fclose(mclib_FILE *stream) {
+    krnlhook_fsync(stream->descriptor);
+    krnlhook_close(stream->descriptor);
 
     /* Don't free the standard I/O streams, as they were never allocated with
      * malloc. */
     if (
-        (stream != &_internal_stdin)
-        && (stream != &_internal_stdout)
-        && (stream != &_internal_stderr)
+        (stream != &mcinternal_stdin)
+        && (stream != &mcinternal_stdout)
+        && (stream != &mcinternal_stderr)
     )
         free(stream);
 }
 
 
-int feof(FILE *stream) {
+int feof(mclib_FILE *stream) {
     return stream->eof;
 }
 
 
-int ferror(FILE *stream) {
+int ferror(mclib_FILE *stream) {
     return stream->last_error;
 }
 
 
-FILE *fopen(const char *path, const char *mode) {
-    FILE *stream;
+mclib_FILE *fopen(const char *path, const char *mode) {
+    mclib_FILE *stream;
     int io_flags;
 
     /* Convert the OS-agnostic mode string to POSIX bit flags, which will be
      * easier for the kernel to deal with. */
-    io_flags = __mcint_mode_string_to_flags(mode);
+    io_flags = mcinternal_mode_string_to_flags(mode);
     if (io_flags == -1) {
-        errno = EINVAL;
+        mclib_errno = mclib_EINVAL;
         return NULL;
     }
 
@@ -173,10 +173,9 @@ FILE *fopen(const char *path, const char *mode) {
         return NULL;
 
     /* Open the file, always using mode 0644 if we're creating a new file. */
-    stream->descriptor = krnlhook_open(
-        path, io_flags, 0644, __mcint_runtime_info->udata
-    );
+    stream->descriptor = krnlhook_open(path, io_flags, 0644);
     if (stream->descriptor == -1) {
+        /* Failed to open the file. */
         free(stream);
         return NULL;
     }
@@ -188,38 +187,32 @@ FILE *fopen(const char *path, const char *mode) {
 }
 
 
-size_t fwrite(const void *ptr, size_t size, size_t count, FILE *stream) {
+size_t fwrite(const void *ptr, size_t size, size_t count, mclib_FILE *stream) {
     /* Complain if we're trying to write to a read-only stream. */
     if ((stream->io_flags & O_ACCMODE) == O_RDONLY) {
-        errno = EPERM;
+        mclib_errno = mclib_EPERM;
         return ~0;
     }
 
     /* Seek to the end of the stream if we opened the file in append mode. */
     if (stream->io_flags & O_APPEND)
-        fseek(stream, 0, SEEK_END);
+        fseek(stream, 0, mclib_SEEK_END);
 
-    return krnlhook_write(
-        stream->descriptor, ptr, size * count, __mcint_runtime_info->udata
-    );
+    return krnlhook_write(stream->descriptor, ptr, size * count);
 }
 
 
-size_t fread(void *ptr, size_t size, size_t count, FILE *stream) {
+size_t fread(void *ptr, size_t size, size_t count, mclib_FILE *stream) {
     /* Complain if we're trying to read from a write-only stream. */
     if ((stream->io_flags & O_ACCMODE) == O_WRONLY) {
-        errno = EPERM;
+        mclib_errno = mclib_EPERM;
         return ~0;
     }
 
-    return krnlhook_read(
-        stream->descriptor, ptr, size * count, __mcint_runtime_info->udata
-    );
+    return krnlhook_read(stream->descriptor, ptr, size * count);
 }
 
 
-fpos_t fseek(FILE *stream, long offset, int whence) {
-    return krnlhook_seek(
-        stream->descriptor, offset, whence, __mcint_runtime_info->udata
-    );
+mclib_fpos_t fseek(mclib_FILE *stream, long offset, int whence) {
+    return krnlhook_seek(stream->descriptor, offset, whence);
 }

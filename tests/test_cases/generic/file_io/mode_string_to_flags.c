@@ -34,24 +34,31 @@ struct ModeStringTestCase mode_string_to_flags_cases[] = {
     {"ab", O_WRONLY | O_CREAT | O_APPEND | O_BINARY, 0},
     {"a+b", O_RDWR | O_CREAT | O_APPEND | O_BINARY, 0},
     {"ab+", O_RDWR | O_CREAT | O_APPEND | O_BINARY, 0},
-    {"R", -1, EINVAL},
-    {"", -1, EINVAL},
-    {"r+x", -1, EINVAL},
-    {"ax", -1, EINVAL},
-    {"a+x", -1, EINVAL},
+    {"R", -1, mclib_EINVAL},
+    {"", -1, mclib_EINVAL},
+    {"r+x", -1, mclib_EINVAL},
+    {"ax", -1, mclib_EINVAL},
+    {"a+x", -1, mclib_EINVAL},
     {NULL, 0, 0}
 };
 
 
-
-BEGIN_TEST()
+BEGIN_TEST(test_mode_string_to_flags__all)
     struct ModeStringTestCase *testcase;
 
     for (testcase = mode_string_to_flags_cases; testcase->mode_string != NULL; ++testcase) {
-        errno = 0;
-        check(
-            __mcint_mode_string_to_flags(testcase->mode_string) == testcase->expected_flags
+        INFO_MSG(
+            "Testing mode string `%s`, expecting output %d and errno %d.",
+            testcase->mode_string,
+            testcase->expected_flags,
+            testcase->errno_value
         );
-        check(errno == testcase->errno_value);
+
+        mclib_errno = 0;
+        CHECK_EQ(
+            mcinternal_mode_string_to_flags(testcase->mode_string),
+            testcase->expected_flags
+        );
+        CHECK_EQ(mclib_errno, testcase->errno_value);
     }
 END_TEST()
