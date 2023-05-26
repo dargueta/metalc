@@ -1,4 +1,5 @@
 #include "metalc/charsets/common.h"
+#include "metalc/crtinit.h"
 #include "metalc/ctype.h"
 #include "metalc/errno.h"
 #include "metalc/limits.h"
@@ -38,7 +39,7 @@ void srand(unsigned seed) {
 void exit(int code) {
     /* TODO: execute atexit handlers here */
     mcinternal_runtime_info->main_return_value = code;
-    longjmp(mcinternal_abort_target, INT_MIN);
+    longjmp(mcinternal_abort_target, CRTINIT_EXIT_SENTINEL);
 }
 
 

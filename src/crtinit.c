@@ -1,7 +1,6 @@
 #include "metalc/crtinit.h"
 #include "metalc/errno.h"
 #include "metalc/internal/efi_shim.h"
-#include "metalc/limits.h"
 #include "metalc/locale.h"
 #include "metalc/metalc.h"
 #include "metalc/setjmp.h"
@@ -63,7 +62,7 @@ int cstdlib_run(int argc, char **argv, char **env) {
          * signal as the return value. */
         rti->signal_code = 0;
     }
-    else if (result == INT_MIN)
+    else if (result == CRTINIT_EXIT_SENTINEL)
         /* exit() was called, rti->main_return_value is already set. */
         rti->signal_code = 0;
     else {

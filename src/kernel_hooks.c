@@ -3,7 +3,6 @@
 #include "metalc/setjmp.h"
 #include "metalc/signal.h"
 #include "metalc/stddef.h"
-#include "metalc/stdint.h"
 #include "metalc/stdio.h"
 
 #include "metalc/sys/mman.h"
