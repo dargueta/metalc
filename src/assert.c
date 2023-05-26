@@ -15,11 +15,7 @@ void mcinternal_assert(
         return;
 
     #if METALC_COMPILE_OPTION_ENABLE_FILE_IO
-<<<<<<< HEAD
-        out = (stderr != NULL) ? stderr : stdout;
-=======
         out = (mclib_stderr != NULL) ? mclib_stderr : mclib_stdout;
->>>>>>> master
         if (out) {
             fprintf(
                 out,

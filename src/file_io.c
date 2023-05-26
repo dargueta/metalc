@@ -216,3 +216,13 @@ size_t fread(void *ptr, size_t size, size_t count, mclib_FILE *stream) {
 mclib_fpos_t fseek(mclib_FILE *stream, long offset, int whence) {
     return krnlhook_seek(stream->descriptor, offset, whence);
 }
+
+
+cstdlib_implement(clearerr);
+cstdlib_implement(fclose);
+cstdlib_implement(feof);
+cstdlib_implement(ferror);
+cstdlib_implement(fopen);
+cstdlib_implement(fwrite);
+cstdlib_implement(fread);
+cstdlib_implement(fseek);

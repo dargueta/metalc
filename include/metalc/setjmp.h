@@ -23,7 +23,6 @@
 
 typedef char mclib_jmp_buf[BUFSIZE] __attribute__((aligned (16)));
 
-
 #undef BUFSIZE
 
 

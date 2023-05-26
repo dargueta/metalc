@@ -1,5 +1,6 @@
 #include "metalc/errno.h"
 #include "metalc/kernel_hooks.h"
+#include "metalc/metalc.h"
 #include "metalc/setjmp.h"
 #include "metalc/signal.h"
 #include "metalc/stdbool.h"
@@ -11,12 +12,12 @@ extern mclib_jmp_buf mcinternal_abort_target;
 
 
 #if METALC_COMPILE_FOR_TESTING
-    METALC_INTERNAL_WITH_ATTR(noreturn) extern void testhook_terminate(int sig);
-    METALC_INTERNAL_WITH_ATTR(noreturn) extern void testhook_signal(int sig);
+    METALC_API_INTERNAL_WITH_ATTR(noreturn) extern void testhook_terminate(int sig);
+    METALC_API_INTERNAL_WITH_ATTR(noreturn) extern void testhook_signal(int sig);
 #endif
 
 
-METALC_INTERNAL_WITH_ATTR(noreturn) static void _sighandler_term(int sig) {
+METALC_API_INTERNAL_WITH_ATTR(noreturn) static void _sighandler_term(int sig) {
     switch (sig) {
         case mclib_SIGQUIT:
         case mclib_SIGILL:
@@ -36,7 +37,7 @@ METALC_INTERNAL_WITH_ATTR(noreturn) static void _sighandler_term(int sig) {
             #if METALC_COMPILE_FOR_TESTING
                 testhook_terminate(sig);
             #else
-                krnlhook_core_dump(sig, __mcint_runtime_info->udata);
+                krnlhook_core_dump(sig, mcinternal_runtime_info->udata);
             #endif
             break;
 
@@ -44,7 +45,7 @@ METALC_INTERNAL_WITH_ATTR(noreturn) static void _sighandler_term(int sig) {
             #if METALC_COMPILE_FOR_TESTING
                 testhook_terminate(sig);
             #else
-                longjmp(__mcint_abort_target, sig);
+                longjmp(mcinternal_abort_target, sig);
             #endif
             break;
 
@@ -66,7 +67,7 @@ static void _sighandler_stop(int sig) {
     #if METALC_COMPILE_FOR_TESTING
         testhook_signal(sig);
     #else
-        krnlhook_suspend(sig, __mcint_runtime_info->udata);
+        krnlhook_suspend(sig, mcinternal_runtime_info->udata);
     #endif
 }
 
@@ -76,7 +77,7 @@ static void _sighandler_resume(int sig) {
     #if METALC_COMPILE_FOR_TESTING
         testhook_signal(sig);
     #else
-        krnlhook_resume(sig, __mcint_runtime_info->udata);
+        krnlhook_resume(sig, mcinternal_runtime_info->udata);
     #endif
 }
 

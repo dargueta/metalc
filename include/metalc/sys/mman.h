@@ -24,6 +24,7 @@
  */
 #define mclib_MAP_FAILED  ((void *)(~((uintptr_t)0)))
 
+
 #define mclib_MAP_PRIVATE     1   /**< Changes are private. */
 #define mclib_MAP_SHARED      2   /**< Share changes. */
 

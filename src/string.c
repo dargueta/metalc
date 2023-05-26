@@ -168,6 +168,7 @@ int memcmp(const void *ptr1, const void *ptr2, size_t num) {
 
     return diff;
 }
+cstdlib_implement(memcmp);
 
 
 void *memcpy(void *destination, const void *source, size_t num) {
@@ -182,6 +183,7 @@ void *memcpy(void *destination, const void *source, size_t num) {
 
     return destination;
 }
+cstdlib_implement(memcpy);
 
 
 void *memmove(void *destination, const void *source, size_t num) {
@@ -211,6 +213,7 @@ void *memmove(void *destination, const void *source, size_t num) {
 
     return destination;
 }
+cstdlib_implement(memmove);
 
 
 void *memset(void *ptr, int value, size_t num) {
@@ -221,11 +224,13 @@ void *memset(void *ptr, int value, size_t num) {
 
     return ptr;
 }
+cstdlib_implement(memset);
 
 
 char *strcat(char *destination, const char *source) {
     return strcpy(strchr(destination, 0), source);
 }
+cstdlib_implement(strcat);
 
 
 char *strchr(const char *str, int character) {
@@ -236,6 +241,7 @@ char *strchr(const char *str, int character) {
 
     return NULL;
 }
+cstdlib_implement(strchr);
 
 
 int strcmp(const char *str1, const char *str2) {
@@ -249,11 +255,13 @@ int strcmp(const char *str1, const char *str2) {
 
     return *(signed char *)str1 - *(signed char *)str2;
 }
+cstdlib_implement(strcmp);
 
 
 int strcoll(const char *str1, const char *str2) {
     return mcinternal_ptr_current_coll->f_strcoll(str1, str2);
 }
+cstdlib_implement(strcoll);
 
 
 char *strcpy(char *destination, const char *source) {
@@ -265,6 +273,7 @@ char *strcpy(char *destination, const char *source) {
 
     return destination;
 }
+cstdlib_implement(strcpy);
 
 
 size_t strcspn(const char *str1, const char *str2) {
@@ -279,6 +288,7 @@ size_t strcspn(const char *str1, const char *str2) {
     }
     return span;
 }
+cstdlib_implement(strcspn);
 
 
 char *strerror(int errnum) {
@@ -290,6 +300,7 @@ char *strerror(int errnum) {
     sprintf(buffer, "Unknown error %d", errnum);
     return buffer;
 }
+cstdlib_implement(strerror);
 
 
 size_t strlen(const char *str) {
@@ -299,6 +310,7 @@ size_t strlen(const char *str) {
         ++length;
     return length;
 }
+cstdlib_implement(strlen);
 
 
 char *strncat(char *destination, const char *source, size_t num) {
@@ -317,6 +329,7 @@ char *strncat(char *destination, const char *source, size_t num) {
     *p_dest = '\0';
     return destination;
 }
+cstdlib_implement(strncat);
 
 
 int strncmp(const char *str1, const char *str2, size_t num) {
@@ -340,6 +353,7 @@ int strncmp(const char *str1, const char *str2, size_t num) {
         return 0;
     return (int)(*str1 - *str2);
 }
+cstdlib_implement(strncmp);
 
 
 char *strncpy(char *destination, const char *source, size_t num) {
@@ -353,6 +367,7 @@ char *strncpy(char *destination, const char *source, size_t num) {
 
     return destination;
 }
+cstdlib_implement(strncpy);
 
 
 char *strpbrk(const char *str1, const char *str2) {
@@ -362,6 +377,7 @@ char *strpbrk(const char *str1, const char *str2) {
         return NULL;
     return (char *)str1 + span;
 }
+cstdlib_implement(strpbrk);
 
 
 char *strrchr(const char *str, int character) {
@@ -373,6 +389,7 @@ char *strrchr(const char *str, int character) {
     }
     return NULL;
 }
+cstdlib_implement(strrchr);
 
 
 size_t strspn(const char *str1, const char *str2) {
@@ -384,6 +401,7 @@ size_t strspn(const char *str1, const char *str2) {
     }
     return span;
 }
+cstdlib_implement(strspn);
 
 
 char *strstr(const char *str, const char *substr) {
@@ -395,6 +413,7 @@ char *strstr(const char *str, const char *substr) {
     }
     return NULL;
 }
+cstdlib_implement(strstr);
 
 
 char *strtok(char *str, const char *delimiters) {
@@ -431,11 +450,13 @@ char *strtok(char *str, const char *delimiters) {
     start[token_length] = '\0';
     return start;
 }
+cstdlib_implement(strtok);
 
 
 size_t strxfrm(char *destination, const char *source, size_t num) {
     return mcinternal_ptr_current_coll->f_strxfrm(destination, source, num);
 }
+cstdlib_implement(strxfrm);
 
 
 size_t strcpy_and_update_buffer(const char *source, char **buffer) {

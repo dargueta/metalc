@@ -15,7 +15,7 @@
 #endif
 
 
-METALC_API_INTERAL_WITH_ATTR(nonnull(3, 4))
+METALC_API_INTERNAL_WITH_ATTR(nonnull(3, 4))
 void mcinternal_assert(
     int expression, int line, const char *file, const char* assert_text,
     const char *message, ...

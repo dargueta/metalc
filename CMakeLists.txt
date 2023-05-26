@@ -3,13 +3,13 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 # TODO (dargueta): Maybe modify this to support NASM-compatible assemblers like YASM?
 project(MetalC VERSION 0.1.0 LANGUAGES C ASM_NASM)
 
-# Compile as C90 with no extensions enabled. This must be 100% cross-platform.
-set(CMAKE_C_STANDARD 90)
+# Compile as C99 with no extensions enabled. This must be 100% cross-platform.
+set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED YES)
 set(CMAKE_C_EXTENSIONS NO)
 
 
-if(CMAKE_C_COMPILER_ID STREQUAL "MinGW")  # TODO: MinGW may lie and say it's GCC
+if(CMAKE_C_PLATFORM_ID MATCHES "MinGW")  # TODO: MinGW may lie and say it's GCC
     set(METALC_COMPILER_MINGW 1)
     set(METALC_ABI_MICROSOFT 1)
     set(METALC_ABI_GNU 0)

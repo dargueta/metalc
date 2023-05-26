@@ -15,8 +15,9 @@ typedef intptr_t ssize_t;
 /* TODO (dargueta): Is this correct? */
 typedef intmax_t max_align_t;
 
-
-#define offsetof(type, member)  ((size_t)(&(((type *)0)->(member))))
+#ifndef offsetof
+#   define offsetof(type, member)  ((size_t)(&(((type *)0)->(member))))
+#endif
 
 
 typedef uint_least32_t wchar_t;
@@ -25,7 +26,7 @@ typedef uint_least32_t wchar_t;
 #define WCHAR_MAX   UINT_LEAST32_MAX
 
 #ifndef NULL
-    #define NULL    ((void *)0)
+#   define NULL    ((void *)0)
 #endif
 
 #endif  /* INCLUDE_METALC_STDDEF_H_ */

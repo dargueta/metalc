@@ -62,3 +62,9 @@ BEGIN_TEST(test_mode_string_to_flags__all)
         CHECK_EQ(mclib_errno, testcase->errno_value);
     }
 END_TEST()
+
+
+const struct UnitTestEntry kFileIOUnitTests[] = {
+    {test_mode_string_to_flags__all, "mode_string_to_flags: all"},
+    {NULL, NULL}
+};

@@ -84,6 +84,9 @@ METALC_API_INTERNAL int malloc_teardown(void) {
 }
 
 
+#define _size_of_allocation(ptr) (((const struct _MemoryBlock *)(((const char *)(ptr)) - sizeof(struct _MemoryBlock)))->block_size)
+
+
 void *malloc(size_t size) {
     if (size == 0)
         return NULL;

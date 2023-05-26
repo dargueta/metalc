@@ -94,9 +94,9 @@ cstdlib_export(free);
 #endif
 
 /* Nonstandard functions */
-METALC_EXPORT char *itoa(int value, char *str, int base);
-METALC_EXPORT char *utoa(unsigned value, char *buf, int base);
-METALC_EXPORT char *ltoa(long value, char *buf, int base);
-METALC_EXPORT char *ultoa(unsigned long value, char *str, int base);
+METALC_API_EXPORT char *itoa(int value, char *str, int base);
+METALC_API_EXPORT char *utoa(unsigned value, char *buf, int base);
+METALC_API_EXPORT char *ltoa(long value, char *buf, int base);
+METALC_API_EXPORT char *ultoa(unsigned long value, char *str, int base);
 
 #endif  /* INCLUDE_METALC_STDLIB_H_ */

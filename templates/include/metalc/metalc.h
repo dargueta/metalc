@@ -164,11 +164,11 @@
 
 
 #if METALC_ENABLE_ASM_IMPLEMENTATIONS
-    #define METALC_EXPORT_ASM   METALC_EXPORT_WITH_ATTR(naked)
-    #define METALC_EXPORT_ASM_WITH_ATTR(...)    METALC_EXPORT_WITH_ATTR(naked, __VA_ARGS__)
+    #define METALC_API_EXPORT_ASM   METALC_API_EXPORT_WITH_ATTR(naked)
+    #define METALC_API_EXPORT_ASM_WITH_ATTR(...)    METALC_API_EXPORT_WITH_ATTR(naked, __VA_ARGS__)
 #else
-    #define METALC_EXPORT_ASM   METALC_EXPORT
-    #define METALC_EXPORT_ASM_WITH_ATTR(...)    METALC_EXPORT_WITH_ATTR(__VA_ARGS__)
+    #define METALC_API_EXPORT_ASM   METALC_EXPORT
+    #define METALC_API_EXPORT_ASM_WITH_ATTR(...)    METALC_API_EXPORT_WITH_ATTR(__VA_ARGS__)
 #endif
 
 
@@ -218,7 +218,7 @@
      * able to test these directly. Make the `METALC_INTERNAL` markers a
      * no-op. */
     #define METALC_API_INTERNAL
-    #define METALC_API_INTERAL_WITH_ATTR(...)   __attribute__((__VA_ARGS__))
+    #define METALC_API_INTERNAL_WITH_ATTR(...)   __attribute__((__VA_ARGS__))
 
     #if METALC_BUILDING_LIBC
         /* We're building the C library but with the intent to run unit tests on

@@ -7,6 +7,7 @@
 #ifndef INCLUDE_METALC_ATOMIC_H_
 #define INCLUDE_METALC_ATOMIC_H_
 
+#include "metalc.h"
 #include "stdint.h"
 
 typedef uint32_t atomic_t;

@@ -54,11 +54,7 @@ double atof(const char *str) {
 
     /* If we hit the end of the string, bail. */
     if (*str == '\0') {
-<<<<<<< HEAD
-        errno = EINVAL;
-=======
         mclib_errno = mclib_EINVAL;
->>>>>>> master
         return 0.0;
     }
 
@@ -446,6 +442,11 @@ void *bsearch(
 
         return str;
     }
+
+    cstdlib_implement(llabs);
+    cstdlib_implement(lltoa);
+    cstdlib_implement(ulltoa);
+    cstdlib_implement(lldiv);
 #endif
 
 

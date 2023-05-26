@@ -1,6 +1,6 @@
-#include <metalc/errno.h>
-#include <metalc/metalc.h>
-#include <metalc/wchar.h>
+#include "metalc/errno.h"
+#include "metalc/metalc.h"
+#include "metalc/wchar.h"
 
 
 METALC_API_INTERNAL

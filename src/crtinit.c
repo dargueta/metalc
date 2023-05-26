@@ -18,7 +18,6 @@ extern int locale_teardown(void);
 
 MetalCRuntimeInfo *mcinternal_runtime_info __attribute__((visibility("hidden"))) = NULL;
 
-
 mclib_jmp_buf mcinternal_abort_target;
 
 

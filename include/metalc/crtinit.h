@@ -8,7 +8,7 @@
 #define INCLUDE_METALC_CRTINIT_H_
 
 #include "internal/efi_shim.h"
-#include "metalc/limits.h"
+#include "limits.h"
 #include "metalc.h"
 
 
@@ -90,12 +90,12 @@ typedef struct {
 /**
  * Initialize the standard C library.
  */
-METALC_EXPORT int cstdlib_init(MetalCRuntimeInfo *rti);
+METALC_API_EXPORT int cstdlib_init(MetalCRuntimeInfo *rti);
 
 
 /**
  * Run the ``main`` function defined in
  */
-METALC_EXPORT int cstdlib_run(int argc, char **argv, char **env);
+METALC_API_EXPORT int cstdlib_run(int argc, char **argv, char **env);
 
 #endif  /* INCLUDE_METALC_CRTINIT_H_ */

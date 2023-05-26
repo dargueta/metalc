@@ -34,7 +34,7 @@ BEGIN_TEST(test_memcmp__one_character_nonzero_equal)
     CHECK_EQ(mclib_memcmp("A", "A", 1), 0);
 END_TEST()
 
-g
+
 const struct UnitTestEntry kStringUnitTests[] = {
     {test_memchr__basic, "memchr: basic"},
     {test_memchr__not_found, "memchr: zero-length string, not found"},
