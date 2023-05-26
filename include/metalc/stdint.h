@@ -414,7 +414,11 @@ typedef unsigned char uint_least8_t;
 
 /* GCC and some compatible compilers define macros that expand to the C types
  * with the attributes we need. Since we have no idea of the underlying hardware,
- * we need to rely on these to be able to define the int_fast*_t types. */
+ * we rely on these by default to be able to define the int_fast*_t types.
+ *
+ * If these predefined types are unavailable, this falls back to the definitions
+ * used by GCC: fast8 is a `char`, all others use `intptr_t`.
+ * */
 
 #if defined(__INT_FAST8_TYPE__)
     typedef __INT_FAST8_TYPE__ int_fast8_t;
@@ -422,6 +426,14 @@ typedef unsigned char uint_least8_t;
 #   define INT_FAST8_MAX __UINT_FAST8_MAX__
 #   define INT_FAST8_MIN __UINT_FAST8_MIN__
 #   define UINT_FAST8_MAX __UINT_FAST8_MAX__
+#else
+    /* This is a guess based on GCC's definitions. */
+    typedef int_least8_t int_fast8_t;
+    typedef uint_least8_t uint_fast8_t;
+
+#   define INT_FAST8_MAX INT_LEAST8_MAX
+#   define INT_FAST8_MIN INT_LEAST8_MIN
+#   define UINT_FAST8_MAX UINT_LEAST8_MAX
 #endif
 
 #if defined(__INT_FAST16_TYPE__)
@@ -430,6 +442,12 @@ typedef unsigned char uint_least8_t;
 #   define INT_FAST16_MAX __UINT_FAST16_MAX__
 #   define INT_FAST16_MIN __UINT_FAST16_MIN__
 #   define UINT_FAST16_MAX __UINT_FAST16_MAX__
+#else
+    typedef int_fast16_t intptr_t;
+    typedef uint_fast16_t uintptr_t;
+#   define INT_FAST16_MIN INTPTR_MIN
+#   define INT_FAST16_MAX INTPTR_MAX
+#   define UINT_FAST16_MAX UINTPTR_MAX
 #endif
 
 #if defined(__INT_FAST32_TYPE__)
@@ -438,6 +456,14 @@ typedef unsigned char uint_least8_t;
 #   define INT_FAST32_MAX __UINT_FAST32_MAX__
 #   define INT_FAST32_MIN __UINT_FAST32_MIN__
 #   define UINT_FAST32_MAX __UINT_FAST32_MAX__
+#elif defined(INT_LEAST32_MAX) && (INTPTR_MAX >= INT_LEAST32_MAX)
+    typedef int_fast32_t intptr_t;
+    typedef uint_fast32_t uintptr_t;
+#   define INT_FAST32_MIN INTPTR_MIN
+#   define INT_FAST32_MAX INTPTR_MAX
+#   define UINT_FAST32_MAX UINTPTR_MAX
+#else
+#   warning Cannot define int_fast32_t; intptr_t is not big enough or int_least32_t is not defined.
 #endif
 
 #if defined(__INT_FAST64_TYPE__)
@@ -446,6 +472,14 @@ typedef unsigned char uint_least8_t;
 #   define INT_FAST64_MAX __UINT_FAST64_MAX__
 #   define INT_FAST64_MIN __UINT_FAST64_MIN__
 #   define UINT_FAST64_MAX __UINT_FAST64_MAX__
+#elif defined(INT_LEAST64_MAX) && (INTPTR_MAX >= INT_LEAST64_MAX)
+    typedef int_fast64_t intptr_t;
+    typedef uint_fast64_t uintptr_t;
+#   define INT_FAST64_MIN INTPTR_MIN
+#   define INT_FAST64_MAX INTPTR_MAX
+#   define UINT_FAST64_MAX UINTPTR_MAX
+#else
+#   warning Cannot define int_fast64_t; intptr_t is not big enough or int_least64_t is not defined.
 #endif
 
 /******************************************************************************\
