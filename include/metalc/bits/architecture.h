@@ -46,13 +46,10 @@
 #        define METALC_TARGET_ARCHITECTURE_ID METALC_TARGET_ARCHITECTURE_X86_64
 #        define METALC_TARGET_ENDIANNESS_ID METALC_TARGET_ENDIANNESS_LITTLE
 #    endif
-/* NOTE: The check for _M_IX86 must go last in this list, because while VS only
- * defines it for 32-bit architectures, Watcom defines it for both 16 and 32-bit
- * targets. We need to check other macros first. */
 #elif defined(__386__) || defined(__386) || defined(__i386) \
         || defined(_M_I386) || defined(__pentium4__) \
         || defined(__i386__) || defined(__i486__) || defined(__i586__) \
-        || defined(__i686__) || defined(__AS386_32__) || defined(_M_IX86)
+        || defined(__i686__) || defined(__AS386_32__)
 #    define METALC_TARGET_ARCHITECTURE_BITS 32
 #    define METALC_TARGET_ARCHITECTURE_ID METALC_TARGET_ARCHITECTURE_X86_32
 #    define METALC_TARGET_ENDIANNESS_ID METALC_TARGET_ENDIANNESS_LITTLE
@@ -60,6 +57,21 @@
 #    define METALC_TARGET_ARCHITECTURE_BITS 16
 #    define METALC_TARGET_ARCHITECTURE_ID METALC_TARGET_ARCHITECTURE_X86_16
 #    define METALC_TARGET_ENDIANNESS_ID METALC_TARGET_ENDIANNESS_LITTLE
+#elif defined(_M_IX86)
+#    if _M_IX86 < 300
+         /* 16-bit x86*/
+#        define METALC_TARGET_ARCHITECTURE_BITS 16
+#        define METALC_TARGET_ARCHITECTURE_ID METALC_TARGET_ARCHITECTURE_X86_16
+#        define METALC_TARGET_ENDIANNESS_ID METALC_TARGET_ENDIANNESS_LITTLE
+#    elif _M_IX86 < 700
+         /* 32-bit x86 */
+#        define METALC_TARGET_ARCHITECTURE_BITS 32
+#        define METALC_TARGET_ARCHITECTURE_ID METALC_TARGET_ARCHITECTURE_X86_32
+#        define METALC_TARGET_ENDIANNESS_ID METALC_TARGET_ENDIANNESS_LITTLE
+#    else
+         /* 64-bit x86, though this is unlikely */
+#        error Unrecognized value for _M_IX86 target architecture macro.
+#    endif
 #elif defined(_M_ARM)
 #    if _M_ARM < 8
 #        define METALC_TARGET_ARCHITECTURE_BITS 32
