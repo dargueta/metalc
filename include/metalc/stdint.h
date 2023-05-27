@@ -9,59 +9,24 @@
 
 #include <limits.h>     /* Provided by the compiler */
 
+#include "bits/architecture.h"
+
 
 /******************************************************************************\
  *                          GUESSING POINTER SIZE                              *
 \******************************************************************************/
 
-/* These macros are defined by various compilers to indicate the architecture
- * that the compiler is building for. This will work for:
- *
- * - GCC 4.1+ and compatible compilers like Clang and MinGW
- * - Visual Studio
- * - OpenWatcom
- * - Intel's C compiler (though possibly not IA-64)
- */
-#if defined(__LP64__) ||    \
-    defined(_M_AMD64) ||    \
-    defined(_M_ARM64) ||    \
-    defined(__AVX__)  ||    \
-    defined(__AVX2__) ||    \
-    defined(_M_X64)   ||    \
-    defined(__x86_64__) ||  \
-    defined(__x86_64) ||    \
-    defined(__w64)    ||    \
-    defined(_WIN64)   ||    \
-    (defined(_M_IX86) && (_M_IX86 >= 600)) ||    \
-    (defined(__MINGW64__) && !defined(__MINGW32__)) || \
-    (defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__ == 8))
-#   define POINTER_IS_64BIT
-#elif defined(__386__) ||                                           \
-    defined(__pentium4__) ||                                        \
-    defined(__AS386_32__) ||                                        \
-    (defined(_WIN32) && !defined(_WIN64))                           \
-    (defined(_M_IX86) && (_M_IX86 < 600) && (_M_IX86 >= 300)) ||    \
-    (defined(__MINGW32__) && !defined(__MINGW64__)) ||              \
-    defined(__ILP32__) ||                                           \
-    (defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__ == 4))
-#   define POINTER_IS_32BIT
-#elif defined(_WIN16) ||                       \
-      (defined(_M_IX86) && (_M_IX86 < 300)) || \
-      defined(__AS386_16__)
-#   define POINTER_IS_16BIT
-#else
-#   error Cannot determine the architecture size.
-#endif
-
-#if defined(POINTER_IS_64BIT)
+#if METALC_TARGET_ARCHITECTURE_BITS == 64
 #    if defined(__LP64__)
 #        define CONSTANT_SUFFIX_32(x)  x
 #        define CONSTANT_SUFFIX_64(x)  x ## L
 #    elif defined(__LLP64__) || defined(__LLP64_IFC__) || defined(_MSC_VER)
 #        define CONSTANT_SUFFIX_32(x)  x ## L
 #        define CONSTANT_SUFFIX_64(x)  x ## LL
+#    else
+#        error Cannot determine integer constant suffixes for this architecture.
 #    endif
-#elif defined(POINTER_IS_32BIT)
+#elif METALC_TARGET_ARCHITECTURE_BITS == 32
 #    define CONSTANT_SUFFIX_32(x)  x ## L
 #    define CONSTANT_SUFFIX_64(x)  x ## LL
 #else
@@ -198,14 +163,16 @@ typedef unsigned char uint_least8_t;
 #   define INT_LEAST64_MIN  INT_MIN
 #   define INT_LEAST64_MAX  INT_MAX
 #   define UINT_LEAST64_MAX UINT_MAX
-#elif defined(LONG_MAX) && (LONG_MAX >= INT64_MAX)
-    /* `long` is at least 64 bits. */
-    typedef signed long int_least64_t;
-    typedef unsigned long uint_least64_t;
+#elif defined(LONG_MAX)
+#   if LONG_MAX >= INT64_MAX
+        /* `long` is at least 64 bits. */
+        typedef signed long int_least64_t;
+        typedef unsigned long uint_least64_t;
 
-#   define INT_LEAST64_MIN  LONG_MIN
-#   define INT_LEAST64_MAX  LONG_MAX
-#   define UINT_LEAST64_MAX ULONG_MAX
+#       define INT_LEAST64_MIN  LONG_MIN
+#       define INT_LEAST64_MAX  LONG_MAX
+#       define UINT_LEAST64_MAX ULONG_MAX
+#   endif
 #elif defined(LLONG_MAX)
     /* Compiler defines a `long long` which by definition must be at least
      * 64 bits. */
@@ -215,7 +182,9 @@ typedef unsigned char uint_least8_t;
 #   define INT_LEAST64_MIN  LLONG_MIN
 #   define INT_LEAST64_MAX  LLONG_MAX
 #   define UINT_LEAST64_MAX ULLONG_MAX
-#else
+#endif
+
+#ifndef INT_LEAST64_MAX
     /* No way to define a 64-bit integer. */
 #   undef INT64_C
 #   undef UINT64_C
@@ -236,7 +205,7 @@ typedef unsigned char uint_least8_t;
 #if defined(__INT8_TYPE__)
     typedef __INT8_TYPE__ int8_t;
     typedef __UINT8_TYPE__ uint8_t;
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) || defined(__INTEL_COMPILER)
     typedef signed __int8 int8_t;
     typedef unsigned __int8 uint8_t;
 #elif defined(__WATCOMC__) || (CHAR_BIT == 8)
@@ -256,7 +225,7 @@ typedef unsigned char uint_least8_t;
 #if defined(__INT16_TYPE__)
     typedef __INT16_TYPE__ int16_t;
     typedef __UINT16_TYPE__  uint16_t;
-#elif defined(_MSC_VER) && defined(_INTEGRAL_MAX_BITS) && (_INTEGRAL_MAX_BITS >= 16)
+#elif defined(_MSC_VER) || defined(__INTEL_COMPILER)
     typedef signed __int16 int16_t;
     typedef unsigned __int16 uint16_t;
 #elif defined(__WATCOMC__)
@@ -276,37 +245,52 @@ typedef unsigned char uint_least8_t;
 #if defined(__INT32_TYPE__)
     typedef __INT32_TYPE__ int32_t;
     typedef __UINT32_TYPE__  uint32_t;
-#elif defined(_MSC_VER) && defined(_INTEGRAL_MAX_BITS) && (_INTEGRAL_MAX_BITS >= 32)
+#elif defined(_MSC_VER) || defined(__INTEL_COMPILER)
     typedef signed __int32 int32_t;
     typedef unsigned __int32 uint32_t;
 #elif defined(__WATCOMC__)
     typedef signed long int32_t;
     typedef unsigned long uint32_t;
-#elif defined(INT_LEAST32_MAX) && (INT_LEAST32_MAX == INT32_MAX)
-    typedef int_least32_t int32_t;
-    typedef uint_least32_t uint32_t;
+#elif defined(INT_LEAST32_MAX)
+#    if INT_LEAST32_MAX == INT32_MAX
+        typedef int_least32_t int32_t;
+        typedef uint_least32_t uint32_t;
+#    else
+#        undef HAVE_EXACT_INT32
+#    endif
 #else
+#   undef HAVE_EXACT_INT32
+#endif
+
+#ifndef HAVE_EXACT_INT32
     /* No integer with exactly 32 bits */
 #   undef INT32_MIN
 #   undef INT32_MAX
 #   undef UINT32_MAX
-#   undef HAVE_EXACT_INT32
 #endif
+
 
 #if defined(__INT64_TYPE__)
     typedef __INT64_TYPE__ int64_t;
     typedef __UINT64_TYPE__  uint64_t;
-#elif defined(_MSC_VER) && defined(_INTEGRAL_MAX_BITS) && (_INTEGRAL_MAX_BITS >= 64)
-    /* Microsoft */
+#elif defined(_MSC_VER) || defined(__INTEL_COMPILER)
     typedef signed __int64 int64_t;
     typedef unsigned __int64 uint64_t;
 #elif defined(__WATCOMC__) && defined(LLONG_MAX)
     typedef signed long long int64_t;
     typedef unsigned long long uint64_t;
-#elif defined(INT_LEAST64_MAX) && (INT_LEAST64_MAX == INT64_MAX)
-    typedef int_least64_t int64_t;
-    typedef uint_least64_t uint64_t;
+#elif defined(INT_LEAST64_MAX)
+#    if INT_LEAST64_MAX == INT64_MAX
+         typedef int_least64_t int64_t;
+         typedef uint_least64_t uint64_t;
+#    else
+#        undef HAVE_EXACT_INT64
+#    endif
 #else
+#    undef HAVE_EXACT_INT64
+#endif
+
+#ifndef HAVE_EXACT_INT64
     /* No integer with exactly 64 bits */
 #   undef INT64_MIN
 #   undef INT64_MAX
@@ -324,19 +308,19 @@ typedef unsigned char uint_least8_t;
 #   define INTPTR_MIN __INTPTR_MIN__
 #   define INTPTR_MAX __INTPTR_MAX__
 #   define UINTPTR_MAX __UINTPTR_MAX__
-#elif defined(POINTER_IS_64BIT)
+#elif METALC_TARGET_ARCHITECTURE_BITS == 64
     typedef int_least64_t intptr_t;
     typedef uint_least64_t uintptr_t;
 #   define INTPTR_MIN INT_LEAST64_MIN
 #   define INTPTR_MAX INT_LEAST64_MAX
 #   define UINTPTR_MAX UINT_LEAST64_MAX
-#elif defined(POINTER_IS_32BIT)
+#elif METALC_TARGET_ARCHITECTURE_BITS == 32
     typedef int_least32_t intptr_t;
     typedef uint_least32_t uintptr_t;
 #   define INTPTR_MIN INT_LEAST32_MIN
 #   define INTPTR_MAX INT_LEAST32_MAX
 #   define UINTPTR_MAX UINT_LEAST32_MAX
-#elif defined(POINTER_IS_16BIT)
+#elif METALC_TARGET_ARCHITECTURE_BITS == 16
     typedef int_least16_t intptr_t;
     typedef uint_least16_t uintptr_t;
 #   define INTPTR_MIN INT_LEAST16_MIN
@@ -352,11 +336,11 @@ typedef unsigned char uint_least8_t;
 
 #ifdef __PTRDIFF_TYPE__
     typedef __PTRDIFF_TYPE__ ptrdiff_t;
-#elif defined(POINTER_IS_64BIT)
+#elif METALC_TARGET_ARCHITECTURE_BITS == 64
     typedef int_least64_t ptrdiff_t;
-#elif defined(POINTER_IS_32BIT)
+#elif METALC_TARGET_ARCHITECTURE_BITS == 32
     typedef int_least32_t ptrdiff_t;
-#elif defined(POINTER_IS_16BIT)
+#elif METALC_TARGET_ARCHITECTURE_BITS == 16
     typedef int_least16_t ptrdiff_t;
 #else
 #   error Unable to determine the target architecture pointer size.
@@ -372,18 +356,38 @@ typedef unsigned char uint_least8_t;
 #   define INTMAX_MIN __INTMAX_MIN__
 #   define INTMAX_MAX __INTMAX_MAX__
 #   define UINTMAX_MAX __UINTMAX_MAX__
-#elif (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 64) || defined(INT_LEAST64_MAX)
-    /* This won't be accurate for systems that support integers greater than 64
-     * bits, but it's good enough... right?
-     * (_INTEGRAL_MAX_BITS is defined on Visual Studio compilers and the Intel C
+#elif defined(_INTEGRAL_MAX_BITS)
+    /* (_INTEGRAL_MAX_BITS is defined on Visual Studio compilers and the Intel C
      * compiler when built for Windows.) */
+#   if _INTEGRAL_MAX_BITS >= 64
+        /* This won't be accurate for systems that support integers greater than 64
+         * bits, but it's good enough... right? */
+        typedef int_least64_t intmax_t;
+        typedef uint_least64_t uintmax_t;
+#       define INTMAX_MIN  INT_LEAST64_MIN
+#       define INTMAX_MAX  INT_LEAST64_MAX
+#       define UINTMAX_MAX UINT_LEAST64_MAX
+#   elif _INTEGRAL_MAX_BITS >= 32
+        typedef int_least32_t intmax_t;
+        typedef uint_least32_t uintmax_t;
+#       define INTMAX_MIN  INT_LEAST32_MIN
+#       define INTMAX_MAX  INT_LEAST32_MAX
+#       define UINTMAX_MAX UINT_LEAST32_MAX
+#   else
+        typedef int_least16_t intmax_t;
+        typedef uint_least16_t uintmax_t;
+#       define INTMAX_MIN  INT_LEAST16_MIN
+#       define INTMAX_MAX  INT_LEAST16_MAX
+#       define UINTMAX_MAX UINT_LEAST16_MAX
+#   endif
+#elif defined(INT_LEAST64_MAX)
     typedef int_least64_t intmax_t;
     typedef uint_least64_t uintmax_t;
 
 #   define INTMAX_MIN  INT_LEAST64_MIN
 #   define INTMAX_MAX  INT_LEAST64_MAX
 #   define UINTMAX_MAX UINT_LEAST64_MAX
-#elif (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 32) || defined(INT_LEAST32_MAX)
+#elif defined(INT_LEAST32_MAX)
     typedef int_least32_t intmax_t;
     typedef uint_least32_t uintmax_t;
 
@@ -391,10 +395,7 @@ typedef unsigned char uint_least8_t;
 #   define INTMAX_MAX  INT_LEAST32_MAX
 #   define UINTMAX_MAX UINT_LEAST32_MAX
 #else
-    /* If we get here then either:
-     *
-     * - We're on Visual Studio and _INTEGRAL_MAX_BITS is less than 32, or
-     * - We're on a different compiler and we don't have int_least32_t.
+    /* If we get here then we don't have int_least32_t.
      *
      * If this is the case then we're probably compiling for a 16-bit system.
      * We can't assume it's exactly 16 bits, as there are some 18- and 24-bit
@@ -453,16 +454,26 @@ typedef unsigned char uint_least8_t;
 #if defined(__INT_FAST32_TYPE__)
     typedef __INT_FAST32_TYPE__ int_fast32_t;
     typedef __UINT_FAST32_TYPE__ uint_fast32_t;
-#   define INT_FAST32_MAX __UINT_FAST32_MAX__
-#   define INT_FAST32_MIN __UINT_FAST32_MIN__
+#   define INT_FAST32_MIN __INT_FAST32_MIN__
+#   define INT_FAST32_MAX __INT_FAST32_MAX__
 #   define UINT_FAST32_MAX __UINT_FAST32_MAX__
-#elif defined(INT_LEAST32_MAX) && (INTPTR_MAX >= INT_LEAST32_MAX)
-    typedef int_fast32_t intptr_t;
-    typedef uint_fast32_t uintptr_t;
-#   define INT_FAST32_MIN INTPTR_MIN
-#   define INT_FAST32_MAX INTPTR_MAX
-#   define UINT_FAST32_MAX UINTPTR_MAX
-#else
+#elif defined(INT_LEAST32_MAX)
+#   if INTPTR_MAX >= INT_LEAST32_MAX
+        typedef int_fast32_t intptr_t;
+        typedef uint_fast32_t uintptr_t;
+#       define INT_FAST32_MIN INTPTR_MIN
+#       define INT_FAST32_MAX INTPTR_MAX
+#       define UINT_FAST32_MAX UINTPTR_MAX
+#   elif INTMAX_MAX >= INT_LEAST32_MAX
+        typedef int_fast32_t intmax_t;
+        typedef uint_fast32_t uintmax_t;
+#       define INT_FAST32_MIN INTMAX_MIN
+#       define INT_FAST32_MAX INTMAX_MAX
+#       define UINT_FAST32_MAX UINTMAX_MAX
+#   endif
+#endif
+
+#ifndef INT_FAST32_MIN
 #   warning Cannot define int_fast32_t; intptr_t is not big enough or int_least32_t is not defined.
 #endif
 
@@ -472,28 +483,24 @@ typedef unsigned char uint_least8_t;
 #   define INT_FAST64_MAX __UINT_FAST64_MAX__
 #   define INT_FAST64_MIN __UINT_FAST64_MIN__
 #   define UINT_FAST64_MAX __UINT_FAST64_MAX__
-#elif defined(INT_LEAST64_MAX) && (INTPTR_MAX >= INT_LEAST64_MAX)
-    typedef int_fast64_t intptr_t;
-    typedef uint_fast64_t uintptr_t;
-#   define INT_FAST64_MIN INTPTR_MIN
-#   define INT_FAST64_MAX INTPTR_MAX
-#   define UINT_FAST64_MAX UINTPTR_MAX
-#else
+#elif defined(INT_LEAST64_MAX)
+#   if INTPTR_MAX >= INT_LEAST64_MAX
+        typedef int_fast64_t intptr_t;
+        typedef uint_fast64_t uintptr_t;
+#       define INT_FAST64_MIN INTPTR_MIN
+#       define INT_FAST64_MAX INTPTR_MAX
+#       define UINT_FAST64_MAX UINTPTR_MAX
+#   elif INTMAX_MAX >= INT_LEAST64_MAX
+        typedef int_fast64_t intmax_t;
+        typedef uint_fast64_t uintmax_t;
+#       define INT_FAST64_MIN INTMAX_MIN
+#       define INT_FAST64_MAX INTMAX_MAX
+#       define UINT_FAST64_MAX UINTMAX_MAX
+#   endif
+#endif
+
+#ifndef UINT_FAST64_MAX
 #   warning Cannot define int_fast64_t; intptr_t is not big enough or int_least64_t is not defined.
-#endif
-
-/******************************************************************************\
-*                              CLEANUP                                        *
-\******************************************************************************/
-
-#ifdef POINTER_IS_64BIT
-#   undef POINTER_IS_64BIT
-#endif
-#ifdef POINTER_IS_32BIT
-#   undef POINTER_IS_64BIT
-#endif
-#ifdef POINTER_IS_16BIT
-#   undef POINTER_IS_16BIT
 #endif
 
 #endif  /* INCLUDE_METALC_STDINT_H_ */

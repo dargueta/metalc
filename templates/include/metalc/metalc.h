@@ -10,6 +10,8 @@
 #ifndef INCLUDE_METALC_METALC_H_
 #define INCLUDE_METALC_METALC_H_
 
+#include "bits/architecture.h"
+
 #cmakedefine01 METALC_COMPILER_GCC
 #cmakedefine01 METALC_COMPILER_MINGW
 #cmakedefine01 METALC_HAVE_EFI_H
@@ -38,52 +40,6 @@
 #if METALC_COMPILE_OPTION_USE_EFI && (!METALC_HAVE_EFI_H)
     #error "Library was built needing UEFI support but doesn't appear to have `efi.h`."
 #endif
-
-
-/**
- * Architecture type indicator: the target architecture is a 16-bit Intel processor.
- */
-#define METALC_TARGET_ARCHITECTURE_X86_16   0
-
-/**
- * Architecture type indicator: the target architecture is a 32-bit Intel processor.
- */
-#define METALC_TARGET_ARCHITECTURE_X86_32   1
-
-/**
- * Architecture type indicator: the target architecture is a 64-bit Intel processor.
- */
-#define METALC_TARGET_ARCHITECTURE_X86_64   2
-
-/**
- * Architecture type indicator: the target architecture is a 32-bit MIPS processor.
- */
-#define METALC_TARGET_ARCHITECTURE_MIPS32   3
-
-/**
- * Architecture type indicator: the target architecture is a 64-bit MIPS processor.
- */
-#define METALC_TARGET_ARCHITECTURE_MIPS64   4
-
-
-/**
- * Architecture type indicator: this indicates the target system this was compiled
- * with.
- *
- * This is only included for documentation purposes. You can ignore the specific
- * value of this macro that appears in the documentation, as it only reflects the
- * architecture of the system that the documentation was built on.
- */
-#define METALC_TARGET_ARCHITECTURE_ID       @METALC_TARGET_ARCHITECTURE_ID@
-
-/**
- * The size of a pointer in the target architecture.
- *
- * This is only included for documentation purposes. You can ignore the specific
- * value of this macro that appears in the documentation, as it only reflects the
- * architecture of the system that the documentation was built on.
- */
-#define METALC_ARCH_BITS    @METALC_TARGET_ARCHITECTURE_BITS@
 
 
 /**
@@ -142,9 +98,11 @@
 #endif
 
 
-#define METALC_ENABLE_ASM_IMPLEMENTATIONS   \
-    ((!METALC_COMPILE_OPTION_DISABLE_ASM)  \
-     && (METALC_COMPILER_GCC_COMPATIBLE || METALC_COMPILER_MS_COMPATIBLE))
+#define METALC_ENABLE_ASM_IMPLEMENTATIONS                               \
+    (                                                                   \
+      (!METALC_COMPILE_OPTION_DISABLE_ASM) &&                           \
+      (METALC_COMPILER_GCC_COMPATIBLE || METALC_COMPILER_MS_COMPATIBLE) \
+    )
 
 
 #if METALC_ARCH_BITS == 64
