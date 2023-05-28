@@ -69,19 +69,20 @@
 #        define METALC_TARGET_ARCHITECTURE_ID METALC_TARGET_ARCHITECTURE_X86_32
 #        define METALC_TARGET_ENDIANNESS_ID METALC_TARGET_ENDIANNESS_LITTLE
 #    else
-         /* 64-bit x86, though this is unlikely */
+         /* P7 is the codename for Itanium so 700+ is *probably* Itanium, but we
+          * can't make that assumption since it's not documented anywhere. */
 #        error Unrecognized value for _M_IX86 target architecture macro.
 #    endif
+#elif defined(_M_ARM64) || defined(__aarch64__)
+#    define METALC_TARGET_ARCHITECTURE_BITS 64
+#    define METALC_TARGET_ARCHITECTURE_ID METALC_TARGET_ARCHITECTURE_ARM64
+#    define METALC_TARGET_ENDIANNESS_ID METALC_TARGET_ENDIANNESS_BIG
 #elif defined(_M_ARM)
 #    if _M_ARM < 8
 #        define METALC_TARGET_ARCHITECTURE_BITS 32
 #        define METALC_TARGET_ARCHITECTURE_ID METALC_TARGET_ARCHITECTURE_ARM
 #        define METALC_TARGET_ENDIANNESS_ID METALC_TARGET_ENDIANNESS_BIG
 #    endif
-#elif defined(_M_ARM64) || defined(__aarch64__)
-#    define METALC_TARGET_ARCHITECTURE_BITS 64
-#    define METALC_TARGET_ARCHITECTURE_ID METALC_TARGET_ARCHITECTURE_ARM64
-#    define METALC_TARGET_ENDIANNESS_ID METALC_TARGET_ENDIANNESS_BIG
 #elif defined(__ia64__) || defined(__ia64) || defined(_M_IA64) || defined(__itanium__)
 #    define METALC_TARGET_ARCHITECTURE_BITS 64
 #    define METALC_TARGET_ARCHITECTURE_ID METALC_TARGET_ARCHITECTURE_ITANIUM
