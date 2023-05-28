@@ -176,7 +176,7 @@
      * able to test these directly. Make the `METALC_API_INTERNAL` markers a
      * no-op. */
     #define METALC_API_INTERNAL
-    #define METALC_API_INTERAL_WITH_ATTR(...)   __attribute__((__VA_ARGS__))
+    #define METALC_API_INTERNAL_WITH_ATTR(...)   __attribute__((__VA_ARGS__))
 
     #if METALC_BUILDING_LIBC
         /* We're building the C library but with the intent to run unit tests on
@@ -213,10 +213,10 @@
      * program is using the library. */
     #if METALC_INTERNALS_USE_FASTCALL && (METALC_TARGET_ARCHITECTURE_BITS != 64)
         #define METALC_API_INTERNAL                 __attribute__((visibility("hidden"), fastcall))
-        #define METALC_API_INTERAL_WITH_ATTR(...)   __attribute__((visibility("hidden"), fastcall, __VA_ARGS__))
+        #define METALC_API_INTERNAL_WITH_ATTR(...)   __attribute__((visibility("hidden"), fastcall, __VA_ARGS__))
     #else
         #define METALC_API_INTERNAL                 __attribute__((visibility("hidden")))
-        #define METALC_API_INTERAL_WITH_ATTR(...)   __attribute__((visibility("hidden"), __VA_ARGS__))
+        #define METALC_API_INTERNAL_WITH_ATTR(...)   __attribute__((visibility("hidden"), __VA_ARGS__))
     #endif
 
 
