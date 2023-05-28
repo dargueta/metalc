@@ -64,32 +64,22 @@ static void sighandler_ignore(int sig) {
 
 
 /* Signal handler pauses the current process. */
-<<<<<<< HEAD
-static void _sighandler_stop(int sig) {
+static void sighandler_stop(int sig) {
     #if METALC_COMPILE_FOR_TESTING
         testhook_signal(sig);
     #else
         krnlhook_suspend(sig, mcinternal_runtime_info->udata);
     #endif
-=======
-static void sighandler_stop(int sig) {
-    krnlhook_suspend(sig);
->>>>>>> master
 }
 
 
 /* Signal handler resumes the current process. */
-<<<<<<< HEAD
-static void _sighandler_resume(int sig) {
+static void sighandler_resume(int sig) {
     #if METALC_COMPILE_FOR_TESTING
         testhook_signal(sig);
     #else
         krnlhook_resume(sig, mcinternal_runtime_info->udata);
     #endif
-=======
-static void sighandler_resume(int sig) {
-    krnlhook_resume(sig);
->>>>>>> master
 }
 
 
