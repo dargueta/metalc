@@ -3,6 +3,7 @@
 #include "metalc/errno.h"
 #include "metalc/limits.h"
 #include "metalc/locale.h"
+#include "metalc/stdlib.h"
 #include "metalc/string.h"
 
 static int default_strcoll(const char *str1, const char *str2);

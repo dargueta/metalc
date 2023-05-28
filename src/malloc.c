@@ -29,6 +29,12 @@ extern MetalCRuntimeInfo *mcinternal_runtime_info;
 
 struct _MemoryBlock {
     void *p_previous;
+
+    /**
+     * The size of the allocation, in bytes. Allocations must always be aligned
+     * on at least a two-byte boundary so the low bit is used to indicate if the
+     * block is free.
+     */
     uintptr_t block_size;
 };
 
