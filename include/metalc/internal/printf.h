@@ -49,6 +49,9 @@ enum MCArgumentWidth {
 };
 
 
+/**
+ * FIXME (dargueta): This assumes implementation details in stdint.h.
+ */
 #define MCFMT_ARGW__INTMAX MCFMT_ARGW__INTPTR
 
 

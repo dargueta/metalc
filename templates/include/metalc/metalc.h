@@ -10,6 +10,8 @@
 #ifndef INCLUDE_METALC_METALC_H_
 #define INCLUDE_METALC_METALC_H_
 
+#include "bits/architecture.h"
+
 #cmakedefine01 METALC_COMPILER_GCC
 #cmakedefine01 METALC_COMPILER_MINGW
 #cmakedefine01 METALC_HAVE_EFI_H
@@ -38,52 +40,6 @@
 #if METALC_COMPILE_OPTION_USE_EFI && (!METALC_HAVE_EFI_H)
     #error "Library was built needing UEFI support but doesn't appear to have `efi.h`."
 #endif
-
-
-/**
- * Architecture type indicator: the target architecture is a 16-bit Intel processor.
- */
-#define METALC_TARGET_ARCHITECTURE_X86_16   0
-
-/**
- * Architecture type indicator: the target architecture is a 32-bit Intel processor.
- */
-#define METALC_TARGET_ARCHITECTURE_X86_32   1
-
-/**
- * Architecture type indicator: the target architecture is a 64-bit Intel processor.
- */
-#define METALC_TARGET_ARCHITECTURE_X86_64   2
-
-/**
- * Architecture type indicator: the target architecture is a 32-bit MIPS processor.
- */
-#define METALC_TARGET_ARCHITECTURE_MIPS32   3
-
-/**
- * Architecture type indicator: the target architecture is a 64-bit MIPS processor.
- */
-#define METALC_TARGET_ARCHITECTURE_MIPS64   4
-
-
-/**
- * Architecture type indicator: this indicates the target system this was compiled
- * with.
- *
- * This is only included for documentation purposes. You can ignore the specific
- * value of this macro that appears in the documentation, as it only reflects the
- * architecture of the system that the documentation was built on.
- */
-#define METALC_TARGET_ARCHITECTURE_ID       @METALC_TARGET_ARCHITECTURE_ID@
-
-/**
- * The size of a pointer in the target architecture.
- *
- * This is only included for documentation purposes. You can ignore the specific
- * value of this macro that appears in the documentation, as it only reflects the
- * architecture of the system that the documentation was built on.
- */
-#define METALC_ARCH_BITS    @METALC_TARGET_ARCHITECTURE_BITS@
 
 
 /**
@@ -142,12 +98,14 @@
 #endif
 
 
-#define METALC_ENABLE_ASM_IMPLEMENTATIONS   \
-    ((!METALC_COMPILE_OPTION_DISABLE_ASM)  \
-     && (METALC_COMPILER_GCC_COMPATIBLE || METALC_COMPILER_MS_COMPATIBLE))
+#define METALC_ENABLE_ASM_IMPLEMENTATIONS                               \
+    (                                                                   \
+      (!METALC_COMPILE_OPTION_DISABLE_ASM) &&                           \
+      (METALC_COMPILER_GCC_COMPATIBLE || METALC_COMPILER_MS_COMPATIBLE) \
+    )
 
 
-#if METALC_ARCH_BITS == 64
+#if METALC_TARGET_ARCHITECTURE_BITS == 64
     /* Can't use cdecl here because GCC, MinGW, etc. will ignore it. GCC will
      * issue warnings and break the build. */
     #define METALC_API_EXPORT
@@ -253,12 +211,24 @@
 #else
     /* Not in testing mode. We're either building the C library or a client
      * program is using the library. */
-    #if METALC_INTERNALS_USE_FASTCALL && (METALC_ARCH_BITS != 64)
+    #if METALC_INTERNALS_USE_FASTCALL && (METALC_TARGET_ARCHITECTURE_BITS != 64)
         #define METALC_API_INTERNAL                 __attribute__((visibility("hidden"), fastcall))
-        #define METALC_API_INTERNAL_WITH_ATTR(...)  __attribute__((visibility("hidden"), fastcall, __VA_ARGS__))
+        #define METALC_API_INTERNAL_WITH_ATTR(...)   __attribute__((visibility("hidden"), fastcall, __VA_ARGS__))
     #else
         #define METALC_API_INTERNAL                 __attribute__((visibility("hidden")))
-        #define METALC_API_INTERNAL_WITH_ATTR(...)  __attribute__((visibility("hidden"), __VA_ARGS__))
+        #define METALC_API_INTERNAL_WITH_ATTR(...)   __attribute__((visibility("hidden"), __VA_ARGS__))
+    #endif
+
+    #if METALC_BUILDING_LIBC
+        /* Building the C library in production mode. */
+        #define cstdlib_export(name)                    extern __typeof__(name) name
+        #define cstdlib_export_with_attr(name, ...)     extern __typeof__(name) name __attribute__((__VA_ARGS__))
+        #define cstdlib_implement(name)
+    #else
+        /* This file is being included by a client program. */
+        #define cstdlib_export(name)                    extern __typeof__(name) name
+        #define cstdlib_export_with_attr(name, ...)     extern __typeof__(name) name __attribute__((__VA_ARGS__))
+        #define cstdlib_implement(name)
     #endif
 #endif  /* METALC_COMPILE_FOR_TESTING */
 

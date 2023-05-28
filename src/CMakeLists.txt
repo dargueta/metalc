@@ -51,6 +51,8 @@ set(HEADER_FILES
     "${INCLUDE_CLIB_DIR}/stdio.h"
     "${INCLUDE_CLIB_DIR}/stdlib.h"
     "${INCLUDE_CLIB_DIR}/string.h"
+    "${INCLUDE_CLIB_DIR}/bits/architecture.h"
+    "${INCLUDE_CLIB_DIR}/bits/errno.h"
     "${INCLUDE_CLIB_DIR}/bits/stdio.h"
     "${INCLUDE_CLIB_DIR}/bits/stdlib_longlong.h"
     "${INCLUDE_CLIB_DIR}/charsets/common.h"
