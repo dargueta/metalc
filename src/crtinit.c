@@ -1,6 +1,5 @@
 #include "metalc/crtinit.h"
 #include "metalc/errno.h"
-#include "metalc/internal/efi_shim.h"
 #include "metalc/locale.h"
 #include "metalc/metalc.h"
 #include "metalc/setjmp.h"
@@ -79,6 +78,7 @@ int cstdlib_run(int argc, char **argv, char **env) {
 
 
 #if !METALC_COMPILE_FOR_TESTING
+    #include "metalc/internal/efi_shim.h"
     #if METALC_PLATFORM_UEFI_FULL
         /* This is a UEFI application. */
         EFI_STATUS _start(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *system_table) {

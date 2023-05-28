@@ -1,7 +1,7 @@
 #include "metalc/ctype.h"
 #include "metalc/errno.h"
 #include "metalc/internal/printf.h"
-#include "metalc/stddef.h"
+#include "metalc/metalc.h"
 #include "metalc/stdlib.h"
 #include "metalc/string.h"
 
@@ -170,6 +170,7 @@ enum MCArgumentType float_argtype_from_width(enum MCArgumentWidth width_kind) {
 }
 
 
+METALC_API_INTERNAL
 int parse_printf_format_type_width_flag(
     const char *format, struct MCFormatSpecifier *info
 ) {
@@ -222,6 +223,7 @@ int parse_printf_format_type_width_flag(
 }
 
 
+METALC_API_INTERNAL
 int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info) {
     enum MCArgumentType arg_type;
     int n_read;
