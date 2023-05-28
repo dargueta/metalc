@@ -1,5 +1,6 @@
 #include "metalc/errno.h"
 #include "metalc/kernel_hooks.h"
+#include "metalc/metalc.h"
 #include "metalc/setjmp.h"
 #include "metalc/signal.h"
 #include "metalc/stdbool.h"
@@ -10,7 +11,8 @@ extern MetalCRuntimeInfo *mcinternal_runtime_info;
 extern mclib_jmp_buf mcinternal_abort_target;
 
 
-__attribute__((noreturn)) static void _sighandler_term(int sig) {
+METALC_API_INTERAL_WITH_ATTR(noreturn)
+static void sighandler_terminate(int sig) {
     switch (sig) {
         case mclib_SIGQUIT:
         case mclib_SIGILL:
@@ -38,19 +40,19 @@ __attribute__((noreturn)) static void _sighandler_term(int sig) {
 
 
 /* Signal handler does nothing. */
-static void _sighandler_ignore(int sig) {
+static void sighandler_ignore(int sig) {
     (void)sig;
 }
 
 
 /* Signal handler pauses the current process. */
-static void _sighandler_stop(int sig) {
+static void sighandler_stop(int sig) {
     krnlhook_suspend(sig);
 }
 
 
 /* Signal handler resumes the current process. */
-static void _sighandler_resume(int sig) {
+static void sighandler_resume(int sig) {
     krnlhook_resume(sig);
 }
 
@@ -60,90 +62,90 @@ static const signal_mask_t kDefaultMask = 0x04401aad00000004;
 static signal_mask_t gCurrentSignalMask = kDefaultMask;
 
 static signal_handler_t kHandlersByMaskValue[] = {
-    _sighandler_term,
-    _sighandler_ignore,
-    _sighandler_stop,
-    _sighandler_resume
+    sighandler_terminate,
+    sighandler_ignore,
+    sighandler_stop,
+    sighandler_resume
 };
 */
 
 
-static const mclib_signal_handler_t _default_signal_handlers[] = {
+static const mclib_signal_handler_t default_signal_handlers[] = {
     /* Signal numbers begin at 1. Don't bother storing a handler for signal 0. */
-    _sighandler_term,       /* SIGHUP */
-    _sighandler_ignore,     /* SIGINT */
-    _sighandler_term,       /* SIGQUIT */
-    _sighandler_term,       /* SIGILL */
-    _sighandler_term,       /* SIGTRAP */
-    _sighandler_term,       /* SIGABRT, SIGIOT */
-    _sighandler_term,       /* SIGBUS */
-    _sighandler_term,       /* SIGFPE */
-    _sighandler_term,       /* SIGKILL */
-    _sighandler_term,       /* SIGUSR1 */
-    _sighandler_term,       /* SIGSEGV */
-    _sighandler_term,       /* SIGUSR2 */
-    _sighandler_term,       /* SIGPIPE */
-    _sighandler_term,       /* SIGALRM */
-    _sighandler_term,       /* SIGTERM */
+    sighandler_terminate,   /* SIGHUP */
+    sighandler_ignore,      /* SIGINT */
+    sighandler_terminate,   /* SIGQUIT */
+    sighandler_terminate,   /* SIGILL */
+    sighandler_terminate,   /* SIGTRAP */
+    sighandler_terminate,   /* SIGABRT, SIGIOT */
+    sighandler_terminate,   /* SIGBUS */
+    sighandler_terminate,   /* SIGFPE */
+    sighandler_terminate,   /* SIGKILL */
+    sighandler_terminate,   /* SIGUSR1 */
+    sighandler_terminate,   /* SIGSEGV */
+    sighandler_terminate,   /* SIGUSR2 */
+    sighandler_terminate,   /* SIGPIPE */
+    sighandler_terminate,   /* SIGALRM */
+    sighandler_terminate,   /* SIGTERM */
     /* -------- END OF SIGNALS REQUIRED BY POSIX -------- */
-    _sighandler_term,       /* SIGSTKFLT */
-    _sighandler_ignore,     /* SIGCHLD */
-    _sighandler_resume,     /* SIGCONT */
-    _sighandler_stop,       /* SIGSTOP */
-    _sighandler_stop,       /* SIGTSTP */
-    _sighandler_stop,       /* SIGTTIN */
-    _sighandler_stop,       /* SIGTTOU */
-    _sighandler_ignore,     /* SIGURG */
-    _sighandler_term,       /* SIGXCPU */
-    _sighandler_term,       /* SIGXFSZ */
-    _sighandler_term,       /* SIGVTALRM */
-    _sighandler_term,       /* SIGPROF */
-    _sighandler_ignore,     /* SIGWINCH */
-    _sighandler_term,       /* SIGIO, SIGPOLL */
-    _sighandler_ignore,     /* SIGPWR */
-    _sighandler_term,       /* SIGSYS, SIGUNUSED */
+    sighandler_terminate,   /* SIGSTKFLT */
+    sighandler_ignore,      /* SIGCHLD */
+    sighandler_resume,      /* SIGCONT */
+    sighandler_stop,        /* SIGSTOP */
+    sighandler_stop,        /* SIGTSTP */
+    sighandler_stop,        /* SIGTTIN */
+    sighandler_stop,        /* SIGTTOU */
+    sighandler_ignore,      /* SIGURG */
+    sighandler_terminate,   /* SIGXCPU */
+    sighandler_terminate,   /* SIGXFSZ */
+    sighandler_terminate,   /* SIGVTALRM */
+    sighandler_terminate,   /* SIGPROF */
+    sighandler_ignore,      /* SIGWINCH */
+    sighandler_terminate,   /* SIGIO, SIGPOLL */
+    sighandler_ignore,      /* SIGPWR */
+    sighandler_terminate,   /* SIGSYS, SIGUNUSED */
 };
 
 
-static void _sighandler_default(int sig) {
-    _default_signal_handlers[sig - 1](sig);
+static void sighandler_default(int sig) {
+    default_signal_handlers[sig - 1](sig);
 }
 
 
-static mclib_signal_handler_t _current_signal_handlers[] = {
+static mclib_signal_handler_t current_signal_handlers[] = {
     /* Signal numbers begin at 1. Don't bother storing a handler for signal 0. */
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default,
-    _sighandler_default
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default,
+    sighandler_default
 };
 
 
@@ -151,7 +153,7 @@ int raise(int sig) {
     if ((sig < 1) || (sig > 32))
         return mclib_EINVAL;
 
-    _current_signal_handlers[sig - 1](sig);
+    current_signal_handlers[sig - 1](sig);
     return 0;
 }
 cstdlib_implement(raise);
@@ -163,24 +165,24 @@ mclib_signal_handler_t signal(int sig, mclib_signal_handler_t handler) {
     /* Ignore attempts to set signal handlers for signals that can't be overridden. */
     if ((sig == mclib_SIGTSTP) || (sig == mclib_SIGKILL)) {
         mclib_errno = mclib_EPERM;
-        return _sighandler_default;
+        return sighandler_default;
     }
     /* Barf if the caller tries overriding a signal we don't support */
     else if ((sig < 1) || (sig > 32)) {
         mclib_errno = mclib_EINVAL;
-        return _sighandler_term;
+        return sighandler_terminate;
     }
 
-    original_handler = _current_signal_handlers[sig - 1];
+    original_handler = current_signal_handlers[sig - 1];
 
     if (handler == (mclib_signal_handler_t)mclib_SIG_DFL)
-        _current_signal_handlers[sig - 1] = _sighandler_default;
+        current_signal_handlers[sig - 1] = sighandler_default;
     else if (handler == (mclib_signal_handler_t)mclib_SIG_IGN)
-        _current_signal_handlers[sig - 1] = _sighandler_ignore;
+        current_signal_handlers[sig - 1] = sighandler_ignore;
     else if (handler == (mclib_signal_handler_t)mclib_SIG_ERR)
-        _current_signal_handlers[sig - 1] = _sighandler_term;
+        current_signal_handlers[sig - 1] = sighandler_terminate;
     else
-        _current_signal_handlers[sig - 1] = handler;
+        current_signal_handlers[sig - 1] = handler;
 
     return original_handler;
 }
