@@ -105,7 +105,7 @@
     )
 
 
-#if METALC_ARCH_BITS == 64
+#if METALC_TARGET_ARCHITECTURE_BITS == 64
     /* Can't use cdecl here because GCC, MinGW, etc. will ignore it. GCC will
      * issue warnings and break the build. */
     #define METALC_API_EXPORT
@@ -211,7 +211,7 @@
 #else
     /* Not in testing mode. We're either building the C library or a client
      * program is using the library. */
-    #if METALC_INTERNALS_USE_FASTCALL && (METALC_ARCH_BITS != 64)
+    #if METALC_INTERNALS_USE_FASTCALL && (METALC_TARGET_ARCHITECTURE_BITS != 64)
         #define METALC_API_INTERNAL                 __attribute__((visibility("hidden"), fastcall))
         #define METALC_API_INTERAL_WITH_ATTR(...)   __attribute__((visibility("hidden"), fastcall, __VA_ARGS__))
     #else

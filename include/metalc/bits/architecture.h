@@ -105,11 +105,4 @@
 #   error Cannot determine the target architecture.
 #endif
 
-/**
- * The size of a pointer in the target architecture.
- *
- * Shorter alias for @ref METALC_TARGET_ARCHITECTURE_BITS.
- */
-#define METALC_ARCH_BITS    METALC_TARGET_ARCHITECTURE_BITS
-
 #endif /* INCLUDE_METALC_BITS_ARCHITECTURE_H_ */

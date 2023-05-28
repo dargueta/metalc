@@ -15,10 +15,10 @@
 extern MetalCRuntimeInfo *mcinternal_runtime_info;
 
 
-#if METALC_ARCH_BITS == 16
+#if METALC_TARGET_ARCHITECTURE_BITS == 16
     #define MINIMUM_ALLOCATION_SIZE     8
     #define MINIMUM_MMAP_REQUEST_SIZE   1024    /* 1 KiB */
-#elif METALC_ARCH_BITS == 32
+#elif METALC_TARGET_ARCHITECTURE_BITS == 32
     #define MINIMUM_ALLOCATION_SIZE     16
     #define MINIMUM_MMAP_REQUEST_SIZE   4194304     /* 4 MiB */
 #else
