@@ -25,8 +25,12 @@ typedef char mclib_jmp_buf[BUFSIZE] __attribute__((aligned (16)));
 
 #undef BUFSIZE
 
-
+METALC_EXPORT
+GCC_ATTRIBUTE(returns_twice)
 int setjmp(mclib_jmp_buf buf);
+
+METALC_EXPORT
+METALC_ATTR__NORETURN
 int longjmp(mclib_jmp_buf buf, int code);
 
 
@@ -36,8 +40,8 @@ int longjmp(mclib_jmp_buf buf, int code);
 
 
 /** @cond DECL */
-cstdlib_export_with_attr(setjmp, returns_twice);
-cstdlib_export_with_attr(longjmp, noreturn);
+cstdlib_export(setjmp);
+cstdlib_export(longjmp);
 /** @endcond */
 
 #endif  /* INCLUDE_METALC_SETJMP_H_ */

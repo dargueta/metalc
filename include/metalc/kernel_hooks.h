@@ -119,7 +119,7 @@ METALC_ATTR__NONNULL_ARGS(1)
 METALC_ATTR__EXPORT_WEAK
 int krnlhook_open(const char *file, int mode, int perms);
 
-METALC_EXPORT_WITH_ATTR(weak)
+METALC_ATTR__EXPORT_WEAK
 int krnlhook_close(int fdesc);
 
 METALC_ATTR__NONNULL_ARGS(2)

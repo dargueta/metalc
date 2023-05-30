@@ -106,14 +106,11 @@
     )
 
 #define METALC_EXPORT                        METALC_ATTR__EXPORT
-#define METALC_EXPORT_WITH_ATTR(...)         METALC_ATTR__EXPORT GCC_ATTRIBUTE(__VA_ARGS__)
 
 #if METALC_ENABLE_ASM_IMPLEMENTATIONS
-    #define METALC_EXPORT_ASM                   METALC_EXPORT_WITH_ATTR(naked)
-    #define METALC_EXPORT_ASM_WITH_ATTR(...)    METALC_EXPORT_WITH_ATTR(naked, __VA_ARGS__)
+    #define METALC_EXPORT_ASM                   METALC_EXPORT GCC_ATTRIBUTE(naked)
 #else
     #define METALC_EXPORT_ASM                   METALC_EXPORT
-    #define METALC_EXPORT_ASM_WITH_ATTR(...)    METALC_EXPORT_ASM GCC_ATTRIBUTE(__VA_ARGS__)
 #endif
 
 
@@ -144,13 +141,13 @@
 
 
 #if !METALC_COMPILE_OPTION_ENABLE_FILE_IO
-    #define METALC_ATTRMARK_REQUIRES_FILEIO  METALC_EXPORT_WITH_ATTR(error ("Library not compiled with file I/O support."))
+    #define METALC_ATTRMARK_REQUIRES_FILEIO  GCC_ATTRIBUTE(error ("Library not compiled with file I/O support."))
 #else
     #define METALC_ATTRMARK_REQUIRES_FILEIO
 #endif
 
 #if !METALC_COMPILE_OPTION_HAVE_TERMINAL
-    #define METALC_ATTRMARK_REQUIRES_TERM  METALC_EXPORT_WITH_ATTR(error ("Library not compiled with terminal I/O support."))
+    #define METALC_ATTRMARK_REQUIRES_TERM  GCC_ATTRIBUTE(error ("Library not compiled with terminal I/O support."))
 #else
     #define METALC_ATTRMARK_REQUIRES_TERM
 #endif
@@ -163,7 +160,6 @@
      * able to test these directly. Make the `METALC_INTERNAL_ONLY` markers a
      * no-op. */
     #define METALC_INTERNAL_ONLY                  METALC_ATTR__EXPORT
-    #define METALC_INTERNAL_ONLY_WITH_ATTR(...)   METALC_ATTR__EXPORT GCC_ATTRIBUTE(__VA_ARGS__)
 
     #if METALC_BUILDING_LIBC
         /* We're building the C library but with the intent to run unit tests on
@@ -204,7 +200,6 @@
         #define METALC_INTERNAL_ONLY                  METALC_ATTR__NO_EXPORT
     #endif
 
-    #define METALC_INTERNAL_ONLY_WITH_ATTR(...)       METALC_INTERNAL_ONLY GCC_ATTRIBUTE(__VA_ARGS__)
     #define cstdlib_export(name)
     #define cstdlib_export_with_attr(name, ...)
     #define cstdlib_implement(name)

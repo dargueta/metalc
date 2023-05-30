@@ -44,12 +44,17 @@ struct mclib_lconv {
 #endif
 
 
+METALC_EXPORT
+METALC_ATTR__NONNULL_ARGS(2)
 int setlocale(int what, const char *name);
+
+METALC_EXPORT
+METALC_ATTR__RETURNS_NONNULL
 struct mclib_lconv* localeconv(void);
 
 
-cstdlib_export_with_attr(setlocale, nonnull(2));
-cstdlib_export_with_attr(localeconv, returns_nonnull);
+cstdlib_export(setlocale);
+cstdlib_export(localeconv);
 
 
 #endif  /* INCLUDE_METALC_LOCALE_H_ */

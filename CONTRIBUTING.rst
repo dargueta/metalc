@@ -12,16 +12,31 @@ All implemented C standard library functions MUST be specially marked in the
 headers where they're declared.
 
 In the header where the file is declared, after the function is declared you MUST
-use the ``METALC_EXPORT`` or ``METALC_EXPORT_WITH_ATTR`` macro before
-the name of the function, like so:
+use the ``METALC_EXPORT`` macro before the name of the function, like so:
 
 .. code-block:: c
 
     /* string.h */
-    METALC_EXPORT_WITH_ATTR(nonnull) size_t strcspn(const char *str1, const char *str2);
+    METALC_EXPORT
+    METALC_ATTR__NONNULL
+    size_t strcspn(const char *str1, const char *str2);
+
     METALC_EXPORT char *strerror(int errnum);
 
-Side note: ``METALC_EXPORT_WITH_ATTR`` accepts multiple arguments, so you're
-not limited to a single attribute.
+In the file where the function is implemented, *after* the code implementing the
+function, you MUST add a call to the ``cstdlib_implement`` macro:
+
+.. code-block:: c
+
+    /* string.c */
+
+    size_t strcspn(const char *str1, const char *str2) {
+        /* ... */
+    }
+    cstdlib_implement(strcspn);
+
+Failure to do so will result in the function either being invisible to the linker,
+being overridden by the host OS's C standard library when testing, and other
+unpredictable behavior.
 
 .. _RFC 2119: https://tools.ietf.org/html/rfc2119
