@@ -5,7 +5,7 @@
 #include "stdint.h"
 
 
-typedef uint32_t mclib_wchar_t;
+typedef uint_least32_t mclib_wchar_t;
 
 
 #ifndef METALC_COMPILE_FOR_TESTING

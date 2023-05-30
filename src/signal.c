@@ -11,7 +11,8 @@ extern MetalCRuntimeInfo *mcinternal_runtime_info;
 extern mclib_jmp_buf mcinternal_abort_target;
 
 
-METALC_API_INTERNAL_WITH_ATTR(noreturn)
+METALC_INTERNAL_ONLY
+METALC_ATTR__NORETURN
 static void sighandler_terminate(int sig) {
     switch (sig) {
         case mclib_SIGQUIT:

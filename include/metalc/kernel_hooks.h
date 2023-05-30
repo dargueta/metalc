@@ -19,7 +19,7 @@
  * @ref SIGTTIN, and @ref SIGTTOU. If this hook is not implemented, any of the
  * above signals will trigger @ref SIGSYS instead and terminate the process.
  */
-METALC_API_EXPORT_WITH_ATTR(weak)
+METALC_ATTR__EXPORT_WEAK
 void krnlhook_suspend(int sig);
 
 
@@ -30,7 +30,7 @@ void krnlhook_suspend(int sig);
  * implemented, the process cannot be resumed, and @ref SIGSYS will be raised
  * instead.
  */
-METALC_API_EXPORT_WITH_ATTR(weak)
+METALC_ATTR__EXPORT_WEAK
 void krnlhook_resume(int sig);
 
 
@@ -41,7 +41,8 @@ void krnlhook_resume(int sig);
  * dump will behave like @ref SIGHUP. The original signal number is still
  * preserved in the runtime data structure passed back to the kernel.
  */
-METALC_API_EXPORT_WITH_ATTR(noreturn, weak)
+METALC_ATTR__EXPORT_WEAK
+METALC_ATTR__NORETURN
 void krnlhook_core_dump(int sig);
 
 
@@ -80,7 +81,7 @@ void krnlhook_core_dump(int sig);
  * @return The page-aligned address to the allocated memory block. On error,
  *         returns @ref MAP_FAILED and @ref errno is set to indicate the cause.
  */
-METALC_API_EXPORT_WITH_ATTR(weak)
+METALC_ATTR__EXPORT_WEAK
 void *krnlhook_mmap(
     void *addr, size_t length, int prot, int flags, int fd, mclib_off_t offset
 );
@@ -96,7 +97,8 @@ void *krnlhook_mmap(
  * @param new_address
  * @return
  */
-METALC_API_EXPORT_WITH_ATTR(weak, nonnull(1))
+METALC_ATTR__NONNULL_ARGS(1)
+METALC_ATTR__EXPORT_WEAK
 void *krnlhook_mremap(
     void *old_address, size_t old_size, size_t new_size, int flags, ... /* void *new_address */
 );
@@ -108,29 +110,33 @@ void *krnlhook_mremap(
  * For the time being, kernels need not implement this. The default stub will
  * always succeed, regardless of its arguments.
  */
-METALC_API_EXPORT_WITH_ATTR(weak, nonnull(1))
+METALC_ATTR__NONNULL_ARGS(1)
+METALC_ATTR__EXPORT_WEAK
 int krnlhook_munmap(void *addr, size_t length);
 
 
-METALC_API_EXPORT_WITH_ATTR(weak, nonnull(1))
+METALC_ATTR__NONNULL_ARGS(1)
+METALC_ATTR__EXPORT_WEAK
 int krnlhook_open(const char *file, int mode, int perms);
 
-METALC_API_EXPORT_WITH_ATTR(weak)
+METALC_EXPORT_WITH_ATTR(weak)
 int krnlhook_close(int fdesc);
 
-METALC_API_EXPORT_WITH_ATTR(weak, nonnull(2))
+METALC_ATTR__NONNULL_ARGS(2)
+METALC_ATTR__EXPORT_WEAK
 ssize_t krnlhook_write(int fdesc, const void *data, size_t size);
 
-METALC_API_EXPORT_WITH_ATTR(weak, nonnull(2))
+METALC_ATTR__NONNULL_ARGS(2)
+METALC_ATTR__EXPORT_WEAK
 ssize_t krnlhook_read(int fdesc, void *buffer, size_t size);
 
-METALC_API_EXPORT_WITH_ATTR(weak)
+METALC_ATTR__EXPORT_WEAK
 mclib_off_t krnlhook_seek(int fdesc, mclib_off_t offset, int whence);
 
-METALC_API_EXPORT_WITH_ATTR(weak)
+METALC_ATTR__EXPORT_WEAK
 mclib_off_t krnlhook_tell(int fdesc);
 
-METALC_API_EXPORT_WITH_ATTR(weak)
+METALC_ATTR__EXPORT_WEAK
 int krnlhook_fsync(int fdesc);
 
 

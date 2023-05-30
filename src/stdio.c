@@ -17,12 +17,12 @@ extern int fileio_init(void);
 extern int fileio_teardown(void);
 
 
-METALC_API_INTERNAL int stdio_init(void) {
+METALC_ATTR__NO_EXPORTint stdio_init(void) {
     return fileio_init();
 }
 
 
-METALC_API_INTERNAL int stdio_teardown(void) {
+METALC_ATTR__NO_EXPORTint stdio_teardown(void) {
     return fileio_teardown();
 }
 

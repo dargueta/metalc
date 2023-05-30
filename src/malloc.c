@@ -58,8 +58,8 @@ static void *allocate_pages(size_t n_pages, void *suggested_address) {
 }
 
 
-METALC_API_INTERNAL int malloc_init(void) {
-    size_t n_pages = MINIMUM_MMAP_REQUEST_SIZE / mcinternal_runtime_info->page_size;
+METALC_INTERNAL_ONLY int malloc_init(void) {
+    size_t request_size;
 
     /* On the off chance that the minimum mmap size is smaller than a page size,
      * allocate one page. */
@@ -77,7 +77,7 @@ METALC_API_INTERNAL int malloc_init(void) {
 }
 
 
-METALC_API_INTERNAL int malloc_teardown(void) {
+METALC_ATTR__NO_EXPORTint malloc_teardown(void) {
     return 0;
 }
 

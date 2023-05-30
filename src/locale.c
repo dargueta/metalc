@@ -66,7 +66,7 @@ static struct mcinternal_collation_info mcinternal_supported_collation[] = {
 };
 
 
-METALC_API_INTERNAL
+METALC_INTERNAL_ONLY
 const struct LConvEntry mcinternal_supported_locales[] = {
     {"C", &mcinternal_default_lconv_info},
     {"", &mcinternal_default_lconv_info},
@@ -74,13 +74,13 @@ const struct LConvEntry mcinternal_supported_locales[] = {
 };
 
 
-METALC_API_INTERNAL
+METALC_INTERNAL_ONLY
 struct mclib_lconv mcinternal_current_lconv;
 
-METALC_API_INTERNAL
+METALC_INTERNAL_ONLY
 const struct mcinternal_charset_info *mcinternal_ptr_current_charset = &mcinternal_supported_charsets[0];
 
-METALC_API_INTERNAL
+METALC_INTERNAL_ONLY
 const struct mcinternal_collation_info *mcinternal_ptr_current_coll = &mcinternal_supported_collation[0];
 
 
@@ -117,14 +117,14 @@ static const struct mcinternal_collation_info *find_collation(const char *name) 
 }
 
 
-METALC_API_INTERNAL int locale_init(void) {
+METALC_ATTR__NO_EXPORTint locale_init(void) {
     const struct mclib_lconv *default_locale = find_lconv("C");
     memcpy(&mcinternal_current_lconv, default_locale, sizeof(mcinternal_current_lconv));
     return 0;
 }
 
 
-METALC_API_INTERNAL int locale_teardown(void) {
+METALC_ATTR__NO_EXPORTint locale_teardown(void) {
     return 0;
 }
 

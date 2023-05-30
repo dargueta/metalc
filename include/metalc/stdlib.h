@@ -90,10 +90,10 @@ cstdlib_export(free);
 #endif
 
 /* Nonstandard functions */
-char *itoa(int value, char *str, int base);
-char *utoa(unsigned value, char *buf, int base);
-char *ltoa(long value, char *buf, int base);
-char *ultoa(unsigned long value, char *str, int base);
+METALC_EXPORT char *itoa(int value, char *str, int base);
+METALC_EXPORT char *utoa(unsigned value, char *buf, int base);
+METALC_EXPORT char *ltoa(long value, char *buf, int base);
+METALC_EXPORT char *ultoa(unsigned long value, char *str, int base);
 
 cstdlib_export(itoa);
 cstdlib_export(utoa);
