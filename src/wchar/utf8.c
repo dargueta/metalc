@@ -3,7 +3,7 @@
 #include "metalc/wchar.h"
 
 
-METALC_API_INTERNAL
+METALC_INTERNAL_ONLY
 int mcinternal_utf8_mblen(const char *str, size_t n) {
     unsigned uchr;
 
@@ -35,7 +35,7 @@ int mcinternal_utf8_mblen(const char *str, size_t n) {
 }
 
 
-METALC_API_INTERNAL
+METALC_INTERNAL_ONLY
 int mcinternal_utf8_mbtowc(mclib_wchar_t *pwc, const char *str, size_t n) {
     mclib_wchar_t result;
     int current_char_len;
@@ -86,7 +86,7 @@ int mcinternal_utf8_mbtowc(mclib_wchar_t *pwc, const char *str, size_t n) {
 }
 
 
-METALC_API_INTERNAL
+METALC_INTERNAL_ONLY
 int mcinternal_utf8_wctomb(char *str, mclib_wchar_t wchar) {
     /* Caller is asking if this encoding is state-dependent. It isn't. */
     if (str == NULL)

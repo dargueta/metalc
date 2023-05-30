@@ -10,6 +10,7 @@
 #ifndef INCLUDE_METALC_METALC_H_
 #define INCLUDE_METALC_METALC_H_
 
+#include "internal/annotations.h"
 #include "bits/architecture.h"
 
 #cmakedefine01 METALC_COMPILER_GCC
@@ -104,29 +105,15 @@
       (METALC_COMPILER_GCC_COMPATIBLE || METALC_COMPILER_MS_COMPATIBLE) \
     )
 
-
-#if METALC_TARGET_ARCHITECTURE_BITS == 64
-    /* Can't use cdecl here because GCC, MinGW, etc. will ignore it. GCC will
-     * issue warnings and break the build. */
-    #define METALC_API_EXPORT
-    #define METALC_API_EXPORT_WITH_ATTR(...)         __attribute__((__VA_ARGS__))
-    #define METALC_API_EXPORT_FAST
-    #define METALC_API_EXPORT_FAST_WITH_ATTR(...)    __attribute__((__VA_ARGS__))
-#else
-    /* 16- or 32-bit compile architecture. */
-    #define METALC_API_EXPORT
-    #define METALC_API_EXPORT_WITH_ATTR(...)        __attribute__((__VA_ARGS__))
-    #define METALC_API_EXPORT_FAST                  __attribute__((fastcall))
-    #define METALC_API_EXPORT_FAST_WITH_ATTR(...)   __attribute__((fastcall, __VA_ARGS__))
-#endif
-
+#define METALC_EXPORT                        METALC_ATTR__EXPORT
+#define METALC_EXPORT_WITH_ATTR(...)         METALC_ATTR__EXPORT GCC_ATTRIBUTE(__VA_ARGS__)
 
 #if METALC_ENABLE_ASM_IMPLEMENTATIONS
-    #define METALC_API_EXPORT_ASM   METALC_API_EXPORT_WITH_ATTR(naked)
-    #define METALC_API_EXPORT_ASM_WITH_ATTR(...)    METALC_API_EXPORT_WITH_ATTR(naked, __VA_ARGS__)
+    #define METALC_EXPORT_ASM                   METALC_EXPORT_WITH_ATTR(naked)
+    #define METALC_EXPORT_ASM_WITH_ATTR(...)    METALC_EXPORT_WITH_ATTR(naked, __VA_ARGS__)
 #else
-    #define METALC_API_EXPORT_ASM   METALC_EXPORT
-    #define METALC_API_EXPORT_ASM_WITH_ATTR(...)    METALC_API_EXPORT_WITH_ATTR(__VA_ARGS__)
+    #define METALC_EXPORT_ASM                   METALC_EXPORT
+    #define METALC_EXPORT_ASM_WITH_ATTR(...)    METALC_EXPORT_ASM GCC_ATTRIBUTE(__VA_ARGS__)
 #endif
 
 
@@ -173,10 +160,10 @@
     /* Building the C library for testing... */
 
     /* No functions are internal to the C library anymore since we need to be
-     * able to test these directly. Make the `METALC_INTERNAL` markers a
+     * able to test these directly. Make the `METALC_INTERNAL_ONLY` markers a
      * no-op. */
-    #define METALC_API_INTERNAL
-    #define METALC_API_INTERNAL_WITH_ATTR(...)   __attribute__((__VA_ARGS__))
+    #define METALC_INTERNAL_ONLY                  METALC_ATTR__EXPORT
+    #define METALC_INTERNAL_ONLY_WITH_ATTR(...)   METALC_ATTR__EXPORT GCC_ATTRIBUTE(__VA_ARGS__)
 
     #if METALC_BUILDING_LIBC
         /* We're building the C library but with the intent to run unit tests on
@@ -185,51 +172,42 @@
          * to avoid naming collisions. */
         #if defined METALC_BUILD_KIND_STATIC
             #define cstdlib_export(name)   \
-                extern __typeof__(name) name __attribute__((visibility("hidden")))
+                extern __typeof__(name) name METALC_ATTR__NO_EXPORT
 
             #define cstdlib_export_with_attr(name, ...)   \
-                extern __typeof__(name) name __attribute__((visibility("hidden"), __VA_ARGS__))
+                extern __typeof__(name) name METALC_ATTR__NO_EXPORT GCC_ATTRIBUTE(__VA_ARGS__)
 
-            #define cstdlib_implement(name)     extern __typeof__(name) mclib_##name __attribute__((alias(#name), copy(name)))
+            #define cstdlib_implement(name)     extern __typeof__(name) mclib_##name GCC_ATTRIBUTE(alias(#name), copy(name))
         #elif defined METALC_BUILD_KIND_SHARED
             #define cstdlib_export(name)   \
-                extern __typeof__(name) name __attribute__((visibility("hidden")))
+                METALC_ATTR__NO_EXPORT extern __typeof__(name) name
 
             #define cstdlib_export_with_attr(name, ...)   \
-                extern __typeof__(name) name __attribute__((visibility("hidden"), __VA_ARGS__))
+                METALC_ATTR__NO_EXPORT extern __typeof__(name) name GCC_ATTRIBUTE(__VA_ARGS__)
 
-            #define cstdlib_implement(name)  extern __typeof__(name) mclib_##name __attribute__((alias(#name), copy(name)))
+            #define cstdlib_implement(name)  extern __typeof__(name) mclib_##name GCC_ATTRIBUTE(alias(#name), copy(name))
         #else
             #error "Need to define METALC_BUILD_KIND_STATIC or METALC_BUILD_KIND_SHARED when compiling the C library in testing mode."
         #endif
     #else
         /* We're building the testbench code. */
-        #define cstdlib_export(name)                    extern __typeof__(name) mclib_##name __attribute__((copy(name)))
-        #define cstdlib_export_with_attr(name, ...)     extern __typeof__(name) mclib_##name __attribute__((copy(name), __VA_ARGS__))
+        #define cstdlib_export(name)                    extern __typeof__(name) mclib_##name GCC_ATTRIBUTE((copy(name)))
+        #define cstdlib_export_with_attr(name, ...)     extern __typeof__(name) mclib_##name GCC_ATTRIBUTE((copy(name), __VA_ARGS__))
         #define cstdlib_implement(name)
     #endif
 #else
     /* Not in testing mode. We're either building the C library or a client
      * program is using the library. */
     #if METALC_INTERNALS_USE_FASTCALL && (METALC_TARGET_ARCHITECTURE_BITS != 64)
-        #define METALC_API_INTERNAL                 __attribute__((visibility("hidden"), fastcall))
-        #define METALC_API_INTERNAL_WITH_ATTR(...)   __attribute__((visibility("hidden"), fastcall, __VA_ARGS__))
+        #define METALC_INTERNAL_ONLY                  METALC_ATTR__NO_EXPORT METALC_ATTR__FASTCALL
     #else
-        #define METALC_API_INTERNAL                 __attribute__((visibility("hidden")))
-        #define METALC_API_INTERNAL_WITH_ATTR(...)   __attribute__((visibility("hidden"), __VA_ARGS__))
+        #define METALC_INTERNAL_ONLY                  METALC_ATTR__NO_EXPORT
     #endif
 
-    #if METALC_BUILDING_LIBC
-        /* Building the C library in production mode. */
-        #define cstdlib_export(name)                    extern __typeof__(name) name
-        #define cstdlib_export_with_attr(name, ...)     extern __typeof__(name) name __attribute__((__VA_ARGS__))
-        #define cstdlib_implement(name)
-    #else
-        /* This file is being included by a client program. */
-        #define cstdlib_export(name)                    extern __typeof__(name) name
-        #define cstdlib_export_with_attr(name, ...)     extern __typeof__(name) name __attribute__((__VA_ARGS__))
-        #define cstdlib_implement(name)
-    #endif
+    #define METALC_INTERNAL_ONLY_WITH_ATTR(...)       METALC_INTERNAL_ONLY GCC_ATTRIBUTE(__VA_ARGS__)
+    #define cstdlib_export(name)
+    #define cstdlib_export_with_attr(name, ...)
+    #define cstdlib_implement(name)
 #endif  /* METALC_COMPILE_FOR_TESTING */
 
 #endif  /* INCLUDE_METALC_METALC_H_ */

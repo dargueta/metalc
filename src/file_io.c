@@ -28,7 +28,7 @@ mclib_FILE * const mclib_stdout = &mcinternal_stdout;
 mclib_FILE * const mclib_stderr = &mcinternal_stderr;
 
 
-METALC_API_INTERNAL int fileio_init(void) {
+METALC_ATTR__NO_EXPORTint fileio_init(void) {
     memset(&mcinternal_stdin, 0, sizeof(mcinternal_stdin));
     memset(&mcinternal_stdout, 0, sizeof(mcinternal_stdout));
     memset(&mcinternal_stderr, 0, sizeof(mcinternal_stderr));
@@ -45,7 +45,7 @@ METALC_API_INTERNAL int fileio_init(void) {
 }
 
 
-METALC_API_INTERNAL int fileio_teardown(void) {
+METALC_ATTR__NO_EXPORTint fileio_teardown(void) {
     fclose(mclib_stdin);
     fclose(mclib_stdout);
     fclose(mclib_stderr);

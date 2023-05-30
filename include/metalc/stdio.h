@@ -48,7 +48,7 @@ size_t fwrite(const void *ptr, size_t size, size_t count, mclib_FILE *stream);
 size_t fread(void *ptr, size_t size, size_t count, mclib_FILE *stream);
 mclib_fpos_t fseek(mclib_FILE *stream, long offset, int whence);
 
-METALC_API_INTERNAL_WITH_ATTR(nonnull)
+METALC_INTERNAL_ONLY_WITH_ATTR(nonnull)
 int mcinternal_mode_string_to_flags(const char *mode);
 
 #endif  /* INCLUDE_METALC_STDIO_H_ */

@@ -12,12 +12,13 @@ extern mclib_jmp_buf mcinternal_abort_target;
 
 
 #if METALC_COMPILE_FOR_TESTING
-    METALC_API_INTERNAL_WITH_ATTR(noreturn) extern void testhook_terminate(int sig);
-    METALC_API_INTERNAL_WITH_ATTR(noreturn) extern void testhook_signal(int sig);
+    METALC_INTERNAL_ONLY METALC_ATTR__NORETURN extern void testhook_terminate(int sig);
+    METALC_INTERNAL_ONLY METALC_ATTR__NORETURN extern void testhook_signal(int sig);
 #endif
 
 
-METALC_API_INTERNAL_WITH_ATTR(noreturn)
+METALC_INTERNAL_ONLY
+METALC_ATTR__NORETURN
 static void sighandler_terminate(int sig) {
     switch (sig) {
         case mclib_SIGQUIT:
@@ -48,10 +49,6 @@ static void sighandler_terminate(int sig) {
             #else
                 longjmp(mcinternal_abort_target, sig);
             #endif
-            break;
-
-        default:
-            longjmp(mcinternal_abort_target, sig);
             break;
     };
 }

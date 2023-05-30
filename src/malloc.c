@@ -59,7 +59,7 @@ static struct _MemoryBlock *_allocate_pages(size_t n_pages, void *suggested_addr
 }
 
 
-METALC_API_INTERNAL int malloc_init(void) {
+METALC_INTERNAL_ONLY int malloc_init(void) {
     size_t request_size;
 
     /* The minimum allocation size depends on the architecture. For 16-bit builds,
@@ -79,7 +79,7 @@ METALC_API_INTERNAL int malloc_init(void) {
 }
 
 
-METALC_API_INTERNAL int malloc_teardown(void) {
+METALC_ATTR__NO_EXPORTint malloc_teardown(void) {
     return 0;
 }
 
