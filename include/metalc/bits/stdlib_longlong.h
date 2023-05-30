@@ -17,23 +17,35 @@ typedef struct {
 
 #define atoll(str)  strtoll((str), NULL, 10)
 
+METALC_EXPORT
+METALC_ATTR__CONST_FUNC
 long long llabs(long long x);      /* done */
+
+METALC_EXPORT
+METALC_ATTR__REPRODUCIBLE
 long long strtoll(const char *str, const char **endptr, int base);
+
+METALC_EXPORT
+METALC_ATTR__REPRODUCIBLE
 unsigned long long strtoull(const char *str, const char **endptr, int base);
+
+METALC_EXPORT
+METALC_ATTR__CONST_FUNC
 mclib_lldiv_t lldiv(long long numer, long long denom);
 
+
 /* Nonstandard */
-char *lltoa(long long value, char *buf, int base);
-char *ulltoa(unsigned long long value, char *str, int base);
+METALC_EXPORT char *lltoa(long long value, char *buf, int base);
+METALC_EXPORT char *ulltoa(unsigned long long value, char *str, int base);
 
 #ifndef METALC_DISABLE_STDLIB_DEFS
     #define lldiv_t mclib_lldiv_t
 #endif
 
-cstdlib_export_with_attr(llabs, const);
-cstdlib_export_with_attr(strtoll, pure);
-cstdlib_export_with_attr(strtoull, pure);
-cstdlib_export_with_attr(lldiv, const);
+cstdlib_export(llabs);
+cstdlib_export(strtoll);
+cstdlib_export(strtoull);
+cstdlib_export(lldiv);
 cstdlib_export(lltoa);
 cstdlib_export(ulltoa);
 

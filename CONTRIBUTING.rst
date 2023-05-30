@@ -12,20 +12,18 @@ All implemented C standard library functions MUST be specially marked in the
 headers where they're declared and in the files where they're implemented.
 
 In the header where the file is declared, after the function is declared you MUST
-add a call to the ``cstdlib_export`` or ``cstdlib_export_with_attr`` macro with
-the name of the function, like so:
+add a call to the ``cstdlib_export`` macro with the name of the function, like so:
 
 .. code-block:: c
 
     /* string.h */
+    METALC_ATTR__NONNULL
     size_t strcspn(const char *str1, const char *str2);
+
     char *strerror(int errnum);
 
-    cstdlib_export_with_attr(strcspn, nonnull);
+    cstdlib_export(strcspn);
     cstdlib_export(strerror);
-
-Side note: ``cstdlib_export_with_attr`` accepts multiple arguments, so you're
-not limited to a single attribute.
 
 In the file where the function is implemented, *after* the code implementing the
 function, you MUST add a call to the ``cstdlib_implement`` macro:

@@ -27,14 +27,16 @@
  *
  * @return The number of bytes copied, not including the terminating null.
  */
-METALC_INTERNAL_ONLY_WITH_ATTR(nonnull)
+METALC_INTERNAL_ONLY
+METALC_ATTR__NONNULL
 size_t strcpy_and_update_buffer(const char *source, char **buffer);
 
 
 /**
  * Same as @ref strcpy_and_update_buffer except copies at most @a n chars.
  */
-METALC_INTERNAL_ONLY_WITH_ATTR(nonnull)
+METALC_INTERNAL_ONLY
+METALC_ATTR__NONNULL
 size_t strncpy_and_update_buffer(const char *source, char **buffer, size_t n);
 
 
