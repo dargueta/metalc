@@ -12,7 +12,6 @@
  * the number will be negative and errno will be set. The absolute value of the
  * return value is still the number of characters read.
  */
-METALC_INTERNAL_ONLY
 int parse_printf_format_flags(const char *format, struct MCFormatSpecifier *info) {
     int i;
 
@@ -55,7 +54,6 @@ int parse_printf_format_flags(const char *format, struct MCFormatSpecifier *info
  * The function returns the number of characters read. If the width isn't present,
  * the return value will be 0 and `info->width` will also be 0.
  */
-METALC_INTERNAL_ONLY
 int parse_printf_format_width(const char *format, struct MCFormatSpecifier *info) {
     unsigned long width;
     const char *end;
@@ -85,7 +83,6 @@ int parse_printf_format_width(const char *format, struct MCFormatSpecifier *info
  * the first character. If not, it assumes there is no precision specifier and
  * returns immediately.
  */
-METALC_INTERNAL_ONLY
 int parse_printf_format_precision(const char *format, struct MCFormatSpecifier *info) {
     unsigned long precision;
     const char *end;
@@ -130,7 +127,6 @@ int parse_printf_format_precision(const char *format, struct MCFormatSpecifier *
 }
 
 
-METALC_INTERNAL_ONLY
 enum MCArgumentType int_argtype_from_width(enum MCArgumentWidth width_kind) {
     mclib_errno = 0;
     switch (width_kind) {
@@ -153,7 +149,6 @@ enum MCArgumentType int_argtype_from_width(enum MCArgumentWidth width_kind) {
 }
 
 
-METALC_INTERNAL_ONLY
 enum MCArgumentType float_argtype_from_width(enum MCArgumentWidth width_kind) {
     mclib_errno = 0;
     if (width_kind == MCFMT_ARGW__DEFAULT)
@@ -169,7 +164,6 @@ enum MCArgumentType float_argtype_from_width(enum MCArgumentWidth width_kind) {
 }
 
 
-METALC_INTERNAL_ONLY
 int parse_printf_format_type_width_flag(
     const char *format, struct MCFormatSpecifier *info
 ) {
@@ -218,7 +212,6 @@ int parse_printf_format_type_width_flag(
 }
 
 
-METALC_INTERNAL_ONLY
 int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info) {
     enum MCArgumentType arg_type;
     int n_read;
@@ -321,7 +314,6 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
 }
 
 
-METALC_INTERNAL_ONLY
 int parse_printf_format_specifier(const char *format, struct MCFormatSpecifier *info) {
     int total_read;
     int current_read;
