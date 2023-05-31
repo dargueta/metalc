@@ -33,7 +33,7 @@
 #endif
 
 // GCC and compatible compilers, except some versions of ICC that don't define this.
-#if defined(__has_attribute)
+#ifdef __has_attribute
 #    if __has_attribute(visibility)
 #        define METALC_ATTR__EXPORT GCC_ATTRIBUTE(visibility("default"))
 #        define METALC_ATTR__NO_EXPORT GCC_ATTRIBUTE(visibility("hidden"))
@@ -176,6 +176,5 @@
 #else
 #    define METALC_ATTR__UNHOSTED_ONLY(x) x
 #endif
-
 
 #endif /* INCLUDE_METALC_INTERNAL_ANNOTATIONS_H_ */
