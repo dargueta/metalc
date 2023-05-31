@@ -21,11 +21,28 @@ extern mclib_FILE * const mclib_stdout;     /**< Standard output file handle */
 extern mclib_FILE * const mclib_stderr;     /**< Standard error output file handle */
 
 
+METALC_EXPORT
+METALC_ATTR__NONNULL_ARGS(2)
 int vsprintf(char *buffer, const char *format, va_list arg_list);
+
+METALC_EXPORT
+METALC_ATTR__NONNULL_ARGS(3)
 int vsnprintf(char *buffer, size_t size, const char *format, va_list arg_list);
-int snprintf(char *buffer, size_t length, const char *format, ...);
+
+METALC_EXPORT
+METALC_ATTR__NONNULL_ARGS(1, 2)
 int sprintf(char *buffer, const char *format, ...);
+
+METALC_EXPORT
+METALC_ATTR__NONNULL_ARGS(1, 3)
+int snprintf(char *buffer, size_t length, const char *format, ...);
+
+METALC_EXPORT
+METALC_ATTR__NONNULL_ARGS(1)
 int vprintf(const char *format, va_list arg_list);
+
+METALC_EXPORT
+METALC_ATTR__NONNULL_ARGS(1)
 int printf(const char *format, ...);
 
 /**
@@ -36,15 +53,45 @@ int printf(const char *format, ...);
  * @a stream. A more efficient way to do this would be to write directly into
  * @a stream without holding the entire result in memory.
  */
+METALC_EXPORT
+METALC_ATTR__NONNULL_ARGS(1, 2)
 int vfprintf(mclib_FILE *stream, const char *format, va_list arg_list);
+
+METALC_EXPORT
+METALC_ATTR__NONNULL_ARGS(1, 2)
 int fprintf(mclib_FILE *stream, const char *format, ...);
+
+METALC_EXPORT
+METALC_ATTR__NONNULL
 void clearerr(mclib_FILE *stream);
+
+METALC_EXPORT
+METALC_ATTR__NONNULL
 void fclose(mclib_FILE *stream);
+
+METALC_EXPORT
+METALC_ATTR__NONNULL
 int feof(mclib_FILE *stream);
+
+METALC_EXPORT
+METALC_ATTR__NONNULL
 int ferror(mclib_FILE *stream);
+
+METALC_EXPORT
+METALC_ATTR__NONNULL
+METALC_ATTR__NODISCARD
 mclib_FILE *fopen(const char *path, const char *mode);
+
+METALC_EXPORT
+METALC_ATTR__NONNULL
 size_t fwrite(const void *ptr, size_t size, size_t count, mclib_FILE *stream);
+
+METALC_EXPORT
+METALC_ATTR__NONNULL
 size_t fread(void *ptr, size_t size, size_t count, mclib_FILE *stream);
+
+METALC_EXPORT
+METALC_ATTR__NONNULL
 mclib_fpos_t fseek(mclib_FILE *stream, long offset, int whence);
 
 METALC_INTERNAL_ONLY
@@ -52,21 +99,21 @@ METALC_ATTR__NONNULL
 int mcinternal_mode_string_to_flags(const char *mode);
 
 
-cstdlib_export_with_attr(vsprintf, nonnull(2));
-cstdlib_export_with_attr(vsnprintf, nonnull(3));
-cstdlib_export_with_attr(sprintf, nonnull(1, 2));
-cstdlib_export_with_attr(snprintf, nonnull(1, 3));
-cstdlib_export_with_attr(vprintf, nonnull(1));
-cstdlib_export_with_attr(printf, nonnull(1));
-cstdlib_export_with_attr(vfprintf, nonnull(1, 2));
-cstdlib_export_with_attr(fprintf, nonnull(1, 2));
-cstdlib_export_with_attr(clearerr, nonnull);
-cstdlib_export_with_attr(fclose, nonnull);
-cstdlib_export_with_attr(feof, nonnull);
-cstdlib_export_with_attr(ferror, nonnull);
-cstdlib_export_with_attr(fopen, nonnull, warn_unused_result);
-cstdlib_export_with_attr(fwrite, nonnull);
-cstdlib_export_with_attr(fread, nonnull);
-cstdlib_export_with_attr(fseek, nonnull);
+cstdlib_export(vsprintf);
+cstdlib_export(vsnprintf);
+cstdlib_export(sprintf);
+cstdlib_export(snprintf);
+cstdlib_export(vprintf);
+cstdlib_export(printf);
+cstdlib_export(vfprintf);
+cstdlib_export(fprintf);
+cstdlib_export(clearerr);
+cstdlib_export(fclose);
+cstdlib_export(feof);
+cstdlib_export(ferror);
+cstdlib_export(fopen);
+cstdlib_export(fwrite);
+cstdlib_export(fread);
+cstdlib_export(fseek);
 
 #endif  /* INCLUDE_METALC_STDIO_H_ */
