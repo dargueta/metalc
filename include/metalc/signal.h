@@ -64,6 +64,4 @@ cstdlib_export(signal);
 #define mclib_SIG_IGN     1   /**< Ignore signal: The signal is ignored. */
 #define mclib_SIG_ERR     2   /**< The signal triggers an error. */
 
-#include "bits/signal.h"
-
 #endif  /* INCLUDE_METALC_SIGNAL_H_ */

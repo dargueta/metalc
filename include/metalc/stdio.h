@@ -45,6 +45,7 @@ METALC_EXPORT
 METALC_ATTR__NONNULL_ARGS(1)
 int printf(const char *format, ...);
 
+
 /**
  * Write formatted output to a file using a variadic argument list.
  *
@@ -97,23 +98,5 @@ mclib_fpos_t fseek(mclib_FILE *stream, long offset, int whence);
 METALC_INTERNAL_ONLY
 METALC_ATTR__NONNULL
 int mcinternal_mode_string_to_flags(const char *mode);
-
-
-cstdlib_export(vsprintf);
-cstdlib_export(vsnprintf);
-cstdlib_export(sprintf);
-cstdlib_export(snprintf);
-cstdlib_export(vprintf);
-cstdlib_export(printf);
-cstdlib_export(vfprintf);
-cstdlib_export(fprintf);
-cstdlib_export(clearerr);
-cstdlib_export(fclose);
-cstdlib_export(feof);
-cstdlib_export(ferror);
-cstdlib_export(fopen);
-cstdlib_export(fwrite);
-cstdlib_export(fread);
-cstdlib_export(fseek);
 
 #endif  /* INCLUDE_METALC_STDIO_H_ */

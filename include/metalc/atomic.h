@@ -37,7 +37,7 @@ METALC_EXPORT METALC_ATTR__NONNULL uint16_t atomic_load_16(const atomic_object_t
 /**
  * Read the 32-bit integer stored in the data area of the lock object.
  */
-METALC_EXPORT METALC_ATTR__NONNULL  uint32_t atomic_load_32(const atomic_object_t *object);
+METALC_EXPORT METALC_ATTR__NONNULL uint32_t atomic_load_32(const atomic_object_t *object);
 
 /**
  * Read the 64-bit integer stored in the data area of the lock object.

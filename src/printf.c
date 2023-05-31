@@ -5,6 +5,7 @@
 #include "metalc/stdlib.h"
 #include "metalc/string.h"
 
+
 /**
  * Examine a format string and read the flags.
  *

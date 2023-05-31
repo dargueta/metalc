@@ -49,8 +49,6 @@ set(HEADER_FILES
     "${INCLUDE_CLIB_DIR}/string.h"
     "${INCLUDE_CLIB_DIR}/bits/architecture.h"
     "${INCLUDE_CLIB_DIR}/bits/errno.h"
-    "${INCLUDE_CLIB_DIR}/bits/signal.h"
-    "${INCLUDE_CLIB_DIR}/bits/stddef.h"
     "${INCLUDE_CLIB_DIR}/bits/stdio.h"
     "${INCLUDE_CLIB_DIR}/bits/stdlib_longlong.h"
     "${INCLUDE_CLIB_DIR}/charsets/common.h"
@@ -86,12 +84,9 @@ set(LIBRARY_C_SOURCES
 set(TEST_SOURCE_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/main.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/ctype.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/tests/file_io.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/tests/printf.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/string.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/testing.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/testing.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/tests/wchar/utf8.c"
 )
 
 include_directories("${CMAKE_BINARY_DIR}/include")

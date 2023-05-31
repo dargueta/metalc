@@ -36,8 +36,9 @@ Compilation Modes
 This library can be compiled in one of several modes, depending on the needs of
 the program linking to it.
 
-* **Bare:** Assumes no underlying system support. Many features such as I/O
-  require hooks to be implemented by the code using the library.
+* **Bare:** Assumes no underlying system system support. Use this for OS kernels
+  that don't need UEFI support or will implement it on their own. Many features
+  such as I/O require hooks to be implemented by the code using the library.
 * **UEFI Application:** Uses the UEFI boot services to provide I/O, memory
   allocation, etc. Useful for writing OS bootloaders and UEFI applications, but
   not OS kernels.
@@ -57,6 +58,7 @@ Requirements
 
 To build this library you'll need:
 
+* Python 3.3 or higher.
 * CMake 3.13 or higher.
 * A compiler supporting ANSI C99 or later, such as GCC, MinGW, OpenWatcom, etc.
   Visual Studio may or may not work.

@@ -40,14 +40,15 @@ struct _MemoryBlock {
 
 
 static struct _MemoryBlock *g_ptr_first_page = NULL;
+static struct _MemoryBlock *g_next_allocation = NULL;
 
 
 /* Yes, yes, this is terrible, but we're only using it for one thing. */
 #define MAX(x, y)  ((x) < (y)) ? (y) : (x)
 
 
-static void *allocate_pages(size_t n_pages, void *suggested_address) {
-    return krnlhook_mmap(
+static struct _MemoryBlock *_allocate_pages(size_t n_pages, void *suggested_address) {
+    return (struct _MemoryBlock *) krnlhook_mmap(
         suggested_address,
         n_pages * mcinternal_runtime_info->page_size,
         mclib_PROT_READ | mclib_PROT_WRITE,
@@ -61,18 +62,19 @@ static void *allocate_pages(size_t n_pages, void *suggested_address) {
 METALC_INTERNAL_ONLY int malloc_init(void) {
     size_t request_size;
 
-    /* On the off chance that the minimum mmap size is smaller than a page size,
-     * allocate one page. */
-    if (n_pages == 0)
-        n_pages = 1;
+    /* The minimum allocation size depends on the architecture. For 16-bit builds,
+     * it's 1 KiB. Otherwise, 4 MiB. */
+    request_size = MAX(MINIMUM_MMAP_REQUEST_SIZE, mcinternal_runtime_info->page_size);
+    g_ptr_first_page = _allocate_pages(request_size, NULL);
 
-    g_ptr_first_page = (struct _MemoryBlock *)allocate_pages(n_pages, NULL);
     if (g_ptr_first_page == mclib_MAP_FAILED)
         /* If mmap failed, then errno is already set for us. */
         return mclib_errno;
 
     g_ptr_first_page->p_previous = NULL;
-    g_ptr_first_page->block_size = MINIMUM_MMAP_REQUEST_SIZE;
+    g_ptr_first_page->block_size = request_size;
+    g_next_allocation = g_ptr_first_page;
+
     return 0;
 }
 
@@ -82,7 +84,7 @@ METALC_ATTR__NO_EXPORTint malloc_teardown(void) {
 }
 
 
-#define _size_of_allocation(ptr)    (((const struct _MemoryBlock *)(((const char *)(ptr)) - sizeof(struct _MemoryBlock)))->block_size)
+#define _size_of_allocation(ptr) (((const struct _MemoryBlock *)(((const char *)(ptr)) - sizeof(struct _MemoryBlock)))->block_size)
 
 
 void *malloc(size_t size) {

@@ -1,9 +1,7 @@
 #ifndef INCLUDE_METALC_WCHAR_H_
 #define INCLUDE_METALC_WCHAR_H_
 
-#include "metalc.h"
-#include "stdint.h"
-
+#include "stddef.h"
 
 typedef uint_least32_t mclib_wchar_t;
 

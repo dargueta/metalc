@@ -1,0 +1,3 @@
+pytest ~= 6.0
+pytest-randomly
+unicorn ~= 1.0.1

@@ -3,6 +3,7 @@
 #include "metalc/locale.h"
 #include "metalc/metalc.h"
 #include "metalc/setjmp.h"
+#include "metalc/stdlib.h"
 #include "metalc/stddef.h"
 
 

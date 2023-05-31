@@ -11,6 +11,12 @@ extern MetalCRuntimeInfo *mcinternal_runtime_info;
 extern mclib_jmp_buf mcinternal_abort_target;
 
 
+#if METALC_COMPILE_FOR_TESTING
+    METALC_INTERNAL_ONLY METALC_ATTR__NORETURN extern void testhook_terminate(int sig);
+    METALC_INTERNAL_ONLY METALC_ATTR__NORETURN extern void testhook_signal(int sig);
+#endif
+
+
 METALC_INTERNAL_ONLY
 METALC_ATTR__NORETURN
 static void sighandler_terminate(int sig) {
@@ -30,11 +36,19 @@ static void sighandler_terminate(int sig) {
              * crt_teardown() will *not* be called and no resources are released.
              * It's up to the operating system to release memory, file handles,
              * etc. */
-            krnlhook_core_dump(sig);
+            #if METALC_COMPILE_FOR_TESTING
+                testhook_terminate(sig);
+            #else
+                krnlhook_core_dump(sig, mcinternal_runtime_info->udata);
+            #endif
             break;
 
         default:
-            longjmp(mcinternal_abort_target, sig);
+            #if METALC_COMPILE_FOR_TESTING
+                testhook_terminate(sig);
+            #else
+                longjmp(mcinternal_abort_target, sig);
+            #endif
             break;
     };
 }
@@ -48,13 +62,21 @@ static void sighandler_ignore(int sig) {
 
 /* Signal handler pauses the current process. */
 static void sighandler_stop(int sig) {
-    krnlhook_suspend(sig);
+    #if METALC_COMPILE_FOR_TESTING
+        testhook_signal(sig);
+    #else
+        krnlhook_suspend(sig, mcinternal_runtime_info->udata);
+    #endif
 }
 
 
 /* Signal handler resumes the current process. */
 static void sighandler_resume(int sig) {
-    krnlhook_resume(sig);
+    #if METALC_COMPILE_FOR_TESTING
+        testhook_signal(sig);
+    #else
+        krnlhook_resume(sig, mcinternal_runtime_info->udata);
+    #endif
 }
 
 
@@ -157,7 +179,6 @@ int raise(int sig) {
     current_signal_handlers[sig - 1](sig);
     return 0;
 }
-cstdlib_implement(raise);
 
 
 mclib_signal_handler_t signal(int sig, mclib_signal_handler_t handler) {
@@ -187,4 +208,3 @@ mclib_signal_handler_t signal(int sig, mclib_signal_handler_t handler) {
 
     return original_handler;
 }
-cstdlib_implement(signal);

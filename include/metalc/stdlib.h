@@ -8,6 +8,10 @@
 
 #define mclib_RAND_MAX    INT_MAX
 
+#ifndef NULL
+    #define NULL ((void *)0)
+#endif
+
 
 typedef struct {
     int quot, rem;

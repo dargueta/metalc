@@ -94,10 +94,12 @@ METALC_EXPORT
 METALC_ATTR__NONNULL
 char *strtok(char *str, const char *delimiters);
 
+/**
+ * @warning Standards violation: Performs no transform, nearly identical to @ref strncpy.
+ */
 METALC_EXPORT
 METALC_ATTR__NONNULL
 size_t strxfrm(char *destination, const char *source, size_t num);
-
 
 /** @cond DECL */
 cstdlib_export(memchr);
@@ -123,6 +125,5 @@ cstdlib_export(strstr);
 cstdlib_export(strtok);
 cstdlib_export(strxfrm);
 /** @endcond */
-
 
 #endif  /* INCLUDE_METALC_STRING_H_ */

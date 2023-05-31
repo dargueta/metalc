@@ -1,7 +1,5 @@
 #include <metalc/assert.h>
 #include <metalc/metalc.h>
-#include <metalc/signal.h>
-#include <metalc/stdbool.h>
 #include <metalc/stdio.h>
 #include <metalc/stdlib.h>
 
