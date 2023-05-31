@@ -16,11 +16,7 @@
 #cmakedefine01 METALC_COMPILER_GCC
 #cmakedefine01 METALC_COMPILER_MINGW
 #cmakedefine01 METALC_HAVE_EFI_H
-#cmakedefine01 METALC_HAVE_FLOAT_H
-#cmakedefine01 METALC_HAVE_LIMITS_H
-#cmakedefine01 METALC_HAVE_STDARG_H
 #cmakedefine01 METALC_HAVE_STDBOOL_H
-#cmakedefine01 METALC_HAVE_STDDEF_H
 #cmakedefine01 METALC_HAVE_STDINT_H
 #cmakedefine01 METALC_COMPILE_OPTION_DISABLE_ASM
 #cmakedefine01 METALC_COMPILE_OPTION_ENABLE_ALL_IO
@@ -69,13 +65,9 @@
  *
  * Does the target platform support the `long long` integer type?
  */
-#if METALC_HAVE_LIMITS_H
-#    include <limits.h>
-#    ifdef LLONG_MAX
-#        define METALC_HAVE_LONG_LONG   1
-#    else
-#        define METALC_HAVE_LONG_LONG   0
-#    endif
+#include <limits.h>
+#ifdef LLONG_MAX
+#    define METALC_HAVE_LONG_LONG   1
 #else
 #    define METALC_HAVE_LONG_LONG   0
 #endif
@@ -86,13 +78,9 @@
  *
  * Does the target platform support the `long double` floating-point type?
  */
-#if METALC_HAVE_FLOAT_H
-#    include <float.h>
-#    ifdef LDBL_MAX
-#        define METALC_HAVE_LONG_DOUBLE 1
-#    else
-#        define METALC_HAVE_LONG_DOUBLE 0
-#    endif
+#include <float.h>
+#ifdef LDBL_MAX
+#    define METALC_HAVE_LONG_DOUBLE 1
 #else
 #    define METALC_HAVE_LONG_DOUBLE 0
 #endif
