@@ -1,10 +1,6 @@
 include("CheckIncludeFile")
 
-check_include_file("float.h" METALC_HAVE_FLOAT_H)
-check_include_file("limits.h" METALC_HAVE_LIMITS_H)
-check_include_file("stdarg.h" METALC_HAVE_STDARG_H)
 check_include_file("stdbool.h" METALC_HAVE_STDBOOL_H)
-check_include_file("stddef.h" METALC_HAVE_STDDEF_H)
 check_include_file("stdint.h" METALC_HAVE_STDINT_H)
 check_include_file("efi.h" METALC_HAVE_EFI_H)
 check_include_file("efilib.h" METALC_HAVE_EFILIB_H)
