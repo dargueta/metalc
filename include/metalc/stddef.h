@@ -4,29 +4,41 @@
 #include "metalc.h"
 #include "stdint.h"
 
+#define mclib_NULL ((void *)0)
 
-typedef uintptr_t size_t;
-typedef intptr_t ssize_t;
+// Why we use `long double` https://en.cppreference.com/w/c/types/max_align_t
+#ifndef METALC_MAX_ALIGN_T_DEFINED
+#    if METALC_HAVE_LONG_DOUBLE
+typedef long double mclib_max_align_t;
+#    else
+typedef intmax_t mclib_max_align_t;
+#    endif
+#    define METALC_MAX_ALIGN_T_DEFINED
+#endif
 
-#define SIZE_MAX UINTPTR_MAX
-#define SSIZE_MIN INTPTR_MIN
-#define SSIZE_MAX INTPTR_MAX
+typedef uintptr_t mclib_size_t;
+typedef intptr_t mclib_ssize_t;
 
-/* TODO (dargueta): Is this correct? */
-typedef intmax_t max_align_t;
+#define mclib_SIZE_MAX UINTPTR_MAX
+#define mclib_SSIZE_MIN INTPTR_MIN
+#define mclib_SSIZE_MAX INTPTR_MAX
+
+#ifndef METALC_DISABLE_STDLIB_DEFS
+#    define NULL mclib_NULL
+#    define max_align_t mclib_max_align_t
+#    define SIZE_MAX mclib_SIZE_MAX
+#    define SSIZE_MIN mclib_SSIZE_MIN
+#    define SSIZE_MAX mclib_SSIZE_MAX
+#endif
+
+#ifdef __has_builtin
+#    if __has_builtin(__builtin_offsetof)
+#        define offsetof(type, member) __builtin_offsetof(type, member)
+#    endif
+#endif
 
 #ifndef offsetof
-#   define offsetof(type, member)  ((size_t)(&(((type *)0)->(member))))
+#    define offsetof(type, member) ((mclib_size_t)(&(((type *)0)->member)))
 #endif
 
-
-typedef uint_least32_t wchar_t;
-
-#define WCHAR_MIN   0
-#define WCHAR_MAX   UINT_LEAST32_MAX
-
-#ifndef NULL
-#   define NULL    ((void *)0)
-#endif
-
-#endif  /* INCLUDE_METALC_STDDEF_H_ */
+#endif // INCLUDE_METALC_STDDEF_H_
