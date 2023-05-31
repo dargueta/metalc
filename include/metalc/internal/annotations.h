@@ -79,7 +79,8 @@
 #    endif
 
 #    if __has_attribute(malloc)
-#        define METALC_ATTR__MALLOC(...) GCC_ATTRIBUTE(malloc, malloc(__VA_ARGS__))
+#        define METALC_ATTR__MALLOC GCC_ATTRIBUTE(malloc)
+#        define METALC_ATTR__MALLOC_ARGS(...) METALC_ATTR__MALLOC GCC_ATTRIBUTE(malloc(__VA_ARGS__))
 #    endif
 
 #    if __has_attribute(weak)
@@ -88,6 +89,10 @@
 
 #    if __has_attribute(fastcall)
 #        define METALC_ATTR__FASTCALL GCC_ATTRIBUTE(fastcall)
+#    endif
+
+#    if __has_attribute(error)
+#        define METALC_ATTR__ERROR_IF_USED(x) GCC_ATTRIBUTE(error (x))
 #    endif
 #endif
 
@@ -157,7 +162,8 @@
 #endif
 
 #ifndef METALC_ATTR__MALLOC
-#    define METALC_ATTR__MALLOC(...)
+#    define METALC_ATTR__MALLOC
+#    define METALC_ATTR__MALLOC_ARGS(...)
 #endif
 
 #ifndef METALC_ATTR__EXPORT_WEAK
@@ -166,6 +172,10 @@
 
 #ifndef METALC_ATTR__FASTCALL
 #    define METALC_ATTR__FASTCALL
+#endif
+
+#ifndef METALC_ATTR__ERROR_IF_USED
+#    define METALC_ATTR__ERROR_IF_USED(x)
 #endif
 
 #if __STDC_HOSTED__

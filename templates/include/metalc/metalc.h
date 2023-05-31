@@ -146,6 +146,15 @@
 #    define METALC_ATTRMARK_REQUIRES_TERM
 #endif
 
+#ifdef __has_attribute
+#    if __has_attribute(copy)
+#        define GCC_ATTR_COPY(x)  GCC_ATTRIBUTE(copy(x))
+#    else
+#        define GCC_ATTR_COPY(x)
+#    endif
+#else
+#    define GCC_ATTR_COPY(x)
+#endif
 
 #if METALC_COMPILE_FOR_TESTING
     /* Building the C library for testing... */
@@ -160,41 +169,23 @@
          * it. Since our testbench requires use of the host OS's standard C
          * library, we need to create aliases for all these exported functions
          * to avoid naming collisions. */
-#        if defined(METALC_BUILD_KIND_STATIC)
-#            define cstdlib_export(name) extern __typeof__(name) name METALC_ATTR__NO_EXPORT
-
-#            define cstdlib_export_with_attr(name, ...)   \
-                extern __typeof__(name) name METALC_ATTR__NO_EXPORT GCC_ATTRIBUTE(__VA_ARGS__)
-
-#            define cstdlib_implement(name)     extern __typeof__(name) mclib_##name GCC_ATTRIBUTE(alias(#name), copy(name))
-#        elif defined(METALC_BUILD_KIND_SHARED)
-#            define cstdlib_export(name)   \
-                METALC_ATTR__NO_EXPORT extern __typeof__(name) name
-
-#            define cstdlib_export_with_attr(name, ...)   \
-                METALC_ATTR__NO_EXPORT extern __typeof__(name) name GCC_ATTRIBUTE(__VA_ARGS__)
-
-#            define cstdlib_implement(name)  extern __typeof__(name) mclib_##name GCC_ATTRIBUTE(alias(#name), copy(name))
-#        else
-#            error "Need to define METALC_BUILD_KIND_STATIC or METALC_BUILD_KIND_SHARED when compiling the C library in testing mode."
-#        endif
+#        define cstdlib_export(name) METALC_ATTR__NO_EXPORT extern __typeof__(name) name
+#        define cstdlib_implement(name)  extern __typeof__(name) mclib_##name GCC_ATTRIBUTE(alias(#name)) GCC_ATTR_COPY(name)
 #    else
         /* We're building the testbench code. */
-#        define cstdlib_export(name)                    extern __typeof__(name) mclib_##name GCC_ATTRIBUTE((copy(name)))
-#        define cstdlib_export_with_attr(name, ...)     extern __typeof__(name) mclib_##name GCC_ATTRIBUTE((copy(name), __VA_ARGS__))
+#        define cstdlib_export(name) extern __typeof__(name) mclib_##name GCC_ATTR_COPY(name)
 #        define cstdlib_implement(name)
 #    endif
 #else
     /* Not in testing mode. We're either building the C library or a client
      * program is using the library. */
 #    if METALC_INTERNALS_USE_FASTCALL && (METALC_TARGET_ARCHITECTURE_BITS != 64)
-#        define METALC_INTERNAL_ONLY                  METALC_ATTR__NO_EXPORT METALC_ATTR__FASTCALL
+#        define METALC_INTERNAL_ONLY METALC_ATTR__NO_EXPORT METALC_ATTR__FASTCALL
 #    else
-#        define METALC_INTERNAL_ONLY                  METALC_ATTR__NO_EXPORT
+#        define METALC_INTERNAL_ONLY METALC_ATTR__NO_EXPORT
 #    endif
 
 #    define cstdlib_export(name)
-#    define cstdlib_export_with_attr(name, ...)
 #    define cstdlib_implement(name)
 #endif  /* METALC_COMPILE_FOR_TESTING */
 
