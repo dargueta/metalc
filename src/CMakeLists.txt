@@ -12,8 +12,8 @@ set(TEMPLATES_DIR "${MetalC_SOURCE_DIR}/templates")
 
 
 configure_file(
-    "${TEMPLATES_DIR}/include/metalc/metalc.h"
-    "${INCLUDE_CLIB_DIR}/metalc.h"
+    "${TEMPLATES_DIR}/include/metalc/internal/config.h"
+    "${INCLUDE_CLIB_DIR}/internal/config.h"
     @ONLY
 )
 
@@ -57,9 +57,10 @@ set(HEADER_FILES
     "${INCLUDE_CLIB_DIR}/charsets/utf8.h"
     "${INCLUDE_CLIB_DIR}/sys/mman.h"
 
-    "${INCLUDE_ROOT_DIR}/metalc/internal/efi_shim.h"
-    "${INCLUDE_ROOT_DIR}/metalc/internal/printf.h"
-    "${INCLUDE_ROOT_DIR}/metalc/internal/string.h"
+    "${INCLUDE_CLIB_DIR}/internal/config.h"
+    "${INCLUDE_CLIB_DIR}/internal/efi_shim.h"
+    "${INCLUDE_CLIB_DIR}/internal/printf.h"
+    "${INCLUDE_CLIB_DIR}/internal/string.h"
 )
 
 
