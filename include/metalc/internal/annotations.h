@@ -24,16 +24,22 @@
 #    endif
 #endif // __has_c_attribute
 
+#if defined(__GNUC__) || defined(__SUNPRO_C) || defined(__INTEL_COMPILER)
+#    define METALC_COMPILER_SUPPORTS_ATTRIBUTE_MACRO 1
+#else
+#    define METALC_COMPILER_SUPPORTS_ATTRIBUTE_MACRO 0
+#endif
+
 // GCC and GCC-compatible compilers. It's unclear if Sun's compiler defines __GNUC__ so we
 // explicitly check for that here.
-#if defined(__GNUC__) || defined(__SUNPRO_C)
+#if METALC_COMPILER_SUPPORTS_ATTRIBUTE_MACRO
 #    define GCC_ATTRIBUTE(...) __attribute__((__VA_ARGS__))
 #else
 #    define GCC_ATTRIBUTE(...)
 #endif
 
 // GCC and compatible compilers, except some versions of ICC that don't define this.
-#ifdef __has_attribute
+#if METALC_COMPILER_SUPPORTS_ATTRIBUTE_MACRO && defined(__has_attribute)
 #    if __has_attribute(visibility)
 #        define METALC_ATTR__EXPORT GCC_ATTRIBUTE(visibility("default"))
 #        define METALC_ATTR__NO_EXPORT GCC_ATTRIBUTE(visibility("hidden"))
@@ -86,26 +92,17 @@
 #endif
 
 // Visual Studio
-#ifdef _MSC_VER
-#    define METALC_ATTR__EXPORT __dllspec(export)
-#    define METALC_ATTR__FASTCALL __declspec(fastcall)
-
-#    ifndef METALC_ATTR__DEPRECATED
-#        define METALC_ATTR__DEPRECATED __dllspec(deprecated)
-#    endif
-
-#    ifndef METALC_ATTR__NORETURN
-#        define METALC_ATTR__NORETURN __declspec(noreturn)
-#    endif
-#endif
-
-// OpenWatcom
-#ifdef __WATCOM__
+#if defined(_MSC_VER) || defined(__WATCOM__)
 #    define METALC_ATTR__EXPORT __declspec(dllexport)
 #    define METALC_ATTR__FASTCALL __declspec(fastcall)
 
 #    ifndef METALC_ATTR__NORETURN
 #        define METALC_ATTR__NORETURN __declspec(noreturn)
+#    endif
+
+// Watcom is almost identical to MSVC except it doesn't support `deprecated`.
+#    if !defined(METALC_ATTR__DEPRECATED) && !defined(__WATCOM__)
+#        define METALC_ATTR__DEPRECATED __declspec(deprecated)
 #    endif
 #endif
 
