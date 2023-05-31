@@ -8,7 +8,7 @@
 #define INCLUDE_METALC_CRTINIT_H_
 
 #include "internal/efi_shim.h"
-#include "metalc/limits.h"
+#include "limits.h"
 #include "metalc.h"
 
 
