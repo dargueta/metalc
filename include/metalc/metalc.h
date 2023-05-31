@@ -5,14 +5,15 @@
 #ifndef INCLUDE_METALC_METALC_H_
 #define INCLUDE_METALC_METALC_H_
 
+#include "bits/architecture.h"
 #include "internal/annotations.h"
 #include "internal/config.h"
-#include "bits/architecture.h"
 
 /**
  * Was this implementation of the C standard library built without UEFI support?
  */
-#define METALC_PLATFORM_NEED_UEFI (METALC_PLATFORM_UEFI_FULL || METALC_PLATFORM_UEFI_RUNTIME_ONLY)
+#define METALC_PLATFORM_NEED_UEFI                                                        \
+    (METALC_PLATFORM_UEFI_FULL || METALC_PLATFORM_UEFI_RUNTIME_ONLY)
 
 #if METALC_COMPILE_OPTION_USE_EFI && (!METALC_HAVE_EFI_H)
 #    error "Library was built needing UEFI support but doesn't appear to have `efi.h`."
@@ -38,7 +39,6 @@
 #    endif
 #endif
 
-
 /**
  * @def METALC_HAVE_LONG_LONG
  *
@@ -46,11 +46,10 @@
  */
 #include <limits.h>
 #ifdef LLONG_MAX
-#    define METALC_HAVE_LONG_LONG   1
+#    define METALC_HAVE_LONG_LONG 1
 #else
-#    define METALC_HAVE_LONG_LONG   0
+#    define METALC_HAVE_LONG_LONG 0
 #endif
-
 
 /**
  * @def METALC_HAVE_LONG_DOUBLE
@@ -64,12 +63,10 @@
 #    define METALC_HAVE_LONG_DOUBLE 0
 #endif
 
-
 /**
  * Is this compiler compatible with GCC?
  */
-#define METALC_COMPILER_GCC_COMPATIBLE      (METALC_COMPILER_GCC || METALC_COMPILER_MINGW)
-
+#define METALC_COMPILER_GCC_COMPATIBLE (METALC_COMPILER_GCC || METALC_COMPILER_MINGW)
 
 /**
  * @def METALC_COMPILER_MS_COMPATIBLE
@@ -86,12 +83,9 @@
 #    define METALC_COMPILER_MS_COMPATIBLE 0
 #endif
 
-
-#define METALC_ENABLE_ASM_IMPLEMENTATIONS                               \
-    (                                                                   \
-      (!METALC_COMPILE_OPTION_DISABLE_ASM) &&                           \
-      (METALC_COMPILER_GCC_COMPATIBLE || METALC_COMPILER_MS_COMPATIBLE) \
-    )
+#define METALC_ENABLE_ASM_IMPLEMENTATIONS                                                \
+    ((!METALC_COMPILE_OPTION_DISABLE_ASM) &&                                             \
+     (METALC_COMPILER_GCC_COMPATIBLE || METALC_COMPILER_MS_COMPATIBLE))
 
 #define METALC_EXPORT METALC_ATTR__EXPORT
 
@@ -102,20 +96,22 @@
 #endif
 
 #if !METALC_ENABLE_FILE_IO
-#    define METALC_ATTRMARK_REQUIRES_FILEIO  GCC_ATTRIBUTE(error ("Library not compiled with file I/O support."))
+#    define METALC_ATTRMARK_REQUIRES_FILEIO                                              \
+        GCC_ATTRIBUTE(error("Library not compiled with file I/O support."))
 #else
 #    define METALC_ATTRMARK_REQUIRES_FILEIO
 #endif
 
 #if !METALC_ENABLE_TERM_IO
-#    define METALC_ATTRMARK_REQUIRES_TERM  GCC_ATTRIBUTE(error ("Library not compiled with terminal I/O support."))
+#    define METALC_ATTRMARK_REQUIRES_TERM                                                \
+        GCC_ATTRIBUTE(error("Library not compiled with terminal I/O support."))
 #else
 #    define METALC_ATTRMARK_REQUIRES_TERM
 #endif
 
 #ifdef __has_attribute
 #    if __has_attribute(copy)
-#        define GCC_ATTR_COPY(x)  GCC_ATTRIBUTE(copy(x))
+#        define GCC_ATTR_COPY(x) GCC_ATTRIBUTE(copy(x))
 #    else
 #        define GCC_ATTR_COPY(x)
 #    endif
@@ -124,28 +120,31 @@
 #endif
 
 #if METALC_COMPILE_FOR_TESTING
-    /* Building the C library for testing... */
+/* Building the C library for testing... */
 
-    /* No functions are internal to the C library anymore since we need to be
-     * able to test these directly. Make the `METALC_INTERNAL_ONLY` markers a
-     * no-op. */
+/* No functions are internal to the C library anymore since we need to be
+ * able to test these directly. Make the `METALC_INTERNAL_ONLY` markers a
+ * no-op. */
 #    define METALC_INTERNAL_ONLY METALC_ATTR__EXPORT
 
 #    if METALC_BUILDING_LIBC
-        /* We're building the C library but with the intent to run unit tests on
-         * it. Since our testbench requires use of the host OS's standard C
-         * library, we need to create aliases for all these exported functions
-         * to avoid naming collisions. */
+/* We're building the C library but with the intent to run unit tests on
+ * it. Since our testbench requires use of the host OS's standard C
+ * library, we need to create aliases for all these exported functions
+ * to avoid naming collisions. */
 #        define cstdlib_export(name) METALC_ATTR__NO_EXPORT extern __typeof__(name) name
-#        define cstdlib_implement(name)  extern __typeof__(name) mclib_##name GCC_ATTRIBUTE(alias(#name)) GCC_ATTR_COPY(name)
+#        define cstdlib_implement(name)                                                  \
+            extern __typeof__(name) mclib_##name GCC_ATTRIBUTE(alias(#name))             \
+                GCC_ATTR_COPY(name)
 #    else
-        /* We're building the testbench code. */
-#        define cstdlib_export(name) extern __typeof__(name) mclib_##name GCC_ATTR_COPY(name)
+/* We're building the testbench code. */
+#        define cstdlib_export(name)                                                     \
+            extern __typeof__(name) mclib_##name GCC_ATTR_COPY(name)
 #        define cstdlib_implement(name)
 #    endif
 #else
-    /* Not in testing mode. We're either building the C library or a client
-     * program is using the library. */
+/* Not in testing mode. We're either building the C library or a client
+ * program is using the library. */
 #    if METALC_INTERNALS_USE_FASTCALL && (METALC_TARGET_ARCHITECTURE_BITS != 64)
 #        define METALC_INTERNAL_ONLY METALC_ATTR__NO_EXPORT METALC_ATTR__FASTCALL
 #    else
@@ -154,6 +153,6 @@
 
 #    define cstdlib_export(name)
 #    define cstdlib_implement(name)
-#endif  /* METALC_COMPILE_FOR_TESTING */
+#endif /* METALC_COMPILE_FOR_TESTING */
 
-#endif  /* INCLUDE_METALC_METALC_H_ */
+#endif /* INCLUDE_METALC_METALC_H_ */
