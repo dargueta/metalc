@@ -19,6 +19,6 @@ Makefile.in
 toolchain.cmake
 settings.cmake
 test-settings.ini
-include/metalc/metalc.h
+include/metalc/internal/config.h
 include/metalc/x86/metalc.inc
 docs/html
