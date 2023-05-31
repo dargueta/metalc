@@ -205,6 +205,10 @@ int parse_printf_format_type_width_flag(
         case 'z':
             info->argument_width = MCFMT_ARGW__SIZE_T;
             return 1;
+        case '\0':
+            /* Hit the end of the format string early -- fail. */
+            mclib_errno = mclib_EINVAL;
+            return -1;
         default:
             info->argument_width = MCFMT_ARGW__DEFAULT;
             return 0;
