@@ -15,43 +15,34 @@
 #ifndef INCLUDE_METALC_INTERNAL_EFI_SHIM_H_
 #define INCLUDE_METALC_INTERNAL_EFI_SHIM_H_
 
-
 #include "../metalc.h"
-#include "../stddef.h"
-
+#include "../stdint.h"
 
 #if METALC_HAVE_EFI_H
-    #include <efi.h>
-#endif
-
-#if METALC_HAVE_EFILIB_H
-    #include <efilib.h>
-#endif
-
-
+#    include <efi.h>
+#elif METALC_HAVE_EFILIB_H
+#    include <efilib.h>
+#else
 /* The EFI headers don't exist so we must be compiling in bare metal mode. */
 
+/** Dummy definition of the real EFI ``EFI_HANDLE`` type. */
+typedef intptr_t EFI_HANDLE;
 
-#if !METALC_HAVE_EFI_H
-    /** Dummy definition of the real EFI ``EFI_HANDLE`` type. */
-    typedef intptr_t EFI_HANDLE;
+/**
+ * Dummy definition of the real EFI ``EFI_SYSTEM_TABLE`` type.
+ *
+ * In the real EFI headers this is defined as a struct, but if we're not using
+ * EFI support then it doesn't really matter what this is, does it?
+ */
+typedef intptr_t EFI_SYSTEM_TABLE;
 
-    /**
-     * Dummy definition of the real EFI ``EFI_SYSTEM_TABLE`` type.
-     *
-     * In the real EFI headers this is defined as a struct, but if we're not using
-     * EFI support then it doesn't really matter what this is, does it?
-     */
-    typedef intptr_t EFI_SYSTEM_TABLE;
-
-    /**
-     * Dummy definition of the EFI ``EFI_STATUS`` type used for return values.
-     *
-     * This was taken from the real efi.h file on Ubuntu 20.04 so it's probably
-     * accurate. Not that it matters.
-     */
-    typedef unsigned long EFI_STATUS;
+/**
+ * Dummy definition of the EFI ``EFI_STATUS`` type used for return values.
+ *
+ * This was taken from the real efi.h file on Ubuntu 20.04 so it's probably
+ * accurate. Not that it matters.
+ */
+typedef unsigned long EFI_STATUS;
 #endif
 
-
-#endif  /* INCLUDE_METALC_INTERNAL_EFI_SHIM_H_ */
+#endif /* INCLUDE_METALC_INTERNAL_EFI_SHIM_H_ */
