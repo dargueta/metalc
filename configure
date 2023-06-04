@@ -22,6 +22,17 @@ stack, pass -fshadow-stack. To disable it, pass -fno-shadow-stack. A full list o
 supported features is below.
 
 
+-fdisk-io [default] / -fno-disk-io
+
+
+-ffile-io [default] / -fno-file-io
+    Implies -fdisk-io.
+
+
+-fterm-io [default] / -fno-term-io
+    Enable/disable terminal I/O (printf, etc.) If disabled, functions using the
+    terminal will fail but not throw exceptions.
+
 -ffastcall-internals [default] / -fno-fastcall-internals
     (x86_32 only) Internal functions not exposed as part of the C library will
     use the fastcall calling convention instead of the normal cdecl.
