@@ -124,11 +124,11 @@ int krnlhook_close(int fdesc);
 
 METALC_ATTR__NONNULL_ARGS(2)
 METALC_ATTR__EXPORT_WEAK
-ssize_t krnlhook_write(int fdesc, const void *data, size_t size);
+mclib_ssize_t krnlhook_write(int fdesc, const void *data, size_t size);
 
 METALC_ATTR__NONNULL_ARGS(2)
 METALC_ATTR__EXPORT_WEAK
-ssize_t krnlhook_read(int fdesc, void *buffer, size_t size);
+mclib_ssize_t krnlhook_read(int fdesc, void *buffer, size_t size);
 
 METALC_ATTR__EXPORT_WEAK
 mclib_off_t krnlhook_seek(int fdesc, mclib_off_t offset, int whence);
