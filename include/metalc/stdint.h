@@ -473,7 +473,7 @@ typedef unsigned char uint_least8_t;
 #   endif
 #endif
 
-#ifndef INT_FAST32_MIN
+#if !defined(INT_FAST32_MAX) && (METALC_TARGET_ARCHITECTURE_BITS >= 32)
 #   warning Cannot define int_fast32_t; intptr_t is not big enough or int_least32_t is not defined.
 #endif
 
@@ -499,7 +499,7 @@ typedef unsigned char uint_least8_t;
 #   endif
 #endif
 
-#ifndef INT_FAST64_MAX
+#if !defined(INT_FAST64_MAX) && (METALC_TARGET_ARCHITECTURE_BITS >= 64)
 #   warning Cannot define int_fast64_t; intptr_t is not big enough or int_least64_t is not defined.
 #endif
 
