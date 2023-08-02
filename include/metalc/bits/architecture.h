@@ -27,17 +27,23 @@
 /* These macros are defined by various compilers to indicate the architecture
  * that the compiler is building for. This will work for:
  *
- * - GCC 4.1+ and compatible compilers like Clang and MinGW
- * - Visual Studio
- * - OpenWatcom
+ * - BCC
+ * - Clang
+ * - FAUCC (probably)
+ * - GCC 4.1+
  * - Intel's C compiler (though possibly not IA-64)
+ * - MinGW
+ * - OpenWatcom
+ * - Sun Studio
+ * - TCC
+ * - Visual Studio
  *
  * List obtained from: https://sourceforge.net/p/predef/wiki/Architectures/
  */
 #if defined(_M_AMD64) || defined(__x86_64__) || defined(__x86_64) ||                     \
     defined(__amd64__) || defined(__amd64)
+// The CPU is x86-64 but we may be compiling for the x32 data model.
 #    if defined(__ILP32__) || defined(_ILP32)
-// CPU is 64-bit but the target architecture is x32
 #        define METALC_TARGET_ARCHITECTURE_BITS 32
 #        define METALC_TARGET_ARCHITECTURE_ID METALC_TARGET_ARCHITECTURE_X86_32
 #        define METALC_TARGET_ENDIANNESS_ID METALC_TARGET_ENDIANNESS_LITTLE
