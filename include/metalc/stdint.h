@@ -173,7 +173,11 @@ typedef unsigned char uint_least8_t;
 #       define INT_LEAST64_MAX  LONG_MAX
 #       define UINT_LEAST64_MAX ULONG_MAX
 #   endif
-#elif defined(LLONG_MAX)
+    /* Else: a `long` is less than 64 bits. Fall through to the next block where
+     * we try to use `long long` if it's supported. */
+#endif
+
+#if !defined(INT_LEAST64_MIN) && defined(LLONG_MAX)
     /* Compiler defines a `long long` which by definition must be at least
      * 64 bits. */
     typedef signed long long int_least64_t;
@@ -383,14 +387,12 @@ typedef unsigned char uint_least8_t;
 #elif defined(INT_LEAST64_MAX)
     typedef int_least64_t intmax_t;
     typedef uint_least64_t uintmax_t;
-
 #   define INTMAX_MIN  INT_LEAST64_MIN
 #   define INTMAX_MAX  INT_LEAST64_MAX
 #   define UINTMAX_MAX UINT_LEAST64_MAX
 #elif defined(INT_LEAST32_MAX)
     typedef int_least32_t intmax_t;
     typedef uint_least32_t uintmax_t;
-
 #   define INTMAX_MIN  INT_LEAST32_MIN
 #   define INTMAX_MAX  INT_LEAST32_MAX
 #   define UINTMAX_MAX UINT_LEAST32_MAX
@@ -403,7 +405,6 @@ typedef unsigned char uint_least8_t;
      * want to build for. */
     typedef int_least16_t intmax_t;
     typedef uint_least16_t uintmax_t;
-
 #   define INTMAX_MIN  INT_LEAST16_MIN
 #   define INTMAX_MAX  INT_LEAST16_MAX
 #   define UINTMAX_MAX UINT_LEAST16_MAX
@@ -419,7 +420,7 @@ typedef unsigned char uint_least8_t;
  *
  * If these predefined types are unavailable, this falls back to the definitions
  * used by GCC: fast8 is a `char`, all others use `intptr_t`.
- * */
+ */
 
 #if defined(__INT_FAST8_TYPE__)
     typedef __INT_FAST8_TYPE__ int_fast8_t;
@@ -428,7 +429,6 @@ typedef unsigned char uint_least8_t;
 #   define INT_FAST8_MAX __INT_FAST8_MAX__
 #   define UINT_FAST8_MAX __UINT_FAST8_MAX__
 #else
-    /* This is a guess based on GCC's definitions. */
     typedef int_least8_t int_fast8_t;
     typedef uint_least8_t uint_fast8_t;
 
