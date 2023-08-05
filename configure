@@ -1,278 +1,214 @@
-#!/usr/bin/env python3
+#!/bin/sh
 
-import argparse
-import collections
-import os
-import platform
-import string
-import sys
+# Default settings
+architecture=$(uname -p)
+disable_asm=0
+disk_io=1
+file_io=1
+term_io=1
+fastcall_internals=0
+shadow_stack=0
+excl_fopen=0
+compile_for_kernel=1
+testing_mode=0
+uefi_full=0
+uefi_runtime=0
+additional_defines=
 
 
-class ErrorExit(Exception):
-    pass
+HELP_TEXT="
+USAGE:
+  $0 [options]
 
+-a <architecture>
+  The target architecture to compile the library for. If not given, assumes the
+  host machine's system ($architecture). Recognized values:
 
-_EPILOG = """\
-FEATURES
+    amd64       Synonym for x86_64
+    arm         32-bit ARM
+    arm64       64-bit ARM (AArch64)
+    itanium     Intel Itanium
+    m68k        Motorola 68K
+    mips32      32-bit MIPS
+    mips64      64-bit MIPS
+    ppc         32-bit PowerPC
+    ppc64       64-bit PowerPC
+    sparc       32-bit SPARC
+    sparc64     64-bit SPARC
+    x86_16      16-bit Intel x86 (8086, 186, 286)
+    x86_32      32-bit Intel x86
+    x86_64      64-bit Intel x86
+
+  Not all of these are fully supported yet.
+
+-D name[=value]
+  Define a preprocessor macro.
+
+-p <platform>
+  Set the target platform. Valid values are:
+    uefi-full     Full UEFI usage. Used for UEFI applications.
+    uefi-runtime  Only UEFI runtime dependencies. Used by UEFI-aware kernels.
+    native        (Default) Assume no underlying system.
+
+-k
+  Compile the library for use by the kernel. Mutually exclusive with -u.
+
+-t
+  Testing mode.
+
+-u
+  Compile the library for use by a userland programs. Mutually exclusive with -k.
+
+FEATURE FLAGS
 --------
 
 You can use the -f<feature_name> and -fno-<feature_name> flags to turn features
-on and off, respectively. For example, to enable use of the x86 processors' shadow
-stack, pass -fshadow-stack. To disable it, pass -fno-shadow-stack. A full list of
-supported features is below.
+on and off, respectively. For example, to enable use of the x86 processors'
+shadow stack, pass -fshadow-stack. To disable it, pass -fno-shadow-stack. A full
+list of supported features is below.
 
+-fdisable-asm / -fno-disable-asm [default]
+    Disable use of assembly-language implementations of functions.
 
 -fdisk-io [default] / -fno-disk-io
 
-
 -ffile-io [default] / -fno-file-io
     Implies -fdisk-io.
-
 
 -fterm-io [default] / -fno-term-io
     Enable/disable terminal I/O (printf, etc.) If disabled, functions using the
     terminal will fail but not throw exceptions.
 
--ffastcall-internals [default] / -fno-fastcall-internals
+-ffastcall-internals / -fno-fastcall-internals [default]
     (x86_32 only) Internal functions not exposed as part of the C library will
     use the fastcall calling convention instead of the normal cdecl.
-
 
 -fshadow-stack / -fno-shadow-stack [default]
     Enable or disable use of the shadow stack. Supported on 32/64-bit x86 targets
     only, and disabled by default.
 
-
 -fexcl-fopen / -fno-excl-fopen [default]
-    Enable or disable the C2011 "x" flag for fopen. This is off by default since
+    Enable or disable the C2011 'x' flag for fopen. This is off by default since
     it requires kernel support to implement.
-"""
-
-HERE = os.path.dirname(__file__)
+"
 
 
-MACHINE_TO_ARCH_ID = {
-    "i386": 1,  # x86_32
-    "i486": 1,  # x86_32
-    "i586": 2,  # x86_64
-    "x86_64": 2,  # x86_64
-    # TODO: Add support here for other processors if possible
-}
+while getopts ':a:D:f:hkp:tu' option
+do
+  case $option in
+    a ) architecture=$OPTARG ;;
+    D )
+      additional_defines="-D$OPTARG\n$additional_defines"
+      ;;
+    f )
+      case $OPTARG in
+        disable-asm ) disable_asm=1 ;;
+        disk-io ) disk_io=1 ;;
+        excl-fopen ) excl_fopen=1 ;;
+        fastcall-internals ) fastcall_internals=1 ;;
+        file-io )
+            file_io=1
+            disk_io=1
+            shift
+        ;;
+        term-io ) term_io=1 ;;
+        no-disable-asm ) disable_asm=0 ;;
+        no-disk-io ) disk_io=0 ;;
+        no-excl-fopen ) excl_fopen=0 ;;
+        no-fastcall-internals ) fastcall_internals=0 ;;
+        no-file-io ) file_io=0 ;;
+        no-shadow-stack ) shadow_stack=0 ;;
+        no-term-io ) term_io=0 ;;
+        shadow-stack )
+          echo 'No support for shadow stacks yet.'
+          exit 1
+        ;;
+        * )
+          echo "Unrecognized feature flag: $OPTARG"
+          exit 1
+          ;;
+      esac
+    ;;
+    h )
+      echo "$HELP_TEXT"
+      exit 0
+      ;;
+    p )
+      case "$OPTARG" in
+        uefi-full )
+          uefi_full=1
+          uefi_runtime=0
+          ;;
+        uefi-runtime )
+          uefi_full=0
+          uefi_runtime=1
+          ;;
+        native )
+          uefi_full=0
+          uefi_runtime=0
+          ;;
+      esac
+      ;;
+    k ) compile_for_kernel=1 ;;
+    t ) testing_mode=1 ;;
+    u ) compile_for_kernel=0 ;;
+    ? )
+      echo "Invalid option: -$OPTARG"
+      exit 1
+      ;;
+  esac
+done
 
+# Handle synonyms
+case "$architecture" in
+  amd64 )
+    architecture=x86_64 ;;
+esac
 
-MACHINE_TO_TARGET_NAME = {
-    "i386": "x86_32",
-    "i486": "x86_32",
-    "i586": "x86_64",
-    "x86_64": "x86_64",
-}
+# Ensure the target architecture is supported.
+case "$architecture" in
+  x86_32 | x86_64 )
+    # Architecture is supported, nothing to do here.
+    ;;
+  arm | arm64 | itanium | m68k | mips32 | mips64 | ppc | ppc64 | sparc | sparc64 | x86_16 )
+    echo "Architecture '$architecture' isn't completely supported yet."
+    exit 1
+    ;;
+  * )
+    echo "Unrecognized target architecture: $architecture"
+    exit 1
+    ;;
+esac
 
-ARCH_ID_TO_BITS = {
-    0: 16,  # x86-16
-    1: 32,  # x86-32
-    2: 64,  # x86-64
-    3: 32,  # MIPS32
-    4: 64,  # MIPS64
-}
+cat <<EOF > settings.cmake
+set(METALC_COMPILE_FOR_KERNEL $compile_for_kernel)
+set(METALC_COMPILE_FOR_TESTING $testing_mode)
+set(BUILD_TESTING $testing_mode)
+set(METALC_PLATFORM_UEFI_FULL $uefi_full)
+set(METALC_PLATFORM_UEFI_RUNTIME_ONLY $uefi_runtime)
+set(METALC_COMPILE_OPTION_ENABLE_DISK_IO $disk_io)
+set(METALC_COMPILE_OPTION_ENABLE_TERM_IO $term_io)
+set(METALC_COMPILE_OPTION_ENABLE_FILE_IO $file_io)
+set(METALC_COMPILE_OPTION_X86_USE_SHADOW_STACK $shadow_stack)
+set(METALC_COMPILE_OPTION_DISABLE_ASM_IMPLEMENTATIONS $disable_asm)
+set(METALC_INTERNALS_USE_FASTCALL $fastcall_internals)
+set(TARGET_PROCESSOR "$architecture")
 
+if (METALC_PLATFORM_UEFI_FULL OR METALC_PLATFORM_UEFI_RUNTIME_ONLY)
+    set(METALC_COMPILE_OPTION_USE_EFI 1)
+else()
+    set(METALC_COMPILE_OPTION_USE_EFI 0)
+endif()
 
-TOOLCHAIN_NAMES = {
-    "host": {
-        "ASSEMBLER": "as",
-        "COMPILER": "gcc",
-        "LINKER": "ld",
-        "ARCHITECTURE_ID": MACHINE_TO_ARCH_ID[platform.machine()],
-        "ARCHITECTURE_BITS": ARCH_ID_TO_BITS[MACHINE_TO_ARCH_ID[platform.machine()]],
-        "COMPILER_DEFINES": ["-march=native", "-mtune=native"],
-        "ASSEMBLER_DEFINES": ["-march=native"],
-    },
-    "x86_16": {
-        "ASSEMBLER": "nasm",
-        "COMPILER": "gcc",
-        "LINKER": "ld",
-        "ARCHITECTURE_ID": 0,
-        "ARCHITECTURE_BITS": 16,
-        "COMPILER_DEFINES": ["-m16"],
-        "ASSEMBLER_DEFINES": [],
-    },
-    "x86_32": {
-        "ASSEMBLER": "nasm",
-        "COMPILER": "gcc",
-        "LINKER": "ld",
-        "ARCHITECTURE_ID": 1,
-        "ARCHITECTURE_BITS": 32,
-        "COMPILER_DEFINES": ["-march=i386"],
-        "ASSEMBLER_DEFINES": [],
-    },
-    "x86_64": {
-        "ASSEMBLER": "nasm",
-        "COMPILER": "x86_64-linux-gnu-gcc",
-        "LINKER": "x86_64-linux-gnu-ld",
-        "ARCHITECTURE_ID": 2,
-        "ARCHITECTURE_BITS": 64,
-        "COMPILER_DEFINES": ["-march=x86-64"],
-        "ASSEMBLER_DEFINES": [],
-    },
-    "mips32": {
-        "ASSEMBLER": "mips-linux-gnu-as",
-        "COMPILER": "mips-linux-gnu-gcc",
-        "LINKER": "mips-linux-gnu-ld",
-        "ARCHITECTURE_ID": 3,
-        "ARCHITECTURE_BITS": 32,
-        "COMPILER_DEFINES": ["-march=mips32"],
-        "ASSEMBLER_DEFINES": ["-march=mips32"],
-    },
-    "mips64": {
-        "ASSEMBLER": "mips-linux-gnu-as",
-        "COMPILER": "mips-linux-gnu-gcc",
-        "LINKER": "mips-linux-gnu-ld",
-        "ARCHITECTURE_ID": 4,
-        "ARCHITECTURE_BITS": 64,
-        "COMPILER_DEFINES": ["-march=mips64"],
-        "ASSEMBLER_DEFINES": ["-march=mips64"],
-    },
-}
+add_definitions(
+    -DMETALC_COMPILE_FOR_TESTING=$testing_mode
+    -DMETALC_COMPILE_FOR_KERNEL=$compile_for_kernel
+    $(echo "$additional_defines")
+)
 
-
-def build_toolchain_params(args):
-    """Build a list of key-value pairs to write to the CMake toolchain file."""
-    if "efi" in args.feature_flags and args.arch not in ("x86_32", "x86_64"):
-        raise ErrorExit(
-            "Cannot use architecture `%s` with UEFI. You can only use x86_32 or x86_64"
-            " with it."
-        )
-
-    variables = collections.OrderedDict()
-    variables["REPOSITORY_ROOT"] = HERE
-
-    defines = " ".join(args.defines or ())
-
-    if "check-args" in args.feature_flags:
-        defines += " -DMETALC_CHECK_ARGS"
-
-    variables["C_DEFINES"] = defines
-    variables["TOOLCHAIN_ID"] = args.toolchain or ""
-    variables["COMPILE_FOR_KERNEL"] = 1 if args.kernel_mode else 0
-    variables["PLATFORM_NONE"] = 1 if args.platform == "none" else 0
-    variables["PLATFORM_UEFI_FULL"] = 1 if args.platform == "uefi-full" else 0
-    variables["PLATFORM_UEFI_RUNTIME_ONLY"] = (
-        1 if args.platform == "uefi-runtime" else 0
-    )
-    variables["X86_USE_SHADOW_STACK"] = 1 if "shadow-stack" in args.feature_flags else 0
-    variables["FASTCALL_INTERNALS"] = (
-        0 if "no-fastcall-internals" in args.feature_flags else 1
-    )
-    variables["COMPILE_FOR_KERNEL"] = 1 if args.kernel_mode else 0
-    variables["COMPILE_FOR_TESTING"] = 1 if args.build == "test" else 0
-
-    if args.arch == "host":
-        variables["TARGET_PROCESSOR"] = MACHINE_TO_TARGET_NAME[platform.machine()]
-    else:
-        variables["TARGET_PROCESSOR"] = args.arch
-
-    # TODO (dargueta): Modify this to be independent of EFI use.
-    # We can do this once support is implemented for giving the kernel callbacks
-    # to catch I/O events with.
-    variables["ENABLE_ALL_IO"] = 1 if "uefi" in args.platform else 0
-
-    variables.update(TOOLCHAIN_NAMES[args.arch])
-    return variables
-
-
-def templatize_cmake_file(params, basename):
-    with open(os.path.join("templates/", basename + ".cmake"), "r") as fd:
-        text = fd.read()
-
-    template = string.Template(text)
-    with open(basename + ".cmake", "w") as fd:
-        fd.write(template.substitute(params))
-
-
-def parse_arguments():
-    parser = argparse.ArgumentParser(
-        description="Configure the MetalC library for building.",
-        epilog=_EPILOG,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        fromfile_prefix_chars="@",
-    )
-    parser.add_argument(
-        "-a",
-        "--arch",
-        choices=("x86_16", "x86_32", "x86_64", "mips32", "mips64", "host"),
-        help="Choose the target architecture to build the library for. `host` (the"
-        " default) chooses the current hardware as the target architecture.",
-        default="host",
-    )
-    parser.add_argument(
-        "-b",
-        "--build",
-        choices=("debug", "release", "test"),
-        help="The mode to compile the library in. Debug mode includes debug symbols in"
-        " the output binary and disables all optimizations. Test mode disables aliasing"
-        " so that MetalC can be used alongside the standard library to test it. Release"
-        " mode enables aliasing and optimizations, and strips out debug info.",
-        default="test",
-    )
-    parser.add_argument(
-        "-D",
-        action="append",
-        dest="defines",
-        metavar="KEY=VALUE",
-        help="Define macros at compile time.",
-        default=[],
-    )
-    parser.add_argument(
-        "-f",
-        action="append",
-        dest="feature_flags",
-        metavar="FLAG",
-        help="Enable or disable a feature. See `FEATURES` below for more information.",
-        default=[],
-    )
-    parser.add_argument(
-        "-k",
-        "--kernel-mode",
-        action="store_true",
-        help="Compile the library for static linkage to an OS kernel. This enables the"
-        " library to make some assumptions about privileges, and disables some features"
-        " inappropriate for use in a kernel, like red zones.",
-    )
-    parser.add_argument(
-        "-p",
-        "--platform",
-        choices=("none", "uefi-full", "uefi-runtime"),
-        help="",
-        default="none",
-    )
-    parser.add_argument(
-        "-t",
-        "--toolchain",
-        metavar="NAME",
-        help="The name of the compiler toolchain to use when cross-compiling. This is"
-        " a three-part string of the form <cpu>-<host>-<abi>. This is normally deduced"
-        " from --arch and whether -fefi is enabled, but you can manually override it"
-        " here.",
-    )
-    return parser.parse_args()
-
-
-def main():
-    args = parse_arguments()
-    params = build_toolchain_params(args)
-    templatize_cmake_file(params, "toolchain")
-    templatize_cmake_file(params, "settings")
-
-
-if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("Killed by user.")
-        sys.exit(1)
-    except ErrorExit as err:
-        print(str(err))
-        sys.exit(2)
-    except Exception as err:
-        print("Unexpected error: (%s) %s" % (type(err).__name__, err))
-        sys.exit(3)
-    sys.exit(0)
+if (METALC_COMPILE_OPTION_USE_EFI EQUAL 1)
+    set(METALC_COMPILE_OPTION_ENABLE_ALL_IO 1)
+else()
+    set(METALC_COMPILE_OPTION_ENABLE_ALL_IO 0)
+endif()
+EOF
