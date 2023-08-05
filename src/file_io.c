@@ -28,7 +28,8 @@ mclib_FILE * const mclib_stdout = &mcinternal_stdout;
 mclib_FILE * const mclib_stderr = &mcinternal_stderr;
 
 
-METALC_ATTR__NO_EXPORTint fileio_init(void) {
+METALC_ATTR__NO_EXPORT
+int fileio_init(void) {
     memset(&mcinternal_stdin, 0, sizeof(mcinternal_stdin));
     memset(&mcinternal_stdout, 0, sizeof(mcinternal_stdout));
     memset(&mcinternal_stderr, 0, sizeof(mcinternal_stderr));
@@ -45,7 +46,8 @@ METALC_ATTR__NO_EXPORTint fileio_init(void) {
 }
 
 
-METALC_ATTR__NO_EXPORTint fileio_teardown(void) {
+METALC_ATTR__NO_EXPORT
+int fileio_teardown(void) {
     fclose(mclib_stdin);
     fclose(mclib_stdout);
     fclose(mclib_stderr);
@@ -165,19 +167,19 @@ mclib_FILE *fopen(const char *path, const char *mode) {
     io_flags = mcinternal_mode_string_to_flags(mode);
     if (io_flags == -1) {
         mclib_errno = mclib_EINVAL;
-        return NULL;
+        return mclib_NULL;
     }
 
     stream = malloc(sizeof(*stream));
-    if (stream == NULL)
-        return NULL;
+    if (stream == mclib_NULL)
+        return mclib_NULL;
 
     /* Open the file, always using mode 0644 if we're creating a new file. */
     stream->descriptor = krnlhook_open(path, io_flags, 0644);
     if (stream->descriptor == -1) {
         /* Failed to open the file. */
         free(stream);
-        return NULL;
+        return mclib_NULL;
     }
 
     stream->eof = 0;
