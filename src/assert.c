@@ -3,6 +3,7 @@
 #include <metalc/signal.h>
 #include <metalc/stdbool.h>
 #include <metalc/stdio.h>
+#include <metalc/stddef.h>
 #include <metalc/stdlib.h>
 
 
@@ -17,7 +18,7 @@ void mcinternal_assert(
         return;
 
     #if METALC_COMPILE_OPTION_ENABLE_FILE_IO
-        out = (mclib_stderr != NULL) ? mclib_stderr : mclib_stdout;
+        out = (mclib_stderr != mclib_NULL) ? mclib_stderr : mclib_stdout;
         if (out) {
             fprintf(
                 out,

@@ -5,8 +5,8 @@
 #ifndef INCLUDE_METALC_METALC_H_
 #define INCLUDE_METALC_METALC_H_
 
-#include "bits/architecture.h"
 #include "internal/annotations.h"
+#include "internal/architecture.h"
 #include "internal/config.h"
 
 /**
@@ -119,7 +119,7 @@
 #    define GCC_ATTR_COPY(x)
 #endif
 
-#if METALC_COMPILE_FOR_TESTING
+#if defined(METALC_COMPILE_FOR_TESTING)
 /* Building the C library for testing... */
 
 /* No functions are internal to the C library anymore since we need to be
@@ -127,7 +127,7 @@
  * no-op. */
 #    define METALC_INTERNAL_ONLY METALC_ATTR__EXPORT
 
-#    if METALC_BUILDING_LIBC
+#    if defined(METALC_BUILDING_LIBC)
 /* We're building the C library but with the intent to run unit tests on
  * it. Since our testbench requires use of the host OS's standard C
  * library, we need to create aliases for all these exported functions

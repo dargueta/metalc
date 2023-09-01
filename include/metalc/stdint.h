@@ -9,7 +9,7 @@
 
 #include <limits.h>     /* Provided by the compiler */
 
-#include "bits/architecture.h"
+#include "internal/architecture.h"
 
 
 /******************************************************************************\
@@ -364,8 +364,8 @@ typedef unsigned char uint_least8_t;
     /* (_INTEGRAL_MAX_BITS is defined on Visual Studio compilers and the Intel C
      * compiler when built for Windows.) */
 #   if _INTEGRAL_MAX_BITS >= 64
-        /* This won't be accurate for systems that support integers greater than 64
-         * bits, but it's good enough... right? */
+        /* This won't be accurate for systems that support integers greater than
+         * 64 bits, but it's good enough... right? */
         typedef int_least64_t intmax_t;
         typedef uint_least64_t uintmax_t;
 #       define INTMAX_MIN  INT_LEAST64_MIN
@@ -399,8 +399,8 @@ typedef unsigned char uint_least8_t;
 #else
     /* If we get here then we don't have int_least32_t.
      *
-     * If this is the case then we're probably compiling for a 16-bit system.
-     * We can't assume it's exactly 16 bits, as there are some 18- and 24-bit
+     * If this is the case then we're probably compiling for a 16-bit system. We
+     * can't assume it's exactly 16 bits, as there are some 18- and 24-bit
      * architectures (such as the PDP-11) that a retro computing enthusiast may
      * want to build for. */
     typedef int_least16_t intmax_t;
@@ -415,8 +415,9 @@ typedef unsigned char uint_least8_t;
 \******************************************************************************/
 
 /* GCC and some compatible compilers define macros that expand to the C types
- * with the attributes we need. Since we have no idea of the underlying hardware,
- * we rely on these by default to be able to define the int_fast*_t types.
+ * with the attributes we need. Since we have limited information about the
+ * underlying hardware, we rely on these by default to be able to define the
+ * int_fast*_t types.
  *
  * If these predefined types are unavailable, this falls back to the definitions
  * used by GCC: fast8 is a `char`, all others use `intptr_t`.

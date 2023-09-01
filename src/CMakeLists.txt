@@ -47,7 +47,6 @@ set(HEADER_FILES
     "${INCLUDE_CLIB_DIR}/stdio.h"
     "${INCLUDE_CLIB_DIR}/stdlib.h"
     "${INCLUDE_CLIB_DIR}/string.h"
-    "${INCLUDE_CLIB_DIR}/bits/architecture.h"
     "${INCLUDE_CLIB_DIR}/bits/errno.h"
     "${INCLUDE_CLIB_DIR}/bits/signal.h"
     "${INCLUDE_CLIB_DIR}/bits/stdio.h"
@@ -56,6 +55,8 @@ set(HEADER_FILES
     "${INCLUDE_CLIB_DIR}/charsets/utf8.h"
     "${INCLUDE_CLIB_DIR}/sys/mman.h"
 
+    "${INCLUDE_CLIB_DIR}/internal/annotations.h"
+    "${INCLUDE_CLIB_DIR}/internal/architecture.h"
     "${INCLUDE_CLIB_DIR}/internal/config.h"
     "${INCLUDE_CLIB_DIR}/internal/efi_shim.h"
     "${INCLUDE_CLIB_DIR}/internal/printf.h"

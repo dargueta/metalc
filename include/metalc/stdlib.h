@@ -68,10 +68,17 @@ METALC_ATTR__ERROR_IF_USED("Function requires OS support.")
 int system(const char *string);
 
 METALC_EXPORT
-void *bsearch(const void *key, const void *base, size_t nitems, size_t size, int (*cmp)(const void *, const void *));
+METALC_ATTR__NONNULL
+void *bsearch(
+    const void *key,
+    const void *base,
+    mclib_size_t nitems,
+    mclib_size_t size,
+    int (*cmp)(const void *, const void *)
+);
 
 METALC_EXPORT
-void qsort(void *base, size_t nitems, size_t size, int (*cmp)(const void *, const void *));
+void qsort(void *base, mclib_size_t nitems, mclib_size_t size, int (*cmp)(const void *, const void *));
 
 METALC_EXPORT
 METALC_ATTR__CONST_FUNC
@@ -96,16 +103,16 @@ METALC_EXPORT
 void srand(unsigned seed);
 
 METALC_EXPORT
-int mblen(const char *str, size_t n);
+int mblen(const char *str, mclib_size_t n);
 
 METALC_EXPORT
-size_t mbstowcs(mclib_wchar_t *pwcs, const char *str, size_t n);
+mclib_size_t mbstowcs(mclib_wchar_t *pwcs, const char *str, mclib_size_t n);
 
 METALC_EXPORT
-int mbtowc(mclib_wchar_t *pwc, const char *str, size_t n);
+int mbtowc(mclib_wchar_t *pwc, const char *str, mclib_size_t n);
 
 METALC_EXPORT
-size_t wcstombs(char *str, const mclib_wchar_t *pwcs, size_t n);
+mclib_size_t wcstombs(char *str, const mclib_wchar_t *pwcs, mclib_size_t n);
 
 METALC_EXPORT
 int wctomb(char *str, mclib_wchar_t wchar);
@@ -116,16 +123,16 @@ void free(void *ptr);
 METALC_EXPORT
 METALC_ATTR__NODISCARD
 METALC_ATTR__MALLOC_ARGS(free)
-void *malloc(size_t size);
+void *malloc(mclib_size_t size);
 
 METALC_EXPORT
 METALC_ATTR__NODISCARD
 METALC_ATTR__MALLOC_ARGS(free)
-void *calloc(size_t n_elements, size_t element_size);
+void *calloc(mclib_size_t n_elements, mclib_size_t element_size);
 
 METALC_EXPORT
 METALC_ATTR__NODISCARD
-void *realloc(void *ptr, size_t size);
+void *realloc(void *ptr, mclib_size_t size);
 
 cstdlib_export(atof);
 cstdlib_export(strtol);

@@ -2,7 +2,7 @@
 #define INCLUDE_METALC_INTERNAL_ANNOTATIONS_H_
 
 // C2x standard attributes
-#ifdef __has_c_attribute
+#if defined(__has_c_attribute) && (__STDC_VERSION__ >= 201900L)
 #    if __has_c_attribute(nodiscard)
 #        define METALC_ATTR__NODISCARD [[nodiscard]]
 #    endif
@@ -49,8 +49,8 @@
 #        define METALC_ATTR__DEPRECATED GCC_ATTRIBUTE(deprecated)
 #    endif
 
-#    if !defined(METALC_ATTR__NODISCARD) && __has_attribute(nodiscard)
-#        define METALC_ATTR__NODISCARD GCC_ATTRIBUTE(nodiscard)
+#    if !defined(METALC_ATTR__NODISCARD) && __has_attribute(warn_unused_result)
+#        define METALC_ATTR__NODISCARD GCC_ATTRIBUTE(warn_unused_result)
 #    endif
 
 #    if !defined(METALC_ATTR__NORETURN) && __has_attribute(noreturn)

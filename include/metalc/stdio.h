@@ -27,7 +27,7 @@ int vsprintf(char *buffer, const char *format, va_list arg_list);
 
 METALC_EXPORT
 METALC_ATTR__NONNULL_ARGS(3)
-int vsnprintf(char *buffer, size_t size, const char *format, va_list arg_list);
+int vsnprintf(char *buffer, mclib_size_t size, const char *format, va_list arg_list);
 
 METALC_EXPORT
 METALC_ATTR__NONNULL_ARGS(1, 2)
@@ -35,7 +35,7 @@ int sprintf(char *buffer, const char *format, ...);
 
 METALC_EXPORT
 METALC_ATTR__NONNULL_ARGS(1, 3)
-int snprintf(char *buffer, size_t length, const char *format, ...);
+int snprintf(char *buffer, mclib_size_t length, const char *format, ...);
 
 METALC_EXPORT
 METALC_ATTR__NONNULL_ARGS(1)
@@ -84,11 +84,11 @@ mclib_FILE *fopen(const char *path, const char *mode);
 
 METALC_EXPORT
 METALC_ATTR__NONNULL
-size_t fwrite(const void *ptr, size_t size, size_t count, mclib_FILE *stream);
+mclib_size_t fwrite(const void *ptr, mclib_size_t size, mclib_size_t count, mclib_FILE *stream);
 
 METALC_EXPORT
 METALC_ATTR__NONNULL
-size_t fread(void *ptr, size_t size, size_t count, mclib_FILE *stream);
+mclib_size_t fread(void *ptr, mclib_size_t size, mclib_size_t count, mclib_FILE *stream);
 
 METALC_EXPORT
 METALC_ATTR__NONNULL

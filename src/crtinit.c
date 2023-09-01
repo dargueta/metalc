@@ -76,7 +76,7 @@ int cstdlib_run(int argc, char **argv, char **env) {
 }
 
 
-#if !METALC_COMPILE_FOR_TESTING
+#if !defined(METALC_COMPILE_FOR_TESTING)
     #include "metalc/internal/efi_shim.h"
     #if METALC_PLATFORM_UEFI_FULL
         /* This is a UEFI application. */
