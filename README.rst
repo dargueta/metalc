@@ -1,3 +1,11 @@
+Status Note
+===========
+
+I have not forgotten about this. I'm currently working on `libmetaldata`_ which
+contains common code to other personal projects and will be reused in here.
+
+.. _libmetaldata: https://github.com/dargueta/libmetaldata
+
 Bare Metal/UEFI Standard C Library
 ==================================
 
