@@ -5,11 +5,10 @@
 #ifndef INCLUDE_METALC_STRING_H_
 #define INCLUDE_METALC_STRING_H_
 
-#include "metalc.h"
-#include "stddef.h"
 #include "internal/poison.h"
 #include "internal/string.h"
-
+#include "metalc.h"
+#include "stddef.h"
 
 METALC_EXPORT
 METALC_ATTR__NONNULL
@@ -99,7 +98,6 @@ METALC_EXPORT
 METALC_ATTR__NONNULL
 size_t LIBC_GUARD(strxfrm)(char *destination, const char *source, size_t num);
 
-
 /** @cond DECL */
 DECLARE_LIBC(memchr)
 DECLARE_LIBC(memcmp)
@@ -125,5 +123,4 @@ DECLARE_LIBC(strtok)
 DECLARE_LIBC(strxfrm)
 /** @endcond */
 
-
-#endif  /* INCLUDE_METALC_STRING_H_ */
+#endif /* INCLUDE_METALC_STRING_H_ */

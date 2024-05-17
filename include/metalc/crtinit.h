@@ -11,22 +11,20 @@
 #include "limits.h"
 #include "metalc.h"
 
-
 #define CRTINIT_EXIT_SENTINEL INT_MIN
-
 
 /**
  * A pointer to the (nonstandard) three-argument variant of the C `main()` function.
  *
  * Code taking
  */
-typedef int (* cmetal_main_fn)(int argc, char **argv, char **env);
-
+typedef int (*cmetal_main_fn)(int argc, char **argv, char **env);
 
 /**
  * Configuration information passed to the C library from the operating system.
  */
-typedef struct {
+typedef struct
+{
     /**
      * User-defined argument passed to the C runtime initialization function.
      *
@@ -86,16 +84,14 @@ typedef struct {
     EFI_SYSTEM_TABLE *efi_system_table;
 } MetalCRuntimeInfo;
 
-
 /**
  * Initialize the standard C library.
  */
 METALC_EXPORT int cstdlib_init(MetalCRuntimeInfo *rti);
-
 
 /**
  * Run the ``main`` function defined in
  */
 METALC_EXPORT int cstdlib_run(int argc, char **argv, char **env);
 
-#endif  /* INCLUDE_METALC_CRTINIT_H_ */
+#endif /* INCLUDE_METALC_CRTINIT_H_ */

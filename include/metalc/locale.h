@@ -3,15 +3,15 @@
 
 #include "metalc.h"
 
-#define mclib_LC_ALL      0
-#define mclib_LC_COLLATE  1
-#define mclib_LC_CTYPE    2
+#define mclib_LC_ALL 0
+#define mclib_LC_COLLATE 1
+#define mclib_LC_CTYPE 2
 #define mclib_LC_MONETARY 3
-#define mclib_LC_NUMERIC  4
-#define mclib_LC_TIME     5
+#define mclib_LC_NUMERIC 4
+#define mclib_LC_TIME 5
 
-
-struct mclib_lconv {
+struct mclib_lconv
+{
     char *decimal_point;
     char *thousands_sep;
     char *grouping;
@@ -38,11 +38,9 @@ struct mclib_lconv {
     char int_n_sign_posn;
 };
 
-
 #ifdef METALC_DISABLE_STDLIB_DEFS
-    #define lconv mclib_lconv
+#    define lconv mclib_lconv
 #endif
-
 
 METALC_EXPORT
 METALC_ATTR__NONNULL_ARGS(2)
@@ -50,11 +48,9 @@ int setlocale(int what, const char *name);
 
 METALC_EXPORT
 METALC_ATTR__RETURNS_NONNULL
-struct mclib_lconv* localeconv(void);
-
+struct mclib_lconv *localeconv(void);
 
 cstdlib_export(setlocale);
 cstdlib_export(localeconv);
 
-
-#endif  /* INCLUDE_METALC_LOCALE_H_ */
+#endif /* INCLUDE_METALC_LOCALE_H_ */

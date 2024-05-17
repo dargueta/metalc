@@ -5,29 +5,26 @@
 #include "stddef.h"
 #include "wchar.h"
 
+#define mclib_RAND_MAX INT_MAX
 
-#define mclib_RAND_MAX    INT_MAX
-
-
-typedef struct {
+typedef struct
+{
     int quot, rem;
 } mclib_div_t;
 
-
-typedef struct {
+typedef struct
+{
     long quot, rem;
 } mclib_ldiv_t;
 
-
 #ifndef METALC_DISABLE_STDLIB_DEFS
-    #define RAND_MAX mclib_RAND_MAX
-    #define div_t mclib_div_t
-    #define ldiv_t mclib_ldiv_t
+#    define RAND_MAX mclib_RAND_MAX
+#    define div_t mclib_div_t
+#    define ldiv_t mclib_ldiv_t
 #endif
 
-
-#define atoi(str)   ((int)strtol((str), NULL, 10))
-#define atol(str)   strtol((str), NULL, 10)
+#define atoi(str) ((int)strtol((str), NULL, 10))
+#define atol(str) strtol((str), NULL, 10)
 
 METALC_EXPORT
 METALC_ATTR__NONNULL
@@ -69,16 +66,12 @@ int system(const char *string);
 
 METALC_EXPORT
 METALC_ATTR__NONNULL
-void *bsearch(
-    const void *key,
-    const void *base,
-    mclib_size_t nitems,
-    mclib_size_t size,
-    int (*cmp)(const void *, const void *)
-);
+void *bsearch(const void *key, const void *base, mclib_size_t nitems, mclib_size_t size,
+              int (*cmp)(const void *, const void *));
 
 METALC_EXPORT
-void qsort(void *base, mclib_size_t nitems, mclib_size_t size, int (*cmp)(const void *, const void *));
+void qsort(void *base, mclib_size_t nitems, mclib_size_t size,
+           int (*cmp)(const void *, const void *));
 
 METALC_EXPORT
 METALC_ATTR__CONST_FUNC
@@ -161,9 +154,8 @@ cstdlib_export(calloc);
 cstdlib_export(realloc);
 cstdlib_export(free);
 
-
 #if METALC_HAVE_LONG_LONG
-    #include "bits/stdlib_longlong.h"
+#    include "bits/stdlib_longlong.h"
 #endif
 
 /* Nonstandard functions */
@@ -177,4 +169,4 @@ cstdlib_export(utoa);
 cstdlib_export(ltoa);
 cstdlib_export(ultoa);
 
-#endif  /* INCLUDE_METALC_STDLIB_H_ */
+#endif /* INCLUDE_METALC_STDLIB_H_ */

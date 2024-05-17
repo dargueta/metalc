@@ -14,7 +14,6 @@
 #include "../metalc.h"
 #include <stddef.h>
 
-
 /**
  * Copy the string pointed to by `source` into the pointer `*buffer`, and update
  * `*buffer` to point to the terminating null just written.
@@ -31,7 +30,6 @@ METALC_INTERNAL_ONLY
 METALC_ATTR__NONNULL
 size_t strcpy_and_update_buffer(const char *source, char **buffer);
 
-
 /**
  * Same as @ref strcpy_and_update_buffer except copies at most @a n chars.
  */
@@ -39,13 +37,13 @@ METALC_INTERNAL_ONLY
 METALC_ATTR__NONNULL
 size_t strncpy_and_update_buffer(const char *source, char **buffer, size_t n);
 
-
 typedef int (*fptr_strcoll)(const char *str1, const char *str2);
 typedef size_t (*fptr_strxfrm)(char *destination, const char *source, size_t num);
 
-struct mcinternal_collation_info {
+struct mcinternal_collation_info
+{
     /* The name of this collation order. */
-    const char * const name;
+    const char *const name;
 
     /** A pointer to the function implementing @ref strcoll for the selected collation. */
     fptr_strcoll f_strcoll;

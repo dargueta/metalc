@@ -3,7 +3,6 @@
 
 #include "metalc.h"
 
-
 METALC_EXPORT_ASM double mclib_cos(double x);
 METALC_EXPORT_ASM float mclib_cosf(float x);
 METALC_EXPORT_ASM double mclib_sin(double x);
@@ -20,13 +19,13 @@ METALC_EXPORT_ASM double mclib_acos(double x);
 METALC_EXPORT_ASM float mclib_acosf(float x);
 
 #if METALC_HAVE_LONG_DOUBLE
-    METALC_EXPORT_ASM long double mclib_cosl(long double x);
-    METALC_EXPORT_ASM long double mclib_sinl(long double x);
-    METALC_EXPORT_ASM long double mclib_tanl(long double x);
-    METALC_EXPORT_ASM long double mclib_powl(long double base, long double exponent);
-    METALC_EXPORT_ASM long double mclib_fabsl(long double x);
-    METALC_EXPORT_ASM long double mclib_asinl(long double x);
-    METALC_EXPORT_ASM long double mclib_acosl(long double x);
+METALC_EXPORT_ASM long double mclib_cosl(long double x);
+METALC_EXPORT_ASM long double mclib_sinl(long double x);
+METALC_EXPORT_ASM long double mclib_tanl(long double x);
+METALC_EXPORT_ASM long double mclib_powl(long double base, long double exponent);
+METALC_EXPORT_ASM long double mclib_fabsl(long double x);
+METALC_EXPORT_ASM long double mclib_asinl(long double x);
+METALC_EXPORT_ASM long double mclib_acosl(long double x);
 #endif
 
-#endif  /* INCLUDE_METALC_MATH_H_ */
+#endif /* INCLUDE_METALC_MATH_H_ */

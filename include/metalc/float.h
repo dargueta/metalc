@@ -9,4 +9,4 @@
 
 #include <float.h>
 
-#endif  /* INCLUDE_METALC_FLOAT_H_ */
+#endif /* INCLUDE_METALC_FLOAT_H_ */

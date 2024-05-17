@@ -12,14 +12,12 @@
 #include "stdarg.h"
 #include "stddef.h"
 
-
 struct mcinternal_FILE;
 typedef struct mcinternal_FILE mclib_FILE;
 
-extern mclib_FILE * const mclib_stdin;      /**< Standard input file handle */
-extern mclib_FILE * const mclib_stdout;     /**< Standard output file handle */
-extern mclib_FILE * const mclib_stderr;     /**< Standard error output file handle */
-
+extern mclib_FILE *const mclib_stdin;  /**< Standard input file handle */
+extern mclib_FILE *const mclib_stdout; /**< Standard output file handle */
+extern mclib_FILE *const mclib_stderr; /**< Standard error output file handle */
 
 METALC_EXPORT
 METALC_ATTR__NONNULL_ARGS(2)
@@ -84,7 +82,8 @@ mclib_FILE *fopen(const char *path, const char *mode);
 
 METALC_EXPORT
 METALC_ATTR__NONNULL
-mclib_size_t fwrite(const void *ptr, mclib_size_t size, mclib_size_t count, mclib_FILE *stream);
+mclib_size_t fwrite(const void *ptr, mclib_size_t size, mclib_size_t count,
+                    mclib_FILE *stream);
 
 METALC_EXPORT
 METALC_ATTR__NONNULL
@@ -97,7 +96,6 @@ mclib_fpos_t fseek(mclib_FILE *stream, long offset, int whence);
 METALC_INTERNAL_ONLY
 METALC_ATTR__NONNULL
 int mcinternal_mode_string_to_flags(const char *mode);
-
 
 cstdlib_export(vsprintf);
 cstdlib_export(vsnprintf);
@@ -116,4 +114,4 @@ cstdlib_export(fwrite);
 cstdlib_export(fread);
 cstdlib_export(fseek);
 
-#endif  /* INCLUDE_METALC_STDIO_H_ */
+#endif /* INCLUDE_METALC_STDIO_H_ */

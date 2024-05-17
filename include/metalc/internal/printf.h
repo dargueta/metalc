@@ -11,31 +11,31 @@
 #include "../stdarg.h"
 #include "../stddef.h"
 
-
 /**
  * The data type of the element in the format string.
  */
-enum MCArgumentType {
+enum MCArgumentType
+{
     MCFMT_ARGT__UNKNOWN = -1,
-    MCFMT_ARGT__CHAR,     /**< For `%%c` */
-    MCFMT_ARGT__STRING,   /**< For `%%s` */
-    MCFMT_ARGT__BYTE,     /**< For `%%hhd`, `%%hhi`, `%%hhu`, `%%hho`, or `%%hhx` */
-    MCFMT_ARGT__SHORT,    /**< For `%%hd`, `%%hi`, `%%hu`, `%%ho`, or `%%hx` */
-    MCFMT_ARGT__INT,      /**< For `%%d`, `%%i`, `%%u`, or `%%x` */
-    MCFMT_ARGT__LONG,     /**< For `%%ld`, `%%li`, `%%lu`, or `%%lx` */
+    MCFMT_ARGT__CHAR,   /**< For `%%c` */
+    MCFMT_ARGT__STRING, /**< For `%%s` */
+    MCFMT_ARGT__BYTE,   /**< For `%%hhd`, `%%hhi`, `%%hhu`, `%%hho`, or `%%hhx` */
+    MCFMT_ARGT__SHORT,  /**< For `%%hd`, `%%hi`, `%%hu`, `%%ho`, or `%%hx` */
+    MCFMT_ARGT__INT,    /**< For `%%d`, `%%i`, `%%u`, or `%%x` */
+    MCFMT_ARGT__LONG,   /**< For `%%ld`, `%%li`, `%%lu`, or `%%lx` */
     /** For `%%lld`, `%%lli`, `%%llu`, or `%%llx`. Not supported on all platforms. */
     MCFMT_ARGT__LONGLONG,
-    MCFMT_ARGT__FLOAT,    /**< For `%%hf` */
-    MCFMT_ARGT__DOUBLE,   /**< For `%%f`, `%%e`, or `%%g` */
+    MCFMT_ARGT__FLOAT,  /**< For `%%hf` */
+    MCFMT_ARGT__DOUBLE, /**< For `%%f`, `%%e`, or `%%g` */
 
     /** For `%%lf`, `%%le`, or `%%lg`. Not supported on all platforms. */
     MCFMT_ARGT__LONGDOUBLE,
-    MCFMT_ARGT__POINTER,  /**< `p` */
-    MCFMT_ARGT__N_WRITTEN_POINTER,    /**< `%%n` */
+    MCFMT_ARGT__POINTER,           /**< `p` */
+    MCFMT_ARGT__N_WRITTEN_POINTER, /**< `%%n` */
 };
 
-
-enum MCArgumentWidth {
+enum MCArgumentWidth
+{
     MCFMT_ARGW__DEFAULT,
     MCFMT_ARGW__BYTE,
     MCFMT_ARGW__SHORT,
@@ -48,38 +48,38 @@ enum MCArgumentWidth {
     MCFMT_ARGW__LONG_DOUBLE
 };
 
-
 /**
  * FIXME (dargueta): This assumes implementation details in stdint.h.
  */
 #define MCFMT_ARGW__INTMAX MCFMT_ARGW__INTPTR
 
-
-enum MCSignRepr {
+enum MCSignRepr
+{
     MCFMT_SIGN__ONLY_NEGATIVE,
     MCFMT_SIGN__FORCE_POSITIVE,
     MCFMT_SIGN__SPACE_FOR_POSITIVE
 };
 
-
-enum MCFieldJustify {
+enum MCFieldJustify
+{
     MCFMT_JUSTIFY__UNSPECIFIED,
     MCFMT_JUSTIFY__LEFT,
     MCFMT_JUSTIFY__RIGHT
 };
 
-enum MCSciNotation {
+enum MCSciNotation
+{
     MCFMT_SCINOT__UNSPECIFIED,
     MCFMT_SCINOT__NEVER = MCFMT_SCINOT__UNSPECIFIED,
     MCFMT_SCINOT__IF_NEEDED,
     MCFMT_SCINOT__ALWAYS
 };
 
-
 /**
  * Information about a format specifier in a printf format string.
  */
-struct MCFormatSpecifier {
+struct MCFormatSpecifier
+{
     /** How to align the text in the rendered field. */
     enum MCFieldJustify justify;
 
@@ -119,7 +119,6 @@ struct MCFormatSpecifier {
     int use_uppercase;
 };
 
-
 /**
  * Examine a format specifier and read the flags, but not the width or type indicators.
  *
@@ -137,7 +136,6 @@ METALC_INTERNAL_ONLY
 METALC_ATTR__NONNULL
 int parse_printf_format_flags(const char *format, struct MCFormatSpecifier *info);
 
-
 /**
  * Examine a format string and read the field width.
  *
@@ -152,7 +150,6 @@ int parse_printf_format_flags(const char *format, struct MCFormatSpecifier *info
 METALC_INTERNAL_ONLY
 METALC_ATTR__NONNULL
 int parse_printf_format_width(const char *format, struct MCFormatSpecifier *info);
-
 
 /**
  * Parse a printf format specifier and extract the information in them.
@@ -173,7 +170,6 @@ METALC_INTERNAL_ONLY
 METALC_ATTR__NONNULL
 int parse_printf_format_specifier(const char *format, struct MCFormatSpecifier *info);
 
-
 /**
  * Examine a format string and determine the floating-point precision.
  *
@@ -185,25 +181,20 @@ METALC_INTERNAL_ONLY
 METALC_ATTR__NONNULL
 int parse_printf_format_precision(const char *format, struct MCFormatSpecifier *info);
 
-
 METALC_INTERNAL_ONLY
 enum MCArgumentType int_argtype_from_width(enum MCArgumentWidth width_kind);
-
 
 METALC_INTERNAL_ONLY
 enum MCArgumentType float_argtype_from_width(enum MCArgumentWidth width_kind);
 
-
 METALC_INTERNAL_ONLY
 METALC_ATTR__NONNULL
-int parse_printf_format_type_width_flag(
-    const char *format, struct MCFormatSpecifier *info
-);
+int parse_printf_format_type_width_flag(const char *format,
+                                        struct MCFormatSpecifier *info);
 
 METALC_INTERNAL_ONLY
 METALC_ATTR__NONNULL
 int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info);
-
 
 /**
  * Given a format string, write a single value to the buffer.
@@ -214,9 +205,7 @@ int parse_printf_format_type(const char *format, struct MCFormatSpecifier *info)
  * @todo Add support for left- and right-justifying values.
  */
 METALC_INTERNAL_ONLY
-int evaluate_format_specifier(
-    const char **format, va_list arg_list, char **output, size_t n_chars_written,
-    size_t limit
-);
+int evaluate_format_specifier(const char **format, va_list arg_list, char **output,
+                              size_t n_chars_written, size_t limit);
 
-#endif  /* INCLUDE_METALC_INTERNAL_PRINTF_H_ */
+#endif /* INCLUDE_METALC_INTERNAL_PRINTF_H_ */

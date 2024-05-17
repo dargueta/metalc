@@ -9,4 +9,4 @@
 
 #include <iso646.h>
 
-#endif  /* METALC_INCLUDE_METALC_ISO646_H_ */
+#endif /* METALC_INCLUDE_METALC_ISO646_H_ */

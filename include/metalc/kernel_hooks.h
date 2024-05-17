@@ -7,10 +7,9 @@
 #ifndef INCLUDE_METALC_KERNEL_HOOKS_H_
 #define INCLUDE_METALC_KERNEL_HOOKS_H_
 
+#include "bits/stdio.h"
 #include "metalc.h"
 #include "stddef.h"
-#include "bits/stdio.h"
-
 
 /**
  * A hook function that suspends the calling process.
@@ -22,7 +21,6 @@
 METALC_ATTR__EXPORT_WEAK
 void krnlhook_suspend(int sig);
 
-
 /**
  * A hook function that resumes the calling process.
  *
@@ -32,7 +30,6 @@ void krnlhook_suspend(int sig);
  */
 METALC_ATTR__EXPORT_WEAK
 void krnlhook_resume(int sig);
-
 
 /**
  * A hook function to tell the OS to dump the core and terminate this process.
@@ -44,7 +41,6 @@ void krnlhook_resume(int sig);
 METALC_ATTR__EXPORT_WEAK
 METALC_ATTR__NORETURN
 void krnlhook_core_dump(int sig);
-
 
 /**
  * A hook function that implements at least part of the POSIX `mmap()` function.
@@ -82,10 +78,8 @@ void krnlhook_core_dump(int sig);
  *         returns @ref MAP_FAILED and @ref errno is set to indicate the cause.
  */
 METALC_ATTR__EXPORT_WEAK
-void *krnlhook_mmap(
-    void *addr, size_t length, int prot, int flags, int fd, mclib_off_t offset
-);
-
+void *krnlhook_mmap(void *addr, size_t length, int prot, int flags, int fd,
+                    mclib_off_t offset);
 
 /**
  * A hook function that implements at least part of the POSIX `mremap()` function.
@@ -99,10 +93,9 @@ void *krnlhook_mmap(
  */
 METALC_ATTR__NONNULL_ARGS(1)
 METALC_ATTR__EXPORT_WEAK
-void *krnlhook_mremap(
-    void *old_address, size_t old_size, size_t new_size, int flags, ... /* void *new_address */
+void *krnlhook_mremap(void *old_address, size_t old_size, size_t new_size, int flags,
+                      ... /* void *new_address */
 );
-
 
 /**
  * Provided for symmetry with @ref krnlhook_mmap but might never be used.
@@ -113,7 +106,6 @@ void *krnlhook_mremap(
 METALC_ATTR__NONNULL_ARGS(1)
 METALC_ATTR__EXPORT_WEAK
 int krnlhook_munmap(void *addr, size_t length);
-
 
 METALC_ATTR__NONNULL_ARGS(1)
 METALC_ATTR__EXPORT_WEAK
@@ -139,5 +131,4 @@ mclib_off_t krnlhook_tell(int fdesc);
 METALC_ATTR__EXPORT_WEAK
 int krnlhook_fsync(int fdesc);
 
-
-#endif  /* INCLUDE_METALC_KERNEL_HOOKS_H_ */
+#endif /* INCLUDE_METALC_KERNEL_HOOKS_H_ */

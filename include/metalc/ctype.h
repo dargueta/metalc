@@ -73,4 +73,4 @@ cstdlib_export(isxdigit);
 cstdlib_export(tolower);
 cstdlib_export(toupper);
 
-#endif  /* INCLUDE_METALC_CTYPE_H_ */
+#endif /* INCLUDE_METALC_CTYPE_H_ */

@@ -9,17 +9,16 @@
 
 #include "../metalc.h"
 
-
-typedef struct {
+typedef struct
+{
     long long quot, rem;
 } mclib_lldiv_t;
 
-
-#define atoll(str)  strtoll((str), NULL, 10)
+#define atoll(str) strtoll((str), NULL, 10)
 
 METALC_EXPORT
 METALC_ATTR__CONST_FUNC
-long long llabs(long long x);      /* done */
+long long llabs(long long x); /* done */
 
 METALC_EXPORT
 METALC_ATTR__REPRODUCIBLE
@@ -33,13 +32,12 @@ METALC_EXPORT
 METALC_ATTR__CONST_FUNC
 mclib_lldiv_t lldiv(long long numer, long long denom);
 
-
 /* Nonstandard */
 METALC_EXPORT char *lltoa(long long value, char *buf, int base);
 METALC_EXPORT char *ulltoa(unsigned long long value, char *str, int base);
 
 #ifndef METALC_DISABLE_STDLIB_DEFS
-    #define lldiv_t mclib_lldiv_t
+#    define lldiv_t mclib_lldiv_t
 #endif
 
 cstdlib_export(llabs);
@@ -49,4 +47,4 @@ cstdlib_export(lldiv);
 cstdlib_export(lltoa);
 cstdlib_export(ulltoa);
 
-#endif  /* METALC_BITS_STDLIB_LONGLONG_H_ */
+#endif /* METALC_BITS_STDLIB_LONGLONG_H_ */

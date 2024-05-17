@@ -80,7 +80,8 @@
 
 #    if __has_attribute(malloc)
 #        define METALC_ATTR__MALLOC GCC_ATTRIBUTE(malloc)
-#        define METALC_ATTR__MALLOC_ARGS(...) METALC_ATTR__MALLOC GCC_ATTRIBUTE(malloc(__VA_ARGS__))
+#        define METALC_ATTR__MALLOC_ARGS(...)                                            \
+            METALC_ATTR__MALLOC GCC_ATTRIBUTE(malloc(__VA_ARGS__))
 #    endif
 
 #    if __has_attribute(weak)
@@ -92,7 +93,7 @@
 #    endif
 
 #    if __has_attribute(error)
-#        define METALC_ATTR__ERROR_IF_USED(x) GCC_ATTRIBUTE(error (x))
+#        define METALC_ATTR__ERROR_IF_USED(x) GCC_ATTRIBUTE(error(x))
 #    endif
 #endif
 

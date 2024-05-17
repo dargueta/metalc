@@ -1,14 +1,14 @@
 #ifndef INCLUDE_METALC_STDDEF_H_
 #define INCLUDE_METALC_STDDEF_H_
 
+#include "internal/poison.h"
 #include "metalc.h"
 #include "stdint.h"
-#include "internal/poison.h"
 
 #ifdef METALC_CURRENTLY_COMPILING_LIBRARY
-#define mclib_NULL ((void *)0)
+#    define mclib_NULL ((void *)0)
 #else
-#define NULL ((void *)0)
+#    define NULL ((void *)0)
 #endif
 
 // Why we use `long double` https://en.cppreference.com/w/c/types/max_align_t
