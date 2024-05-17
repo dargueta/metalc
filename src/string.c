@@ -156,7 +156,7 @@ void *memchr(const void *ptr, int value, size_t num) {
 cstdlib_implement(memchr);
 
 
-int memcmp(const void *ptr1, const void *ptr2, size_t num) {
+int mclib_memcmp(const void *ptr1, const void *ptr2, size_t num) {
     const signed char *left, *right;
     int diff;
 
@@ -169,8 +169,13 @@ int memcmp(const void *ptr1, const void *ptr2, size_t num) {
 
     return diff;
 }
-cstdlib_implement(memcmp);
 
+#ifndef METALC_CURRENTLY_COMPILING_LIBRARY
+inline int memcmp(const void *ptr1, const void *ptr2, size_t num)
+{
+    return mclib_memcmp(ptr1, ptr2, num);
+}
+#endif
 
 void *memcpy(void *destination, const void *source, size_t num) {
     char *p_dest;

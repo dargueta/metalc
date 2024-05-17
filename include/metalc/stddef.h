@@ -3,21 +3,26 @@
 
 #include "metalc.h"
 #include "stdint.h"
+#include "internal/poison.h"
 
+#ifdef METALC_CURRENTLY_COMPILING_LIBRARY
 #define mclib_NULL ((void *)0)
+#else
+#define NULL ((void *)0)
+#endif
 
 // Why we use `long double` https://en.cppreference.com/w/c/types/max_align_t
 #ifndef METALC_MAX_ALIGN_T_DEFINED
 #    if METALC_HAVE_LONG_DOUBLE
-typedef long double mclib_max_align_t;
+typedef long double LIBC_GUARD(max_align_t);
 #    else
-typedef intmax_t mclib_max_align_t;
+typedef intmax_t LIBC_GUARD(max_align_t);
 #    endif
 #    define METALC_MAX_ALIGN_T_DEFINED
 #endif
 
-typedef uintptr_t mclib_size_t;
-typedef intptr_t mclib_ssize_t;
+typedef uintptr_t LIBC_GUARD(size_t);
+typedef intptr_t LIBC_GUARD(ssize_t);
 
 #define mclib_SIZE_MAX UINTPTR_MAX
 #define mclib_SSIZE_MIN INTPTR_MIN

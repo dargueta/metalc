@@ -7,15 +7,11 @@
 
 typedef uint_least32_t mclib_wchar_t;
 
-
-#ifndef METALC_COMPILE_FOR_TESTING
-    typedef mclib_wchar_t wchar_t;
-#endif
-
 #define mclib_WCHAR_MIN   0UL
 #define mclib_WCHAR_MAX   0x10ffffUL
 
-#ifndef METALC_DISABLE_STDLIB_DEFS
+#ifndef METALC_CURRENTLY_COMPILING_LIBRARY
+    typedef mclib_wchar_t wchar_t;
     #define WCHAR_MIN mclib_WCHAR_MIN
     #define WCHAR_MAX mclib_WCHAR_MAX
 #endif

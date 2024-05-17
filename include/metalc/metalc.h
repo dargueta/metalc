@@ -119,15 +119,15 @@
 #    define GCC_ATTR_COPY(x)
 #endif
 
-#if defined(METALC_COMPILE_FOR_TESTING)
-/* Building the C library for testing... */
+#if defined(METALC_CURRENTLY_COMPILING_LIBRARY)
+#define LIBC_GUARD(id) mclib_##id
 
 /* No functions are internal to the C library anymore since we need to be
  * able to test these directly. Make the `METALC_INTERNAL_ONLY` markers a
  * no-op. */
 #    define METALC_INTERNAL_ONLY METALC_ATTR__EXPORT
 
-#    if defined(METALC_BUILDING_LIBC)
+#    if defined(METALC_COMPILE_FOR_TESTING)
 /* We're building the C library but with the intent to run unit tests on
  * it. Since our testbench requires use of the host OS's standard C
  * library, we need to create aliases for all these exported functions
@@ -145,6 +145,7 @@
 #else
 /* Not in testing mode. We're either building the C library or a client
  * program is using the library. */
+#define LIBC_GUARD(id) id
 #    if METALC_INTERNALS_USE_FASTCALL && (METALC_TARGET_ARCHITECTURE_BITS != 64)
 #        define METALC_INTERNAL_ONLY METALC_ATTR__NO_EXPORT METALC_ATTR__FASTCALL
 #    else

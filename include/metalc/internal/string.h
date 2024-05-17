@@ -12,7 +12,7 @@
 #define INCLUDE_MCINTERNAL_STRING_H_
 
 #include "../metalc.h"
-#include "../stddef.h"
+#include <stddef.h>
 
 
 /**
