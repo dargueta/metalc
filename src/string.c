@@ -1,10 +1,9 @@
+#include "metalc/string.h"
 #include "metalc/errno.h"
+#include "metalc/locale.h"
 #include "metalc/metalc.h"
 #include "metalc/stdio.h"
 #include "metalc/stdlib.h"
-#include "metalc/string.h"
-#include "metalc/locale.h"
-
 
 /* These are copied and pasted from the Linux headers on Ubuntu 19.10. */
 static const char *ERROR_STRINGS[mclib__MAX_ERRNO] = {
@@ -143,11 +142,12 @@ static const char *ERROR_STRINGS[mclib__MAX_ERRNO] = {
     "Memory page has hardware error",
 };
 
-
-void *memchr(const void *ptr, int value, size_t num) {
+void *memchr(const void *ptr, int value, size_t num)
+{
     const unsigned char *p;
 
-    for (p = ptr; num != 0; --num, ++p) {
+    for (p = ptr; num != 0; --num, ++p)
+    {
         if (*p == (unsigned char)value)
             return (void *)p;
     }
@@ -155,8 +155,8 @@ void *memchr(const void *ptr, int value, size_t num) {
 }
 cstdlib_implement(memchr);
 
-
-int mclib_memcmp(const void *ptr1, const void *ptr2, size_t num) {
+int mclib_memcmp(const void *ptr1, const void *ptr2, size_t num)
+{
     const signed char *left, *right;
     int diff;
 
@@ -177,7 +177,8 @@ inline int memcmp(const void *ptr1, const void *ptr2, size_t num)
 }
 #endif
 
-void *memcpy(void *destination, const void *source, size_t num) {
+void *memcpy(void *destination, const void *source, size_t num)
+{
     char *p_dest;
     const char *p_src;
 
@@ -191,14 +192,15 @@ void *memcpy(void *destination, const void *source, size_t num) {
 }
 cstdlib_implement(memcpy);
 
-
-void *memmove(void *destination, const void *source, size_t num) {
+void *memmove(void *destination, const void *source, size_t num)
+{
     char *p_dest;
     const char *p_src;
 
     if ((destination == source) || (num == 0))
         return destination;
-    else if (destination < source) {
+    else if (destination < source)
+    {
         /* Moving source backwards. We can copy from the beginning of the source
          * onwards. */
         p_dest = destination;
@@ -207,7 +209,8 @@ void *memmove(void *destination, const void *source, size_t num) {
         for (; num > 0; --num)
             *p_dest++ = *p_src++;
     }
-    else {
+    else
+    {
         /* Moving source forwards. To avoid stomping on the end of the source
          * we need to copy from the end of the source back to the beginning. */
         p_dest = (char *)destination + num - 1;
@@ -221,8 +224,8 @@ void *memmove(void *destination, const void *source, size_t num) {
 }
 cstdlib_implement(memmove);
 
-
-void *memset(void *ptr, int value, size_t num) {
+void *memset(void *ptr, int value, size_t num)
+{
     unsigned char *p_dest;
 
     for (p_dest = (unsigned char *)ptr; num > 0; --num)
@@ -232,15 +235,16 @@ void *memset(void *ptr, int value, size_t num) {
 }
 cstdlib_implement(memset);
 
-
-char *strcat(char *destination, const char *source) {
+char *strcat(char *destination, const char *source)
+{
     return strcpy(strchr(destination, 0), source);
 }
 cstdlib_implement(strcat);
 
-
-char *strchr(const char *str, int character) {
-    do {
+char *strchr(const char *str, int character)
+{
+    do
+    {
         if (*str == (char)character)
             return (char *)str;
     } while (*str++ != '\0');
@@ -249,11 +253,12 @@ char *strchr(const char *str, int character) {
 }
 cstdlib_implement(strchr);
 
-
-int strcmp(const char *str1, const char *str2) {
+int strcmp(const char *str1, const char *str2)
+{
     int diff = 0;
 
-    for (; (*str1 != '\0') && (*str2 != '\0'); ++str1, ++str2) {
+    for (; (*str1 != '\0') && (*str2 != '\0'); ++str1, ++str2)
+    {
         diff = *str1 - *str2;
         if (diff != 0)
             return diff;
@@ -263,17 +268,18 @@ int strcmp(const char *str1, const char *str2) {
 }
 cstdlib_implement(strcmp);
 
-
-int strcoll(const char *str1, const char *str2) {
+int strcoll(const char *str1, const char *str2)
+{
     return mcinternal_ptr_current_coll->f_strcoll(str1, str2);
 }
 cstdlib_implement(strcoll);
 
-
-char *strcpy(char *destination, const char *source) {
+char *strcpy(char *destination, const char *source)
+{
     char *p_dest = destination;
 
-    do {
+    do
+    {
         *p_dest++ = *source;
     } while (*source++ != '\0');
 
@@ -281,14 +287,15 @@ char *strcpy(char *destination, const char *source) {
 }
 cstdlib_implement(strcpy);
 
-
-size_t strcspn(const char *str1, const char *str2) {
+size_t strcspn(const char *str1, const char *str2)
+{
     size_t span;
 
     /**
      * @todo There must be a better way of implementing this than O(n^2).
      */
-    for (span = 0; *str1 != '\0'; ++str1, ++span) {
+    for (span = 0; *str1 != '\0'; ++str1, ++span)
+    {
         if (strchr(str2, (int)*str1))
             return span;
     }
@@ -296,8 +303,8 @@ size_t strcspn(const char *str1, const char *str2) {
 }
 cstdlib_implement(strcspn);
 
-
-char *strerror(int errnum) {
+char *strerror(int errnum)
+{
     static char buffer[128];
 
     if ((errnum >= 0) && (errnum < mclib__MAX_ERRNO))
@@ -308,8 +315,8 @@ char *strerror(int errnum) {
 }
 cstdlib_implement(strerror);
 
-
-size_t strlen(const char *str) {
+size_t strlen(const char *str)
+{
     size_t length = 0;
 
     while (str[length] != '\0')
@@ -318,8 +325,8 @@ size_t strlen(const char *str) {
 }
 cstdlib_implement(strlen);
 
-
-char *strncat(char *destination, const char *source, size_t num) {
+char *strncat(char *destination, const char *source, size_t num)
+{
     char *p_dest;
 
     /* Return early if `num` is 0 to avoid a potentially expensive call to
@@ -337,11 +344,12 @@ char *strncat(char *destination, const char *source, size_t num) {
 }
 cstdlib_implement(strncat);
 
-
-int strncmp(const char *str1, const char *str2, size_t num) {
+int strncmp(const char *str1, const char *str2, size_t num)
+{
     int diff = 0;
 
-    while ((num > 0) && (*str1 != '\0') && (*str2 != '\0')) {
+    while ((num > 0) && (*str1 != '\0') && (*str2 != '\0'))
+    {
         diff = *str1 - *str2;
         if (diff != 0)
             return diff;
@@ -361,8 +369,8 @@ int strncmp(const char *str1, const char *str2, size_t num) {
 }
 cstdlib_implement(strncmp);
 
-
-char *strncpy(char *destination, const char *source, size_t num) {
+char *strncpy(char *destination, const char *source, size_t num)
+{
     char *p_dest = destination;
 
     for (; (num > 0) && (*source != '\0'); --num)
@@ -375,8 +383,8 @@ char *strncpy(char *destination, const char *source, size_t num) {
 }
 cstdlib_implement(strncpy);
 
-
-char *strpbrk(const char *str1, const char *str2) {
+char *strpbrk(const char *str1, const char *str2)
+{
     size_t span = strcspn(str1, str2);
 
     if (str1[span] == '\0')
@@ -385,11 +393,12 @@ char *strpbrk(const char *str1, const char *str2) {
 }
 cstdlib_implement(strpbrk);
 
-
-char *strrchr(const char *str, int character) {
+char *strrchr(const char *str, int character)
+{
     const char *p_end;
 
-    for (p_end = str + strlen(str); p_end != str; --p_end) {
+    for (p_end = str + strlen(str); p_end != str; --p_end)
+    {
         if (*p_end == (char)character)
             return (char *)p_end;
     }
@@ -397,11 +406,12 @@ char *strrchr(const char *str, int character) {
 }
 cstdlib_implement(strrchr);
 
-
-size_t strspn(const char *str1, const char *str2) {
+size_t strspn(const char *str1, const char *str2)
+{
     size_t span = 0;
 
-    for (; *str1 != '\0'; ++str1, ++span) {
+    for (; *str1 != '\0'; ++str1, ++span)
+    {
         if (strchr(str2, *str1) == NULL)
             break;
     }
@@ -409,11 +419,12 @@ size_t strspn(const char *str1, const char *str2) {
 }
 cstdlib_implement(strspn);
 
-
-char *strstr(const char *str, const char *substr) {
+char *strstr(const char *str, const char *substr)
+{
     size_t substr_length = strlen(substr);
 
-    for (; *str != '\0'; ++str) {
+    for (; *str != '\0'; ++str)
+    {
         if (strncmp(str, substr, substr_length) == 0)
             return (char *)str;
     }
@@ -421,8 +432,8 @@ char *strstr(const char *str, const char *substr) {
 }
 cstdlib_implement(strstr);
 
-
-char *strtok(char *str, const char *delimiters) {
+char *strtok(char *str, const char *delimiters)
+{
     size_t token_length;
     static char *start = NULL;
 
@@ -439,7 +450,8 @@ char *strtok(char *str, const char *delimiters) {
 
     /* Search for the first character in `start` that *isn't* a delimiter. If we
      * hit EOS, bail and return NULL forevermore. */
-    for (; *start != '\0'; ++start) {
+    for (; *start != '\0'; ++start)
+    {
         if (strchr(delimiters, *start) == NULL)
             break;
     }
@@ -458,14 +470,14 @@ char *strtok(char *str, const char *delimiters) {
 }
 cstdlib_implement(strtok);
 
-
-size_t strxfrm(char *destination, const char *source, size_t num) {
+size_t strxfrm(char *destination, const char *source, size_t num)
+{
     return mcinternal_ptr_current_coll->f_strxfrm(destination, source, num);
 }
 cstdlib_implement(strxfrm);
 
-
-size_t strcpy_and_update_buffer(const char *source, char **buffer) {
+size_t strcpy_and_update_buffer(const char *source, char **buffer)
+{
     size_t buffer_size = strlen(source);
 
     strcpy(*buffer, source);
@@ -473,8 +485,8 @@ size_t strcpy_and_update_buffer(const char *source, char **buffer) {
     return buffer_size;
 }
 
-
-size_t strncpy_and_update_buffer(const char *source, char **buffer, size_t n) {
+size_t strncpy_and_update_buffer(const char *source, char **buffer, size_t n)
+{
     size_t source_size, buffer_size;
 
     source_size = strlen(source);

@@ -3,9 +3,9 @@
 #include <metalc/string.h>
 #include <metalc/wchar.h>
 
-
 METALC_INTERNAL_ONLY
-int mcinternal_utf8_mblen(const char *str, size_t n) {
+int mcinternal_utf8_mblen(const char *str, size_t n)
+{
     unsigned uchr;
 
     /* A NULL pointer means the caller is asking if the character set is state-dependent.
@@ -13,7 +13,8 @@ int mcinternal_utf8_mblen(const char *str, size_t n) {
     if (str == NULL)
         return 0;
 
-    if (n == 0) {
+    if (n == 0)
+    {
         mclib_errno = mclib_EINVAL;
         return -1;
     }
@@ -35,9 +36,9 @@ int mcinternal_utf8_mblen(const char *str, size_t n) {
     return -1;
 }
 
-
 METALC_INTERNAL_ONLY
-int mcinternal_utf8_mbtowc(mclib_wchar_t *pwc, const char *str, size_t n) {
+int mcinternal_utf8_mbtowc(mclib_wchar_t *pwc, const char *str, size_t n)
+{
     mclib_wchar_t result;
     int current_char_len;
 
@@ -50,35 +51,34 @@ int mcinternal_utf8_mbtowc(mclib_wchar_t *pwc, const char *str, size_t n) {
     /* We need to examine at least current_char_len bytes to correctly interpret
      * the wide character. If we can't, then consider it an illegal byte sequence
      * and complain. */
-    if (n < (size_t)current_char_len) {
+    if (n < (size_t)current_char_len)
+    {
         mclib_errno = mclib_EILSEQ;
         return -1;
     }
 
-    switch (current_char_len) {
-        case 0:
-            result = 0;
-            break;
-        case 1:
-            result = (unsigned)str[0] & 0x7f;
-            break;
-        case 2:
-            result = (((unsigned)str[0] & 0x1f) << 8) | ((unsigned)str[1] & 0x3f);
-            break;
-        case 3:
-            result = (((unsigned)str[0] & 0x0f) << 14)  \
-                   | (((unsigned)str[1] & 0x3f) << 6)   \
-                   | ((unsigned)str[2] & 0x3f);
-            break;
-        case 4:
-            result = (((unsigned)str[0] & 0x07) << 18)  \
-                   | (((unsigned)str[1] & 0x3f) << 12)  \
-                   | (((unsigned)str[2] & 0x3f) << 6)   \
-                   | ((unsigned)str[3] & 0x3f);
-            break;
-        default:
-            mclib_errno = mclib_EILSEQ;
-            return -1;
+    switch (current_char_len)
+    {
+    case 0:
+        result = 0;
+        break;
+    case 1:
+        result = (unsigned)str[0] & 0x7f;
+        break;
+    case 2:
+        result = (((unsigned)str[0] & 0x1f) << 8) | ((unsigned)str[1] & 0x3f);
+        break;
+    case 3:
+        result = (((unsigned)str[0] & 0x0f) << 14) | (((unsigned)str[1] & 0x3f) << 6) |
+                 ((unsigned)str[2] & 0x3f);
+        break;
+    case 4:
+        result = (((unsigned)str[0] & 0x07) << 18) | (((unsigned)str[1] & 0x3f) << 12) |
+                 (((unsigned)str[2] & 0x3f) << 6) | ((unsigned)str[3] & 0x3f);
+        break;
+    default:
+        mclib_errno = mclib_EILSEQ;
+        return -1;
     }
 
     if (pwc)
@@ -86,36 +86,41 @@ int mcinternal_utf8_mbtowc(mclib_wchar_t *pwc, const char *str, size_t n) {
     return current_char_len;
 }
 
-
 METALC_INTERNAL_ONLY
-int mcinternal_utf8_wctomb(char *str, mclib_wchar_t wchar) {
+int mcinternal_utf8_wctomb(char *str, mclib_wchar_t wchar)
+{
     /* Caller is asking if this encoding is state-dependent. It isn't. */
     if (str == NULL)
         return 0;
 
-    if (wchar < 0x80) {
+    if (wchar < 0x80)
+    {
         *str = (char)wchar;
         return 1;
     }
-    else if (wchar < 0x800) {
+    else if (wchar < 0x800)
+    {
         str[0] = (char)(0xc0 | ((wchar >> 6) & 0x1f));
         str[1] = (char)(0x80 | (wchar & 0x3f));
         return 2;
     }
-    else if (wchar < 0x10000) {
+    else if (wchar < 0x10000)
+    {
         str[0] = (char)(0xe0 | ((wchar >> 12) & 0x0f));
         str[1] = (char)(0x80 | ((wchar >> 6) & 0x3f));
         str[2] = (char)(0x80 | (wchar & 0x3f));
         return 3;
     }
-    else if (wchar < 0x110000) {
+    else if (wchar < 0x110000)
+    {
         str[0] = (char)(0xf0 | ((wchar >> 18) & 0x07));
         str[1] = (char)(0x80 | ((wchar >> 12) & 0x3f));
         str[2] = (char)(0x80 | ((wchar >> 6) & 0x3f));
         str[3] = (char)(0x80 | (wchar & 0x3f));
         return 3;
     }
-    else {
+    else
+    {
         mclib_errno = mclib_EILSEQ;
         return -1;
     }

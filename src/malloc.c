@@ -11,23 +11,21 @@
 #include "metalc/string.h"
 #include "metalc/sys/mman.h"
 
-
 extern MetalCRuntimeInfo *mcinternal_runtime_info;
 
-
 #if METALC_TARGET_ARCHITECTURE_BITS == 16
-    #define MINIMUM_ALLOCATION_SIZE     8
-    #define MINIMUM_MMAP_REQUEST_SIZE   1024    /* 1 KiB */
+#    define MINIMUM_ALLOCATION_SIZE 8
+#    define MINIMUM_MMAP_REQUEST_SIZE 1024 /* 1 KiB */
 #elif METALC_TARGET_ARCHITECTURE_BITS == 32
-    #define MINIMUM_ALLOCATION_SIZE     16
-    #define MINIMUM_MMAP_REQUEST_SIZE   4194304     /* 4 MiB */
+#    define MINIMUM_ALLOCATION_SIZE 16
+#    define MINIMUM_MMAP_REQUEST_SIZE 4194304 /* 4 MiB */
 #else
-    #define MINIMUM_ALLOCATION_SIZE     32
-    #define MINIMUM_MMAP_REQUEST_SIZE   4194304     /* 4 MiB */
+#    define MINIMUM_ALLOCATION_SIZE 32
+#    define MINIMUM_MMAP_REQUEST_SIZE 4194304 /* 4 MiB */
 #endif
 
-
-struct _MemoryBlock {
+struct _MemoryBlock
+{
     void *p_previous;
 
     /**
@@ -38,27 +36,19 @@ struct _MemoryBlock {
     uintptr_t block_size;
 };
 
-
 static struct _MemoryBlock *g_ptr_first_page = NULL;
 
-
 /* Yes, yes, this is terrible, but we're only using it for one thing. */
-#define MAX(x, y)  ((x) < (y)) ? (y) : (x)
+#define MAX(x, y) ((x) < (y)) ? (y) : (x)
 
-
-static void *allocate_pages(size_t n_pages, void *suggested_address) {
-    return krnlhook_mmap(
-        suggested_address,
-        n_pages * mcinternal_runtime_info->page_size,
-        mclib_PROT_READ | mclib_PROT_WRITE,
-        mclib_MAP_ANONYMOUS,
-        -1,
-        0
-    );
+static void *allocate_pages(size_t n_pages, void *suggested_address)
+{
+    return krnlhook_mmap(suggested_address, n_pages * mcinternal_runtime_info->page_size,
+                         mclib_PROT_READ | mclib_PROT_WRITE, mclib_MAP_ANONYMOUS, -1, 0);
 }
 
-
-METALC_INTERNAL_ONLY int malloc_init(void) {
+METALC_INTERNAL_ONLY int malloc_init(void)
+{
     size_t request_size;
 
     /* On the off chance that the minimum mmap size is smaller than a page size,
@@ -76,16 +66,18 @@ METALC_INTERNAL_ONLY int malloc_init(void) {
     return 0;
 }
 
-
-METALC_ATTR__NO_EXPORTint malloc_teardown(void) {
+METALC_ATTR__NO_EXPORTint malloc_teardown(void)
+{
     return 0;
 }
 
+#define _size_of_allocation(ptr)                                                         \
+    (((const struct _MemoryBlock *)(((const char *)(ptr)) -                              \
+                                    sizeof(struct _MemoryBlock)))                        \
+         ->block_size)
 
-#define _size_of_allocation(ptr)    (((const struct _MemoryBlock *)(((const char *)(ptr)) - sizeof(struct _MemoryBlock)))->block_size)
-
-
-void *malloc(size_t size) {
+void *malloc(size_t size)
+{
     if (size == 0)
         return NULL;
 
@@ -93,8 +85,8 @@ void *malloc(size_t size) {
     return NULL;
 }
 
-
-void *calloc(size_t n_elements, size_t element_size) {
+void *calloc(size_t n_elements, size_t element_size)
+{
     size_t total_size;
     void *pointer;
 
@@ -104,7 +96,8 @@ void *calloc(size_t n_elements, size_t element_size) {
     total_size = n_elements * element_size;
 
     /* Bail out if n_elements * element_size overflows. */
-    if (total_size / element_size != n_elements) {
+    if (total_size / element_size != n_elements)
+    {
         mclib_errno = mclib_ERANGE;
         return NULL;
     }
@@ -117,12 +110,13 @@ void *calloc(size_t n_elements, size_t element_size) {
     return pointer;
 }
 
-
-void *realloc(void *pointer, size_t new_size) {
+void *realloc(void *pointer, size_t new_size)
+{
     uintptr_t old_size;
     void *new_pointer;
 
-    if (new_size == 0) {
+    if (new_size == 0)
+    {
         free(pointer);
         return NULL;
     }
@@ -148,11 +142,10 @@ void *realloc(void *pointer, size_t new_size) {
     return new_pointer;
 }
 
-
-void free(void *pointer) {
+void free(void *pointer)
+{
     (void)pointer;
 }
-
 
 #undef MINIMUM_ALLOCATION_SIZE
 #undef MINIMUM_MMAP_REQUEST_SIZE

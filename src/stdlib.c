@@ -1,3 +1,4 @@
+#include "metalc/stdlib.h"
 #include "metalc/charsets/common.h"
 #include "metalc/crtinit.h"
 #include "metalc/ctype.h"
@@ -8,9 +9,7 @@
 #include "metalc/setjmp.h"
 #include "metalc/signal.h"
 #include "metalc/stdbool.h"
-#include "metalc/stdlib.h"
 #include "metalc/string.h"
-
 
 static unsigned g_rand_seed = 0;
 static const char *kIntAlphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
@@ -21,8 +20,8 @@ extern mclib_jmp_buf mcinternal_abort_target;
 extern const struct mclib_lconv mcinternal_current_lconv;
 extern const struct mcinternal_charset_info *mcinternal_ptr_current_charset;
 
-
-void abort(void) {
+void abort(void)
+{
     raise(mclib_SIGABRT);
 
     /* Theoretically we should never get here; the program should exit once the
@@ -30,18 +29,17 @@ void abort(void) {
     exit(-1);
 }
 
-
-void srand(unsigned seed) {
+void srand(unsigned seed)
+{
     g_rand_seed = seed;
 }
 
-
-void exit(int code) {
+void exit(int code)
+{
     /* TODO: execute atexit handlers here */
     mcinternal_runtime_info->main_return_value = code;
     longjmp(mcinternal_abort_target, CRTINIT_EXIT_SENTINEL);
 }
-
 
 #if 0
 double atof(const char *str) {
@@ -79,33 +77,34 @@ double atof(const char *str) {
 }
 #endif
 
-
-int abs(int x) {
+int abs(int x)
+{
     if (x >= 0)
         return x;
     return -x;
 }
 
-
-long labs(long x) {
+long labs(long x)
+{
     if (x >= 0)
         return x;
     return -x;
 }
 
-
-char *itoa(int value, char *str, int base) {
+char *itoa(int value, char *str, int base)
+{
     return ltoa((long)value, str, base);
 }
 
-
-char *utoa(unsigned value, char *str, int base) {
+char *utoa(unsigned value, char *str, int base)
+{
     return ultoa((unsigned long)value, str, base);
 }
 
-
-char *ltoa(long value, char *str, int base) {
-    if ((base < 2) || (base > 36)) {
+char *ltoa(long value, char *str, int base)
+{
+    if ((base < 2) || (base > 36))
+    {
         mclib_errno = mclib_EINVAL;
         return NULL;
     }
@@ -119,18 +118,20 @@ char *ltoa(long value, char *str, int base) {
     return ultoa((unsigned long)labs(value), str, base);
 }
 
-
-char *ultoa(unsigned long value, char *str, int base) {
+char *ultoa(unsigned long value, char *str, int base)
+{
     int i;
     char temp_c;
     char *write_pointer = str;
 
-    if ((base < 2) || (base > 36)) {
+    if ((base < 2) || (base > 36))
+    {
         mclib_errno = mclib_EINVAL;
         return NULL;
     }
 
-    do {
+    do
+    {
         *write_pointer++ = kIntAlphabet[value % base];
         value /= base;
     } while (value != 0);
@@ -142,7 +143,8 @@ char *ultoa(unsigned long value, char *str, int base) {
      * character in the string, and swap characters until we meet in the middle.
      */
     --write_pointer;
-    for (i = 0; &str[i] != write_pointer; ++i, --write_pointer) {
+    for (i = 0; &str[i] != write_pointer; ++i, --write_pointer)
+    {
         temp_c = str[i];
         str[i] = *write_pointer;
         *write_pointer = temp_c;
@@ -151,8 +153,8 @@ char *ultoa(unsigned long value, char *str, int base) {
     return str;
 }
 
-
-unsigned long strtoul(const char *str, const char **endptr, int base) {
+unsigned long strtoul(const char *str, const char **endptr, int base)
+{
     unsigned long value, current_digit;
     char next_char;
     int n_digits_processed;
@@ -166,10 +168,12 @@ unsigned long strtoul(const char *str, const char **endptr, int base) {
     if (*str == '+')
         ++str;
 
-    if (base == 0) {
+    if (base == 0)
+    {
         /* Caller wants us to determine the radix on our own. If this starts with
          * a '0' then it's either a radix or the entire value is 0. */
-        if (*str == '0') {
+        if (*str == '0')
+        {
             /* Starts with a 0; if it's followed by x then it's hexadecimal, if
              * followed by a digit then it's octal. */
             next_char = str[1];
@@ -178,7 +182,8 @@ unsigned long strtoul(const char *str, const char **endptr, int base) {
                 base = 16;
             else if (isdigit(next_char))
                 base = 8;
-            else {
+            else
+            {
                 /* String is '0' followed by a non-digit character. This must be
                  * just "0". */
                 if (endptr)
@@ -190,7 +195,8 @@ unsigned long strtoul(const char *str, const char **endptr, int base) {
             /* String doesn't have an explicit radix, so assume it's base 10. */
             base = 10;
     }
-    else if ((base < 2) || (base > 36)) {
+    else if ((base < 2) || (base > 36))
+    {
         /* If a radix is passed in, it must be between 2 and 36, inclusive. */
         mclib_errno = mclib_EINVAL;
         if (endptr)
@@ -199,7 +205,8 @@ unsigned long strtoul(const char *str, const char **endptr, int base) {
     }
 
     value = 0;
-    for (n_digits_processed = 0; *str != '\0'; ++n_digits_processed, ++str) {
+    for (n_digits_processed = 0; *str != '\0'; ++n_digits_processed, ++str)
+    {
         p_digit = strchr(kIntAlphabet, tolower(*str));
         if (p_digit == NULL)
             break;
@@ -214,7 +221,8 @@ unsigned long strtoul(const char *str, const char **endptr, int base) {
         value += current_digit;
     }
 
-    if (n_digits_processed == 0) {
+    if (n_digits_processed == 0)
+    {
         /* If we haven't processed any digits then this isn't a valid string.
          * Indicate this in @ref errno and return 0. */
         mclib_errno = mclib_EINVAL;
@@ -228,19 +236,21 @@ unsigned long strtoul(const char *str, const char **endptr, int base) {
     return value;
 }
 
-
-long strtol(const char *str, const char **endptr, int base) {
+long strtol(const char *str, const char **endptr, int base)
+{
     unsigned long magnitude;
     long sign;
 
     while (isspace(*str))
         ++str;
 
-    if (*str == '+') {
+    if (*str == '+')
+    {
         sign = 1;
         ++str;
     }
-    else if (*str == '-') {
+    else if (*str == '-')
+    {
         sign = -1;
         ++str;
     }
@@ -250,7 +260,8 @@ long strtol(const char *str, const char **endptr, int base) {
     magnitude = strtoul(str, endptr, base);
     if (mclib_errno != 0)
         return 0;
-    if (magnitude > LONG_MAX) {
+    if (magnitude > LONG_MAX)
+    {
         mclib_errno = mclib_EOVERFLOW;
         return 0;
     }
@@ -258,8 +269,8 @@ long strtol(const char *str, const char **endptr, int base) {
     return sign * (long)magnitude;
 }
 
-
-mclib_div_t div(int numer, int denom) {
+mclib_div_t div(int numer, int denom)
+{
     mclib_div_t result;
 
     result.quot = numer / denom;
@@ -267,8 +278,8 @@ mclib_div_t div(int numer, int denom) {
     return result;
 }
 
-
-mclib_ldiv_t ldiv(long numer, long denom) {
+mclib_ldiv_t ldiv(long numer, long denom)
+{
     mclib_ldiv_t result;
 
     result.quot = numer / denom;
@@ -276,30 +287,32 @@ mclib_ldiv_t ldiv(long numer, long denom) {
     return result;
 }
 
-
-int mblen(const char *str, size_t n) {
+int mblen(const char *str, size_t n)
+{
     return mcinternal_ptr_current_charset->f_mblen(str, n);
 }
 
-
-int wctomb(char *str, mclib_wchar_t wchar) {
+int wctomb(char *str, mclib_wchar_t wchar)
+{
     return mcinternal_ptr_current_charset->f_wctomb(str, wchar);
 }
 
-
-int mbtowc(mclib_wchar_t *pwc, const char *str, size_t n) {
+int mbtowc(mclib_wchar_t *pwc, const char *str, size_t n)
+{
     return mcinternal_ptr_current_charset->f_mbtowc(pwc, str, n);
 }
 
-
-size_t mbstowcs(mclib_wchar_t *pwcs, const char *str, size_t n) {
+size_t mbstowcs(mclib_wchar_t *pwcs, const char *str, size_t n)
+{
     size_t out_position;
     ptrdiff_t current_char_len;
 
-    for (out_position = 0; out_position < n; ++out_position) {
+    for (out_position = 0; out_position < n; ++out_position)
+    {
         current_char_len = mbtowc(pwcs + out_position, str, current_char_len);
 
-        if (current_char_len < 0) {
+        if (current_char_len < 0)
+        {
             mclib_errno = mclib_EILSEQ;
             return out_position;
         }
@@ -314,26 +327,30 @@ size_t mbstowcs(mclib_wchar_t *pwcs, const char *str, size_t n) {
     return out_position;
 }
 
-
-size_t wcstombs(char *str, const mclib_wchar_t *pwcs, size_t n) {
+size_t wcstombs(char *str, const mclib_wchar_t *pwcs, size_t n)
+{
     size_t out_position;
     char buffer[4];
     int wchar_length;
 
     out_position = 0;
-    while (out_position < n) {
-        if (*pwcs == 0) {
+    while (out_position < n)
+    {
+        if (*pwcs == 0)
+        {
             *str = '\0';
             return out_position;
         }
 
         wchar_length = wctomb(buffer, *pwcs);
-        if (wchar_length < 0) {
+        if (wchar_length < 0)
+        {
             mclib_errno = mclib_EILSEQ;
             return (size_t)-1;
         }
 
-        if ((out_position + (size_t)wchar_length) > n) {
+        if ((out_position + (size_t)wchar_length) > n)
+        {
             /* Not enough space left to write this last character. */
             return out_position;
         }
@@ -348,18 +365,17 @@ size_t wcstombs(char *str, const mclib_wchar_t *pwcs, size_t n) {
     return out_position;
 }
 
-
-void *bsearch(
-    const void *key, const void *base, size_t nitems, size_t size,
-    int (*cmp)(const void *, const void *)
-) {
+void *bsearch(const void *key, const void *base, size_t nitems, size_t size,
+              int (*cmp)(const void *, const void *))
+{
     const void *partition;
     size_t partition_index;
     int compare_result;
 
     if (nitems == 0)
         return NULL;
-    if (nitems == 1) {
+    if (nitems == 1)
+    {
         if (cmp(key, base) == 0)
             return (void *)base;
         return NULL;
@@ -380,75 +396,79 @@ void *bsearch(
 }
 
 #if METALC_HAVE_LONG_LONG
-    mclib_lldiv_t lldiv(long long numer, long long denom) {
-        mclib_lldiv_t result;
+mclib_lldiv_t lldiv(long long numer, long long denom)
+{
+    mclib_lldiv_t result;
 
-        result.quot = numer / denom;
-        result.rem = numer % denom;
-        return result;
+    result.quot = numer / denom;
+    result.rem = numer % denom;
+    return result;
+}
+
+long long llabs(long long x)
+{
+    if (x >= 0)
+        return x;
+    return -x;
+}
+
+char *lltoa(long long value, char *str, int base)
+{
+    if ((base < 2) || (base > 36))
+    {
+        mclib_errno = mclib_EINVAL;
+        return NULL;
     }
 
+    if ((base == 10) && (value < 0))
+        *str++ = '-';
 
-    long long llabs(long long x) {
-        if (x >= 0)
-            return x;
-        return -x;
+    /* Values are always treated as unsigned if the base is not 10. We also just
+     * wrote the sign for `value` (if applicable) so we don't care that it's
+     * negative anymore. */
+    return ulltoa((unsigned long)labs(value), str, base);
+}
+
+char *ulltoa(unsigned long long value, char *str, int base)
+{
+    int i;
+    char temp_c;
+    char *write_pointer = str;
+
+    if ((base < 2) || (base > 36))
+    {
+        mclib_errno = mclib_EINVAL;
+        return NULL;
     }
 
+    do
+    {
+        *write_pointer++ = kIntAlphabet[value % base];
+        value /= base;
+    } while (value != 0);
 
-    char *lltoa(long long value, char *str, int base) {
-        if ((base < 2) || (base > 36)) {
-            mclib_errno = mclib_EINVAL;
-            return NULL;
-        }
+    *write_pointer = '\0';
 
-        if ((base == 10) && (value < 0))
-            *str++ = '-';
-
-        /* Values are always treated as unsigned if the base is not 10. We also just
-         * wrote the sign for `value` (if applicable) so we don't care that it's
-         * negative anymore. */
-        return ulltoa((unsigned long)labs(value), str, base);
+    /* When we get here the string is backwards, and write_pointer points past
+     * the end of it. Decrement the write pointer so it points to the last
+     * character in the string, and swap characters until we meet in the middle.
+     */
+    --write_pointer;
+    for (i = 0; &str[i] != write_pointer; ++i, --write_pointer)
+    {
+        temp_c = str[i];
+        str[i] = *write_pointer;
+        *write_pointer = temp_c;
     }
 
+    return str;
+}
 
-    char *ulltoa(unsigned long long value, char *str, int base) {
-        int i;
-        char temp_c;
-        char *write_pointer = str;
-
-        if ((base < 2) || (base > 36)) {
-            mclib_errno = mclib_EINVAL;
-            return NULL;
-        }
-
-        do {
-            *write_pointer++ = kIntAlphabet[value % base];
-            value /= base;
-        } while (value != 0);
-
-        *write_pointer = '\0';
-
-        /* When we get here the string is backwards, and write_pointer points past
-         * the end of it. Decrement the write pointer so it points to the last
-         * character in the string, and swap characters until we meet in the middle.
-         */
-        --write_pointer;
-        for (i = 0; &str[i] != write_pointer; ++i, --write_pointer) {
-            temp_c = str[i];
-            str[i] = *write_pointer;
-            *write_pointer = temp_c;
-        }
-
-        return str;
-    }
-
-    cstdlib_implement(llabs);
-    cstdlib_implement(lltoa);
-    cstdlib_implement(ulltoa);
-    cstdlib_implement(lldiv);
+cstdlib_implement(llabs);
+cstdlib_implement(lltoa);
+cstdlib_implement(ulltoa);
+cstdlib_implement(lldiv);
 #endif
-
 
 cstdlib_implement(abort);
 cstdlib_implement(abs);

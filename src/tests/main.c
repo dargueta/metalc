@@ -8,45 +8,37 @@
 
 #include "testing.h"
 
-
 extern const struct UnitTestEntry kStringUnitTests[];
 extern const struct UnitTestEntry kFileIOUnitTests[];
 extern const struct UnitTestEntry kCtypeUnitTests[];
 extern const struct UnitTestEntry kWcharUtf8UnitTests[];
 extern const struct UnitTestEntry kPrintfUnitTests[];
 
-
-const struct UnitTestEntry *kAllUnitTestGroups[] = {
-    kStringUnitTests,
-    kFileIOUnitTests,
-    kCtypeUnitTests,
-    kWcharUtf8UnitTests,
-    kPrintfUnitTests,
-    NULL
-};
-
+const struct UnitTestEntry *kAllUnitTestGroups[] = {kStringUnitTests, kFileIOUnitTests,
+                                                    kCtypeUnitTests,  kWcharUtf8UnitTests,
+                                                    kPrintfUnitTests, NULL};
 
 FILE *test_output_fd;
 
-#define PAGE_SIZE   4096
-#define HEAP_SIZE   (16 * PAGE_SIZE)
+#define PAGE_SIZE 4096
+#define HEAP_SIZE (16 * PAGE_SIZE)
 
 static char g_heap[HEAP_SIZE];
 
 /** Pointer to the first invalid address. */
 static char *g_heap_top = g_heap;
 
-
-void *krnlhook_mmap(
-    void *addr, size_t length, int prot, int flags, int fd, mclib_off_t offset
-) {
+void *krnlhook_mmap(void *addr, size_t length, int prot, int flags, int fd,
+                    mclib_off_t offset)
+{
     void *old_top;
 
     /* For the purposes of testing we don't care about permissions nor flags. We
      * can't enforce them, anyway. */
     (void)prot, (void)flags, (void)fd, (void)offset;
 
-    if (addr != NULL) {
+    if (addr != NULL)
+    {
         mclib_errno = mclib_ENOSYS;
         return mclib_MAP_FAILED;
     }
@@ -56,7 +48,8 @@ void *krnlhook_mmap(
         length += PAGE_SIZE - (length % PAGE_SIZE);
 
     /* Can't do anything if we're at the top of the heap. */
-    if ((g_heap_top + length) >= (g_heap + HEAP_SIZE)) {
+    if ((g_heap_top + length) >= (g_heap + HEAP_SIZE))
+    {
         mclib_errno = mclib_ENOMEM;
         return mclib_MAP_FAILED;
     }
@@ -68,8 +61,8 @@ void *krnlhook_mmap(
     return old_top;
 }
 
-
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     unsigned n_failed, n_succeeded, n_errored;
     int result, i_group, i_test;
     MetalCRuntimeInfo rti;
@@ -83,9 +76,11 @@ int main(int argc, char **argv) {
     n_failed = n_succeeded = n_errored = 0;
     initialize_test_log();
 
-    for (i_group = 0; kAllUnitTestGroups[i_group] != NULL; ++i_group) {
+    for (i_group = 0; kAllUnitTestGroups[i_group] != NULL; ++i_group)
+    {
         group = kAllUnitTestGroups[i_group];
-        for (i_test = 0; group[i_test].name != NULL; ++i_test) {
+        for (i_test = 0; group[i_test].name != NULL; ++i_test)
+        {
             current_test = &group[i_test];
 
             fprintf(stderr, "Running test: %s\n", current_test->name);
@@ -99,7 +94,8 @@ int main(int argc, char **argv) {
             result = cstdlib_run(0, NULL, NULL);
             fflush(test_output_fd);
 
-            if (result == 0) {
+            if (result == 0)
+            {
                 if (rti.signal_code != 0)
                     ++n_errored;
                 else if (rti.main_return_value == 0)

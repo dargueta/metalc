@@ -4,13 +4,12 @@
 
 #include "testing.h"
 
-
-struct ModeStringTestCase {
+struct ModeStringTestCase
+{
     const char *mode_string;
     int expected_flags;
     int errno_value;
 };
-
 
 struct ModeStringTestCase mode_string_to_flags_cases[] = {
     {"w", O_WRONLY | O_TRUNC | O_CREAT, 0},
@@ -39,32 +38,22 @@ struct ModeStringTestCase mode_string_to_flags_cases[] = {
     {"r+x", -1, mclib_EINVAL},
     {"ax", -1, mclib_EINVAL},
     {"a+x", -1, mclib_EINVAL},
-    {NULL, 0, 0}
-};
-
+    {NULL, 0, 0}};
 
 BEGIN_TEST(test_mode_string_to_flags__all)
-    struct ModeStringTestCase *testcase;
+struct ModeStringTestCase *testcase;
 
-    for (testcase = mode_string_to_flags_cases; testcase->mode_string != NULL; ++testcase) {
-        INFO_MSG(
-            "Testing mode string `%s`, expecting output %d and errno %d.",
-            testcase->mode_string,
-            testcase->expected_flags,
-            testcase->errno_value
-        );
+for (testcase = mode_string_to_flags_cases; testcase->mode_string != NULL; ++testcase)
+{
+    INFO_MSG("Testing mode string `%s`, expecting output %d and errno %d.",
+             testcase->mode_string, testcase->expected_flags, testcase->errno_value);
 
-        mclib_errno = 0;
-        CHECK_EQ(
-            mcinternal_mode_string_to_flags(testcase->mode_string),
-            testcase->expected_flags
-        );
-        CHECK_EQ(mclib_errno, testcase->errno_value);
-    }
+    mclib_errno = 0;
+    CHECK_EQ(mcinternal_mode_string_to_flags(testcase->mode_string),
+             testcase->expected_flags);
+    CHECK_EQ(mclib_errno, testcase->errno_value);
+}
 END_TEST()
 
-
 const struct UnitTestEntry kFileIOUnitTests[] = {
-    {test_mode_string_to_flags__all, "mode_string_to_flags: all"},
-    {NULL, NULL}
-};
+    {test_mode_string_to_flags__all, "mode_string_to_flags: all"}, {NULL, NULL}};
